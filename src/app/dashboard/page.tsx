@@ -80,7 +80,7 @@ export default function DashboardPage() {
               return (
                 <Card key={project.id} className="transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/10">
                   <CardContent className="p-4 sm:p-6">
-                    <div className='flex items-center justify-between gap-4 mb-4'>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-4 mb-4">
                       <div className="flex items-center gap-4">
                         <Avatar className="size-11">
                             {owner?.photoURL && <AvatarImage src={owner.photoURL} alt={owner.displayName} />}
@@ -91,7 +91,7 @@ export default function DashboardPage() {
                             <p className="text-sm text-muted-foreground">Project Owner</p>
                         </div>
                       </div>
-                      <Button asChild size="sm" variant="secondary" className='shrink-0'>
+                      <Button asChild size="sm" variant="secondary" className='shrink-0 w-full sm:w-auto'>
                         <Link href={`/dashboard/projects/${project.id}`}>View Project</Link>
                       </Button>
                     </div>
@@ -141,11 +141,13 @@ export default function DashboardPage() {
                                 {student.photoURL && <AvatarImage src={student.photoURL} alt={student.displayName} data-ai-hint="person portrait" />}
                                 <AvatarFallback>{student.displayName.substring(0, 2)}</AvatarFallback>
                             </Avatar>
-                            <div className="flex-1">
-                                <p className="font-semibold">{student.displayName}</p>
+                            <div className="flex-1 min-w-0">
+                                <p className="font-semibold truncate">{student.displayName}</p>
                                 <p className="text-sm text-muted-foreground truncate">{student.skills?.slice(0,2).join(', ')}</p>
                             </div>
-                            <Button variant="default" size="sm">Connect</Button>
+                            <Button variant="default" size="sm" asChild>
+                              <Link href="/dashboard/teammates">Connect</Link>
+                            </Button>
                             </div>
                         );
                         })}

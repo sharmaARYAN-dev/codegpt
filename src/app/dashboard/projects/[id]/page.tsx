@@ -17,19 +17,20 @@ import type { Project, StudentProfile } from '@/lib/types';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import { useMemo } from 'react';
 
 function ProjectWorkspaceSkeleton() {
   return (
      <div className="space-y-8">
-        <div className='flex justify-between items-start gap-4'>
+        <div className='flex flex-col sm:flex-row justify-between items-start gap-4'>
             <div className='space-y-3'>
-                <Skeleton className="h-10 w-80" />
+                <Skeleton className="h-10 w-64 md:w-80" />
                 <div className="flex flex-wrap gap-2 mt-3">
                   <Skeleton className="h-6 w-20 rounded-full" />
                   <Skeleton className="h-6 w-24 rounded-full" />
                 </div>
             </div>
-            <Skeleton className="h-12 w-32 rounded-md" />
+            <Skeleton className="h-12 w-full sm:w-32 rounded-md" />
         </div>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
           <Skeleton className="h-5 w-24" />
@@ -59,21 +60,22 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
   const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
   const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery);
 
-  const teamMembers = useMemoFirebase(() => {
+  const teamMembers = useMemo(() => {
     if (!project || !users) return [];
-    return users.filter(u => project.memberIds.includes(u.id) || u.id === project.ownerId)
+    const memberIds = project.memberIds || [];
+    return users.filter(u => memberIds.includes(u.id) || u.id === project.ownerId);
   }, [project, users]);
 
   const openRoles = [
     {
       title: 'UI/UX Designer',
       description: 'Passionate about creating beautiful and intuitive user interfaces.',
-      avatar: 'https://images.unsplash.com/photo-1643932919088-53349a7c3385?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwb3J0cmFpdCUyMHBlcnNvbnxlbnwwfHx8fDE3NjI1NTAyNzZ8MA&ixlib=rb-4.1.0&q=80&w=1080',
+      avatar: 'https://picsum.photos/seed/role1/200/200',
     },
     {
       title: 'ML Engineer',
       description: 'Experienced in building and deploying machine learning models.',
-      avatar: 'https://images.unsplash.com/photo-1561740303-a0fd9fabc646?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxwb3J0cmFpdCUyMHBlcnNvbnxlbnwwfHx8fDE3NjI1NTAyNzZ8MA&ixlib=rb-4.1.0&q=80&w=1080',
+      avatar: 'https://picsum.photos/seed/role2/200/200',
     },
   ];
 
@@ -119,7 +121,7 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
                 ))}
                 </div>
             </div>
-             <Button size="lg" className="w-full sm:w-auto" onClick={handleJoinTeam}>
+             <Button size="lg" className="w-full sm:w-auto shrink-0" onClick={handleJoinTeam}>
                 Join Team
             </Button>
         </div>
@@ -127,15 +129,15 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-muted-foreground">
         <div className='flex items-center gap-2'>
             <Users className='size-4' />
-            <span>{teamMembers.length} Members</span>
+            <span>{teamMembers.length} Member{teamMembers.length !== 1 && 's'}</span>
         </div>
         <div className='flex items-center gap-2'>
             <GitFork className='size-4' />
-            <span>{project.forks} Forks</span>
+            <span>{project.forks} Fork{project.forks !== 1 && 's'}</span>
         </div>
          <div className='flex items-center gap-2'>
             <MessageSquare className='size-4' />
-            <span>{project.comments} Comments</span>
+            <span>{project.comments} Comment{project.comments !== 1 && 's'}</span>
         </div>
       </div>
 

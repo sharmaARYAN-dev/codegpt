@@ -82,7 +82,7 @@ export default function ProfilePage() {
         <div className="h-24 md:h-36 bg-gradient-to-r from-primary/70 to-accent/70" />
         <CardContent className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-end -mt-16 sm:-mt-20">
-            <Avatar className="h-28 w-28 sm:h-32 sm:w-32 border-4 border-background">
+            <Avatar className="h-28 w-28 sm:h-32 sm:w-32 border-4 border-background shrink-0">
               {userProfile.photoURL && (
                 <AvatarImage src={userProfile.photoURL} alt={userProfile.displayName || 'User'} />
               )}
@@ -93,12 +93,12 @@ export default function ProfilePage() {
                   .join('')}
               </AvatarFallback>
             </Avatar>
-            <div className="mt-4 sm:ml-6 flex-grow">
-              <h1 className="text-2xl sm:text-3xl font-bold font-headline">
+            <div className="mt-4 sm:ml-6 flex-grow min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-bold font-headline truncate">
                 {userProfile.displayName}
               </h1>
-              <p className="text-sm sm:text-base text-muted-foreground">{userProfile.email}</p>
-                <div className="flex items-center gap-3 mt-2">
+              <p className="text-sm sm:text-base text-muted-foreground truncate">{userProfile.email}</p>
+                <div className="flex items-center gap-1 sm:gap-3 mt-2 -ml-2">
                     {userProfile.socialLinks?.github && (
                         <Button variant="ghost" size="icon" asChild>
                             <a href={userProfile.socialLinks.github} target="_blank" rel="noopener noreferrer"><Github className="h-5 w-5 text-muted-foreground" /></a>
@@ -126,7 +126,7 @@ export default function ProfilePage() {
                     )}
                 </div>
             </div>
-            <Button variant="outline" className="mt-4 sm:mt-0 w-full sm:w-auto" onClick={() => setEditProfileOpen(true)}>
+            <Button variant="outline" className="mt-4 sm:mt-0 w-full sm:w-auto shrink-0" onClick={() => setEditProfileOpen(true)}>
               Edit Profile
             </Button>
           </div>
@@ -138,7 +138,7 @@ export default function ProfilePage() {
                   <CardTitle className="font-headline text-xl">About Me</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground leading-relaxed">
                     Aspiring full-stack developer and AI enthusiast. Passionate
                     about building products that make a difference. Currently a
                     1st year Computer Science student.
@@ -152,11 +152,16 @@ export default function ProfilePage() {
                 <CardContent>
                   {loadingProjects ? <Loader2 className="animate-spin" /> : 
                     !userProjects || userProjects.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">No projects yet. Start creating!</p>
+                      <div className="text-center py-8 text-muted-foreground">
+                        <p>No projects yet. Start creating!</p>
+                        <Button asChild variant="secondary" className="mt-4">
+                           <Link href="/dashboard/projects">Create a Project</Link>
+                        </Button>
+                      </div>
                     ) : (
                       <div className='space-y-4'>
                         {userProjects.map(project => (
-                          <Link href={`/dashboard/projects/${project.id}`} key={project.id}>
+                          <Link href={`/dashboard/projects/${project.id}`} key={project.id} className="block">
                             <div className="p-3 border rounded-md hover:bg-muted/50 transition-colors">
                               <h3 className="font-semibold">{project.name}</h3>
                               <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
@@ -175,11 +180,11 @@ export default function ProfilePage() {
                   <CardTitle className="font-headline text-xl">Skills</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
-                  {userProfile.skills?.map((skill) => (
+                  {userProfile.skills?.length > 0 ? userProfile.skills?.map((skill) => (
                     <Badge key={skill} variant="secondary" className='text-sm'>
                       {skill}
                     </Badge>
-                  ))}
+                  )) : <p className="text-sm text-muted-foreground">No skills added yet.</p>}
                 </CardContent>
               </Card>
               <Card>
@@ -187,11 +192,11 @@ export default function ProfilePage() {
                   <CardTitle className="font-headline text-xl">Interests</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
-                  {userProfile.interests?.map((interest) => (
+                  {userProfile.interests?.length > 0 ? userProfile.interests?.map((interest) => (
                     <Badge key={interest} variant="outline" className='text-sm'>
                       {interest}
                     </Badge>
-                  ))}
+                  )) : <p className="text-sm text-muted-foreground">No interests added yet.</p>}
                 </CardContent>
               </Card>
               <Card>
@@ -199,7 +204,7 @@ export default function ProfilePage() {
                   <CardTitle className="font-headline text-xl">Reputation</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {userProfile.reputation?.map((rep) => {
+                  {userProfile.reputation?.length > 0 ? userProfile.reputation?.map((rep) => {
                     const Icon = reputationIcons[rep.label as keyof typeof reputationIcons] || Star;
                     return (
                       <div key={rep.label} className="flex items-center gap-3 text-sm">
@@ -207,7 +212,7 @@ export default function ProfilePage() {
                         <span className='font-medium'>{rep.label}</span>
                       </div>
                     )
-                  })}
+                  }) : <p className="text-sm text-muted-foreground">No reputation earned yet.</p>}
                 </CardContent>
               </Card>
             </div>
