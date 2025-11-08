@@ -6,7 +6,7 @@ import { ArrowBigUp, MessageSquare, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { CreatePostDialog } from '@/components/create-post-dialog';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import type { ForumPost, Project, StudentProfile } from '@/lib/types';
@@ -53,7 +53,7 @@ export default function CommunitiesPage() {
   const [activeFilter, setActiveFilter] = useState('All');
   const firestore = useFirestore();
 
-  const filters = ['All', 'AI/ML', 'WebDev', 'Design', 'Startups', 'Gaming'];
+  const filters = ['All', 'AI/ML', 'WebDev', 'Design', 'Startups', 'Gaming', 'General'];
 
   const postsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -100,7 +100,7 @@ export default function CommunitiesPage() {
 
         <div className="flex items-center gap-2 flex-wrap">
           {filters.map((filter) => (
-            <Button key={filter} variant={activeFilter === filter ? 'default' : 'outline'} onClick={() => setActiveFilter(filter)}>
+            <Button key={filter} variant={activeFilter === filter ? 'default' : 'outline'} size="sm" onClick={() => setActiveFilter(filter)}>
               {filter}
             </Button>
           ))}
@@ -114,16 +114,16 @@ export default function CommunitiesPage() {
                 return (
                   <Card key={post.id} className="p-0 transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/10">
                     <CardContent className="p-6">
-                      <div className='mb-4 flex items-center gap-3 flex-wrap'>
+                      <div className='mb-4 flex items-start sm:items-center gap-3 flex-wrap'>
                         <Avatar className='size-9'>
                           {author?.photoURL && <AvatarImage src={author.photoURL} alt={author.displayName} />}
                           <AvatarFallback>{author?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
                         </Avatar>
-                        <div>
-                          <p className="text-sm font-semibold">{author?.displayName}</p>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold truncate">{author?.displayName}</p>
                           <p className="text-xs text-muted-foreground">{post.createdAt?.toDate()?.toLocaleDateString()}</p>
                         </div>
-                        <Badge variant="secondary" className='ml-0 sm:ml-auto'>{post.community}</Badge>
+                        <Badge variant="secondary" className='ml-0 sm:ml-auto shrink-0'>{post.community}</Badge>
                       </div>
                       <h2 className="font-headline text-xl font-semibold">{post.title}</h2>
                       <p className='text-muted-foreground mt-2 line-clamp-2 text-sm leading-relaxed'>{post.content}</p>
@@ -139,7 +139,7 @@ export default function CommunitiesPage() {
                       </div>
                       <div className="flex-1 min-w-[10px]"></div>
                       <Button size='sm' asChild>
-                        <Link href="#">Join Discussion</Link>
+                        <Link href={`/dashboard/communities/${post.id}`}>Join Discussion</Link>
                       </Button>
                     </div>
                   </Card>
@@ -162,9 +162,9 @@ export default function CommunitiesPage() {
                             {owner?.photoURL && <AvatarImage src={owner.photoURL} alt={owner.displayName} />}
                             <AvatarFallback>{owner?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
                           </Avatar>
-                          <div>
-                            <p className="font-semibold text-sm">{project.name}</p>
-                            <p className="text-xs text-muted-foreground">by {owner?.displayName}</p>
+                          <div className="min-w-0">
+                            <p className="font-semibold text-sm truncate">{project.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">by {owner?.displayName}</p>
                           </div>
                         </div>
                         <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{project.description}</p>

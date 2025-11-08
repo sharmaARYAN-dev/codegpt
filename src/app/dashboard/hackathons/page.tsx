@@ -15,9 +15,10 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import type { Event, StudentProfile } from '@/lib/types';
-import { collection } from 'firebase/firestore';
+import { collection, query, where, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { useMemo, useState } from 'react';
 
 function HackathonsSkeleton() {
   return (
@@ -38,11 +39,29 @@ function HackathonsSkeleton() {
   )
 }
 
+type EventType = 'All' | 'Hackathon' | 'Workshop' | 'Conference';
+
 export default function HackathonsPage() {
   const heroImage = PlaceHolderImages.find(img => img.id === 'event-conference');
   const firestore = useFirestore();
+  const [activeType, setActiveType] = useState<EventType>('All');
+  const [locationType, setLocationType] = useState('all');
 
-  const eventsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'events') : null, [firestore]);
+  const eventsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    const baseColl = collection(firestore, 'events');
+    const queries = [];
+
+    if (activeType !== 'All') {
+      queries.push(where('type', '==', activeType));
+    }
+    if (locationType !== 'all') {
+      queries.push(where('location', locationType === 'online' ? '==' : '!=', 'Online'));
+    }
+
+    return query(baseColl, ...queries, orderBy('date'));
+  }, [firestore, activeType, locationType]);
+
   const { data: allEvents, loading: loadingEvents } = useCollection<Event>(eventsQuery);
 
   const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
@@ -53,6 +72,8 @@ export default function HackathonsPage() {
       description: `You have joined the event: ${eventName}.`,
     });
   }
+  
+  const eventTypes: EventType[] = ['All', 'Hackathon', 'Workshop', 'Conference'];
 
   if (loadingEvents || loadingUsers) {
     return <div className='space-y-8'><div className="relative min-h-[240px] rounded-lg bg-muted" /><HackathonsSkeleton /></div>
@@ -77,11 +98,11 @@ export default function HackathonsPage() {
             <CardContent className='space-y-4'>
               <div>
                 <h3 className="text-sm font-semibold mb-2 text-muted-foreground">Location</h3>
-                <ToggleGroup type="single" defaultValue="online" className="grid w-full grid-cols-2 gap-2">
+                <ToggleGroup type="single" value={locationType} onValueChange={(v) => setLocationType(v || 'all')} className="grid w-full grid-cols-2 gap-2">
                   <ToggleGroupItem value="online" aria-label="Toggle online" className='gap-2'>
                     <Home className='size-4' /> Online
                   </ToggleGroupItem>
-                  <ToggleGroupItem value="campus-based" aria-label="Toggle campus-based" className='gap-2'>
+                  <ToggleGroupItem value="campus" aria-label="Toggle campus-based" className='gap-2'>
                     <Building className='size-4' /> Campus
                   </ToggleGroupItem>
                 </ToggleGroup>
@@ -89,10 +110,16 @@ export default function HackathonsPage() {
                <div>
                 <h3 className="text-sm font-semibold mb-2 text-muted-foreground">Event Type</h3>
                 <div className='flex flex-col gap-2'>
-                    <Button variant="outline" className='justify-start'>All Types</Button>
-                    <Button variant="ghost" className='justify-start'>Hackathons</Button>
-                    <Button variant="ghost" className='justify-start'>Workshops</Button>
-                    <Button variant="ghost" className='justify-start'>Conferences</Button>
+                  {eventTypes.map(type => (
+                    <Button 
+                      key={type}
+                      variant={activeType === type ? 'secondary' : 'ghost'} 
+                      className='justify-start'
+                      onClick={() => setActiveType(type)}
+                    >
+                      {type === 'All' ? 'All Types' : type}
+                    </Button>
+                  ))}
                 </div>
               </div>
             </CardContent>
@@ -111,8 +138,8 @@ export default function HackathonsPage() {
                         {organizer?.photoURL && <AvatarImage src={organizer.photoURL} alt={organizer.displayName} />}
                         <AvatarFallback>{organizer?.displayName?.substring(0, 2) ?? 'EV'}</AvatarFallback>
                       </Avatar>
-                      <div>
-                        <p className="font-semibold text-base">{organizer?.displayName}</p>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-base truncate">{organizer?.displayName}</p>
                         <p className="text-sm text-muted-foreground">Organizer</p>
                       </div>
                     </div>

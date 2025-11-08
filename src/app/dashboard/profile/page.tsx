@@ -1,6 +1,6 @@
 'use client';
 
-import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
+import { useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +13,7 @@ import { collection, doc, query, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import { RedditIcon, WhatsAppIcon } from '@/components/icons';
+import { useCollection } from '@/firebase/firestore/use-collection';
 
 const reputationIcons = {
   'Top Contributor': Award,
@@ -139,9 +140,7 @@ export default function ProfilePage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground leading-relaxed">
-                    Aspiring full-stack developer and AI enthusiast. Passionate
-                    about building products that make a difference. Currently a
-                    1st year Computer Science student.
+                    {userProfile.aboutMe || 'No bio added yet. Click "Edit Profile" to tell everyone about yourself!'}
                   </p>
                 </CardContent>
               </Card>
@@ -153,7 +152,8 @@ export default function ProfilePage() {
                   {loadingProjects ? <Loader2 className="animate-spin" /> : 
                     !userProjects || userProjects.length === 0 ? (
                       <div className="text-center py-8 text-muted-foreground">
-                        <p>No projects yet. Start creating!</p>
+                        <FileCode2 className="mx-auto h-12 w-12" />
+                        <p className="mt-4">No projects yet. Start creating!</p>
                         <Button asChild variant="secondary" className="mt-4">
                            <Link href="/dashboard/projects">Create a Project</Link>
                         </Button>

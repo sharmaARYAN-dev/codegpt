@@ -62,7 +62,10 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
   const teamMembers = useMemo(() => {
     if (!project || !users) return [];
     const memberIds = project.memberIds || [];
-    return users.filter(u => memberIds.includes(u.id) || u.id === project.ownerId);
+    if (!memberIds.includes(project.ownerId)) {
+        memberIds.push(project.ownerId);
+    }
+    return users.filter(u => memberIds.includes(u.id));
   }, [project, users]);
 
   const openRoles = [
@@ -169,8 +172,8 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
                         {member.displayName.substring(0, 2)}
                       </AvatarFallback>
                     </Avatar>
-                    <div>
-                      <p className="font-semibold text-base">{member.displayName}</p>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-base truncate">{member.displayName}</p>
                       <p className="text-sm text-muted-foreground">
                         {project.ownerId === member.id ? 'Project Owner' : 'Member'}
                       </p>
@@ -226,14 +229,21 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
                 </CardTitle>
             </CardHeader>
             <CardContent className='space-y-4'>
-                <Link href="#" className='flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors'>
-                    <ExternalLink className='size-4' />
-                    <span>View Live Demo</span>
-                </Link>
-                 <Link href="#" className='flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors'>
-                    <GitFork className='size-4' />
-                    <span>GitHub Repository</span>
-                </Link>
+                {project.links?.demo && (
+                  <Link href={project.links.demo} target="_blank" rel="noopener noreferrer" className='flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors'>
+                      <ExternalLink className='size-4' />
+                      <span>View Live Demo</span>
+                  </Link>
+                )}
+                 {project.links?.repo && (
+                  <Link href={project.links.repo} target="_blank" rel="noopener noreferrer" className='flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors'>
+                      <GitFork className='size-4' />
+                      <span>GitHub Repository</span>
+                  </Link>
+                 )}
+                 {!project.links?.demo && !project.links?.repo && (
+                    <p className="text-sm text-muted-foreground">No links provided yet.</p>
+                 )}
             </CardContent>
           </Card>
         </div>

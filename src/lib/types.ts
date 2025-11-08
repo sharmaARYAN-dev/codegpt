@@ -5,6 +5,7 @@ export type StudentProfile = {
   displayName: string;
   email: string;
   photoURL: string;
+  aboutMe?: string;
   skills: string[];
   interests: string[];
   reputation: {
@@ -31,6 +32,10 @@ export type Project = {
   forks: number;
   comments: number;
   createdAt: any; // Can be Timestamp
+  links?: {
+    repo?: string;
+    demo?: string;
+  };
 };
 
 export type Event = {
