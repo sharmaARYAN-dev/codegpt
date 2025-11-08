@@ -18,7 +18,7 @@ export default function LandingPage() {
     },
     {
       icon: <Trophy className="h-8 w-8 text-primary" />,
-      title: 'Join Hackathons',
+      title: 'Join hacklathon',
       description: "Compete in exciting challenges and win amazing prizes."
     },
   ];

@@ -28,6 +28,8 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 const projectSchema = z.object({
   name: z.string().min(3, 'Project name must be at least 3 characters long.'),
@@ -66,16 +68,27 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
     }
 
     setIsSubmitting(true);
+    const projectData = {
+      ...values,
+      tags: values.tags.split(',').map(tag => tag.trim()),
+      ownerId: user.uid,
+      memberIds: [],
+      rating: Math.floor(Math.random() * 5) + 1,
+      forks: 0,
+      comments: 0,
+      createdAt: serverTimestamp(),
+    };
+
     try {
-      await addDoc(collection(firestore, 'projects'), {
-        ...values,
-        tags: values.tags.split(',').map(tag => tag.trim()),
-        ownerId: user.uid,
-        memberIds: [],
-        rating: 0,
-        forks: 0,
-        comments: 0,
-        createdAt: serverTimestamp(),
+      const collectionRef = collection(firestore, 'projects');
+      addDoc(collectionRef, projectData).catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: collectionRef.path,
+          operation: 'create',
+          requestResourceData: projectData,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        throw serverError; // re-throw to be caught by outer try-catch
       });
       
       toast({
@@ -86,11 +99,14 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
       onOpenChange(false);
     } catch (error) {
       console.error('Error creating project:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh!',
-        description: 'There was a problem creating your project.',
-      });
+      // The toast will be shown by the FirebaseErrorListener if it's a permission error
+      if (!(error instanceof FirestorePermissionError)) {
+          toast({
+            variant: 'destructive',
+            title: 'Uh oh!',
+            description: 'There was a problem creating your project.',
+          });
+      }
     } finally {
       setIsSubmitting(false);
     }

@@ -28,6 +28,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
+
 
 const postSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters long.'),
@@ -68,13 +71,23 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
     }
 
     setIsSubmitting(true);
-    try {
-      await addDoc(collection(firestore, 'forumPosts'), {
+    const postData = {
         ...values,
         authorId: user.uid,
         upvotes: 0,
         comments: 0,
         createdAt: serverTimestamp(),
+      };
+    try {
+      const collectionRef = collection(firestore, 'forumPosts');
+      addDoc(collectionRef, postData).catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+            path: collectionRef.path,
+            operation: 'create',
+            requestResourceData: postData,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        throw serverError; // re-throw to be caught by outer try-catch
       });
 
       toast({
@@ -85,11 +98,13 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
       onOpenChange(false);
     } catch (error) {
       console.error('Error creating post:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh!',
-        description: 'There was a problem starting your discussion.',
-      });
+       if (!(error instanceof FirestorePermissionError)) {
+            toast({
+                variant: 'destructive',
+                title: 'Uh oh!',
+                description: 'There was a problem starting your discussion.',
+            });
+       }
     } finally {
       setIsSubmitting(false);
     }

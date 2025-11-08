@@ -3,12 +3,12 @@
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Orbit, Chrome } from 'lucide-react';
+import { Chrome } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword } from 'firebase/auth';
 import { useAuth, useUser } from '@/firebase';
 import { useEffect } from 'react';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -38,24 +38,30 @@ export default function LoginPage() {
       const user = result.user;
       
       const userRef = doc(firestore, 'users', user.uid);
-      const userData = {
-        id: user.uid,
-        displayName: user.displayName,
-        email: user.email,
-        photoURL: user.photoURL,
-        skills: [],
-        interests: [],
-        reputation: [],
-      };
+      const userDoc = await getDoc(userRef);
 
-      setDoc(userRef, userData, { merge: true }).catch(async () => {
-          const permissionError = new FirestorePermissionError({
-            path: userRef.path,
-            operation: 'create',
-            requestResourceData: userData,
+      // Create profile only if it doesn't exist
+      if (!userDoc.exists()) {
+          const userData = {
+            id: user.uid,
+            displayName: user.displayName || 'New User',
+            email: user.email,
+            photoURL: user.photoURL || '',
+            skills: [],
+            interests: [],
+            reputation: [],
+          };
+
+          setDoc(userRef, userData, { merge: true }).catch(async () => {
+              const permissionError = new FirestorePermissionError({
+                path: userRef.path,
+                operation: 'create',
+                requestResourceData: userData,
+              });
+              errorEmitter.emit('permission-error', permissionError);
           });
-          errorEmitter.emit('permission-error', permissionError);
-      });
+      }
+
 
       router.push('/dashboard');
     } catch (error: any) {
@@ -137,6 +143,7 @@ export default function LoginPage() {
               Continue with Google
             </Button>
             <div className="mt-4 text-center text-sm text-muted-foreground">
+              Don&apos;t have an account?{' '}
               <Link href="/register" className="underline hover:text-primary">
                 Create Account
               </Link>
