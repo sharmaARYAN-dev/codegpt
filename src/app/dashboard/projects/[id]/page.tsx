@@ -122,7 +122,7 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
                 </div>
             </div>
              <Button size="lg" className="w-full sm:w-auto shrink-0" onClick={handleJoinTeam}>
-                Join Team
+                Request to Join
             </Button>
         </div>
       
