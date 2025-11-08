@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { Award, ShieldCheck, Star } from 'lucide-react';
+import { Award, ShieldCheck, Star, Trophy } from 'lucide-react';
 
 export type Student = {
   id: string;
@@ -70,7 +70,7 @@ export const students: Student[] = [
     skills: ['Swift', 'Kotlin', 'Firebase', 'UI/UX'],
     interests: ['Mobile Dev', 'AR/VR', 'Game Development'],
     reputation: [
-      { icon: Award, label: 'Hackathon Winner', color: 'text-blue-400' },
+      { icon: Trophy, label: 'Hackathon Winner', color: 'text-blue-400' },
     ],
   },
   {

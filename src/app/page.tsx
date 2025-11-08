@@ -1,93 +1,107 @@
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Rocket, Users, BrainCircuit } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Orbit, Users, Lightbulb, Trophy } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function LandingPage() {
-  const heroImage = PlaceHolderImages.find(p => p.id === 'landing-hero');
-
   const features = [
     {
-      icon: <Rocket className="h-8 w-8 text-accent" />,
-      title: 'Launch Your Ideas',
-      description: 'Generate innovative project ideas with AI and find the resources to bring them to life.',
+      icon: <Users className="h-8 w-8 text-primary" />,
+      title: 'Find Your Team',
     },
     {
-      icon: <Users className="h-8 w-8 text-accent" />,
-      title: 'Build Your Team',
-      description: 'Connect with students who have the skills and passion to build something great with you.',
+      icon: <Lightbulb className="h-8 w-8 text-accent" />,
+      title: 'Share Your Idea',
     },
     {
-      icon: <BrainCircuit className="h-8 w-8 text-accent" />,
-      title: 'Expand Your Universe',
-      description: 'Discover hackathons, workshops, and community events to grow your network and knowledge.',
+      icon: <Trophy className="h-8 w-8 text-primary" />,
+      title: 'Join Hackathons',
     },
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      <main className="flex-grow">
-        <section className="relative h-[60vh] md:h-[70vh] flex items-center justify-center text-center text-white">
-          {heroImage && (
-            <Image
-              src={heroImage.imageUrl}
-              alt={heroImage.description}
-              fill
-              className="object-cover"
-              priority
-              data-ai-hint={heroImage.imageHint}
-            />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-          <div className="relative z-10 p-4 max-w-4xl mx-auto">
-            <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tighter !leading-[1.1]">
-              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">UniVerse</span>: Your Cosmos of Creation
-            </h1>
-            <p className="mt-4 md:mt-6 text-base md:text-xl max-w-2xl mx-auto text-foreground/80">
-              The ultimate platform for students to connect, collaborate on projects, and discover exciting opportunities. Your next big idea starts here.
-            </p>
-            <div className="mt-8 flex justify-center gap-4">
-              <Button asChild size="lg" className="font-bold text-lg px-8 py-6 bg-primary hover:bg-primary/90 text-primary-foreground">
-                <Link href="/dashboard">Enter the UniVerse</Link>
-              </Button>
+    <div className="flex flex-col min-h-screen bg-background text-foreground">
+      <div
+        className="absolute inset-0 z-0 opacity-20"
+        style={{
+          backgroundImage:
+            'radial-gradient(circle at 25% 25%, hsl(var(--primary) / 0.3), rgba(255, 255, 255, 0) 35%), radial-gradient(circle at 75% 75%, hsl(var(--accent) / 0.3), rgba(255, 255, 255, 0) 35%)',
+        }}
+      />
+      <div className="absolute inset-0 z-0 h-full w-full bg-[url('https://res.cloudinary.com/dfhpkqrjw/image/upload/v1717438453/grid_y4h5x6.svg')] [background-position:calc(50%_+_1px)_calc(50%_+_1px)]" />
+
+      <header className="sticky top-0 z-50">
+        <div className="container mx-auto px-4">
+            <div className="flex h-20 items-center justify-between">
+                <Link href="/" className="flex items-center gap-2">
+                    <Orbit className="h-7 w-7 text-primary" />
+                    <span className="text-xl font-bold">Universe</span>
+                </Link>
+                <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
+                    <Link href="#" className="text-foreground/70 transition-colors hover:text-foreground">Features</Link>
+                    <Link href="#" className="text-foreground/70 transition-colors hover:text-foreground">Pricing</Link>
+                </nav>
+                <div className="hidden items-center gap-4 md:flex">
+                    <Button variant="ghost" asChild>
+                        <Link href="/dashboard">Login</Link>
+                    </Button>
+                    <Button asChild className="bg-gradient-to-r from-accent to-primary text-primary-foreground font-bold">
+                        <Link href="/dashboard">Get Started</Link>
+                    </Button>
+                </div>
+                <Button variant="ghost" size="icon" className="md:hidden">
+                    <Orbit className="h-6 w-6" />
+                    <span className="sr-only">Toggle Menu</span>
+                </Button>
             </div>
-          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 relative z-10">
+        <section className="container mx-auto px-4 pt-20 pb-16 md:pt-32 md:pb-24 text-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div className="text-left">
+                    <h1 className="font-headline text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tighter !leading-[1.1]">
+                        Where Students <br/>
+                        <span className="text-primary">Connect</span>, <span className="text-accent">Create</span><br/>
+                        & Collaborate.
+                    </h1>
+                    <p className="mt-6 text-lg md:text-xl max-w-md text-foreground/70">
+                        The all-one platform for college innovators to find teammates, share ideas, and build the future.
+                    </p>
+                    <div className="mt-8 flex flex-wrap gap-4">
+                        <Button asChild size="lg" className="font-bold text-lg px-8 py-6 bg-gradient-to-r from-accent to-primary text-primary-foreground">
+                            <Link href="/dashboard">Get Started</Link>
+                        </Button>
+                         <Button asChild size="lg" variant="outline" className="font-bold text-lg px-8 py-6">
+                            <Link href="/dashboard/events">Explore Projects</Link>
+                        </Button>
+                    </div>
+                </div>
+
+                 <div className="hidden md:flex items-center justify-center">
+                     <Image src="https://www.genkit.dev/images/gemini-orbit.svg" alt="Orbit graphic" width={400} height={400} className="opacity-70" />
+                </div>
+
+            </div>
         </section>
 
-        <section className="py-16 md:py-24">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="font-headline text-3xl md:text-4xl font-bold">Everything You Need to Succeed</h2>
-              <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
-                UniVerse provides a complete ecosystem for student developers and innovators.
-              </p>
+        <section className="container mx-auto px-4 pb-20 md:pb-32">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {features.map((feature) => (
+                    <Card key={feature.title} className="bg-card/50 backdrop-blur-sm border-border/20 p-6 text-center transition-all duration-300 hover:border-primary/50 hover:-translate-y-2">
+                        <CardContent className="p-0 flex flex-col items-center justify-center gap-4">
+                            <div className="p-4 bg-background rounded-full">
+                                {feature.icon}
+                            </div>
+                            <p className="font-semibold text-lg">{feature.title}</p>
+                        </CardContent>
+                    </Card>
+                ))}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {features.map((feature) => (
-                <Card key={feature.title} className="text-center bg-card/50 border-border/50 hover:border-accent/50 hover:bg-card transition-all duration-300 transform hover:-translate-y-2">
-                  <CardHeader className="items-center">
-                    <div className="p-4 bg-accent/10 rounded-full mb-4">
-                      {feature.icon}
-                    </div>
-                    <CardTitle className="font-headline text-xl">{feature.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">{feature.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
         </section>
       </main>
-
-      <footer className="py-6 border-t border-border/50">
-        <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} UniVerse. All rights reserved.</p>
-        </div>
-      </footer>
     </div>
   );
 }
