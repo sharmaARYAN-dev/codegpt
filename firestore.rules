@@ -37,8 +37,9 @@ service cloud.firestore {
       }
     }
 
-    match /events/{id} {
-      allow read: if isSignedIn();
+    match /events/{eventId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
       allow create: if isSignedIn();
       allow update, delete: if request.auth.uid == resource.data.organizerId;
     }
