@@ -21,7 +21,7 @@ const fontBody = Plus_Jakarta_Sans({
 
 
 export const metadata: Metadata = {
-  title: 'Universe',
+  title: 'Progress',
   description: 'The all-in-one platform for college innovators to find teammates, share ideas, and build the future.',
   viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
 };
