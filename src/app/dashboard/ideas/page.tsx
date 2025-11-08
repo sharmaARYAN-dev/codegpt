@@ -8,7 +8,11 @@ export default function IdeasPage() {
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-headline text-3xl font-bold tracking-tight">AI Project Ideas</h1>
+          <h1 className="font-headline text-3xl font-bold tracking-tight">
+            <span className="animate-twinkle bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              AI Project Ideas
+            </span>
+          </h1>
           <p className="mt-1 text-muted-foreground">Let our AI help you find the perfect project based on your skills and interests.</p>
         </div>
       </div>

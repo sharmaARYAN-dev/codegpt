@@ -98,7 +98,11 @@ export default function SearchPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-headline text-3xl font-bold tracking-tight">Search Results</h1>
+        <h1 className="font-headline text-3xl font-bold tracking-tight">
+          <span className="animate-twinkle bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            Search Results
+          </span>
+        </h1>
         {query ? (
              <p className="mt-1 text-muted-foreground">Found {totalResults} results for &quot;{query}&quot;</p>
         ) : (

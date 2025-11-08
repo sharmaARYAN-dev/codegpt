@@ -307,7 +307,11 @@ export default function ConnectionsPage() {
       />
       <div className="space-y-8">
         <div>
-          <h1 className="font-headline text-3xl font-bold tracking-tight">Find Connections</h1>
+          <h1 className="font-headline text-3xl font-bold tracking-tight">
+            <span className="animate-twinkle bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Find Connections
+            </span>
+          </h1>
           <p className="text-muted-foreground mt-1">Browse and connect with talented students across the university.</p>
         </div>
 

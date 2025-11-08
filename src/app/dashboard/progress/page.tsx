@@ -115,7 +115,11 @@ export default function ProgressPage() {
     <div className="space-y-8">
        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="font-headline text-3xl font-bold tracking-tight">Your Progress</h1>
+            <h1 className="font-headline text-3xl font-bold tracking-tight">
+              <span className="animate-twinkle bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Your Progress
+              </span>
+            </h1>
             <p className="mt-1 text-muted-foreground">Track your growth, skills, and contributions across the UniVerse.</p>
           </div>
           <div className='w-full sm:w-64 space-y-2'>

@@ -179,7 +179,11 @@ export default function ProfilePage() {
     />
     <div className="space-y-8">
         <div>
-            <h1 className="font-headline text-3xl font-bold tracking-tight">My Profile</h1>
+            <h1 className="font-headline text-3xl font-bold tracking-tight">
+              <span className="animate-twinkle bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                My Profile
+              </span>
+            </h1>
             <p className="mt-1 text-muted-foreground">This is your personal space. Customize it to reflect who you are.</p>
         </div>
       <Card className="overflow-hidden">
