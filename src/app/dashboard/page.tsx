@@ -89,7 +89,9 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
        <div>
-        <h1 className="font-headline text-3xl font-bold tracking-tight">Hey {user?.displayName?.split(' ')[0]}, Welcome Back!</h1>
+        <h1 className="font-headline text-3xl font-bold tracking-tight">
+            Hey {user?.displayName?.split(' ')[0]}, <span className="animate-twinkle bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Welcome Back!</span>
+        </h1>
         <p className="mt-1 text-muted-foreground">Here&apos;s a snapshot of what&apos;s happening in your UniVerse.</p>
       </div>
 
