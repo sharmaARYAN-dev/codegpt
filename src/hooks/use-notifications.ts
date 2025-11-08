@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { collection, query, orderBy, onSnapshot, writeBatch, doc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, writeBatch, doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Notification } from '@/lib/types';
 import { toast } from 'sonner';
