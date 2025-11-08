@@ -65,7 +65,7 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
   const projectRef = useMemo(() => db ? doc(db, 'projects', id) : null, [id]);
   const { data: project, loading: loadingProject } = useDoc<Project>(projectRef);
 
-  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, [db]);
+  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, []);
   const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery, 'users');
 
   const chatQuery = useMemo(() => db ? query(collection(db, 'projects', id, 'chat'), orderBy('createdAt', 'asc')) : null, [db, id]);
@@ -103,7 +103,7 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
     const requestData = {
         uid: user.id,
         message: `User ${user.displayName} wants to join the project.`,
-        createdAt: serverTimestamp(),
+        createdAt: new Date(),
     };
 
     const promise = updateDoc(projectDocRef, {
