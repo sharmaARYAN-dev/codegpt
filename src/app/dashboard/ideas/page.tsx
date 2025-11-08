@@ -2,7 +2,7 @@ import { ProjectIdeaGenerator } from '@/components/project-idea-generator';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'AI Project Ideas | Progress',
+  title: 'AI Project Ideas | uniVerse',
 };
 
 export default function IdeasPage() {

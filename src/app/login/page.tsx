@@ -108,7 +108,7 @@ export default function LoginPage() {
         <Card className="w-full max-w-md bg-card/60 backdrop-blur-lg border-border/30">
           <CardHeader className="text-center">
             <CardTitle className="font-headline text-3xl font-bold">Welcome Back</CardTitle>
-            <CardDescription>Log in to step into your Progress.</CardDescription>
+            <CardDescription>Log in to step into your uniVerse.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleEmailLogin} className="space-y-4">

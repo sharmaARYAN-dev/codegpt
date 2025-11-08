@@ -57,7 +57,7 @@ export function Header() {
       </div>
 
        <div className="hidden items-center gap-2 md:ml-4 md:hidden">
-            <h1 className="font-headline text-xl font-semibold tracking-tight">Progress</h1>
+            <h1 className="font-headline text-xl font-semibold tracking-tight">uniVerse</h1>
         </div>
 
         <div className='hidden md:flex flex-1 justify-center px-4 lg:px-16'>
