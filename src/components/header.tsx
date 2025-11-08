@@ -36,7 +36,9 @@ export function Header() {
             <Orbit className="h-7 w-7 text-primary" />
         </Link>
         <SidebarTrigger asChild className="md:hidden">
-          <Button variant="ghost" size="icon"><Menu className="h-5 w-5" /></Button>
+          <Button variant="ghost" size="icon">
+            <Menu className="h-5 w-5" />
+          </Button>
         </SidebarTrigger>
       </div>
 
