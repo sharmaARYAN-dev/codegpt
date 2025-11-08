@@ -35,9 +35,10 @@ import { FirestorePermissionError } from '@/firebase/errors';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Calendar } from './ui/calendar';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
+import { format, startOfToday } from 'date-fns';
 import { Switch } from './ui/switch';
 import type { Event } from '@/lib/types';
+import { MultiSelect } from './ui/multi-select';
 
 const eventSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters long.'),
@@ -47,10 +48,17 @@ const eventSchema = z.object({
   }),
   isOnline: z.boolean().default(false),
   location: z.string().optional(),
+  customLocation: z.string().optional(),
   description: z.string().min(20, 'Description must be at least 20 characters long.'),
-  tags: z.string().min(2, 'Please provide at least one tag.'),
-}).refine(data => data.isOnline || (!!data.location && data.location.length >= 2), {
-    message: 'Location is required for in-person events.',
+  tags: z.array(z.string()).min(1, 'Please provide at least one tag.'),
+}).refine(data => {
+    if (data.isOnline) return true;
+    if (data.location === 'Other') {
+        return !!data.customLocation && data.customLocation.length >= 2;
+    }
+    return !!data.location && data.location.length >= 2;
+}, {
+    message: 'A valid location is required for in-person events.',
     path: ['location'],
 });
 
@@ -62,6 +70,10 @@ interface CreateEventDialogProps {
   eventToEdit?: Event;
 }
 
+const campusLocations = ["Main Auditorium", "Library", "Engineering Block", "Science Wing", "Student Union"];
+const popularTags = ["AI", "WebDev", "Mobile", "Design", "Networking", "Career"];
+
+
 export function CreateEventDialog({ open, onOpenChange, eventToEdit }: CreateEventDialogProps) {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -72,29 +84,33 @@ export function CreateEventDialog({ open, onOpenChange, eventToEdit }: CreateEve
       title: '',
       isOnline: false,
       location: '',
+      customLocation: '',
       description: '',
-      tags: '',
+      tags: [],
     },
   });
 
   useEffect(() => {
     if (eventToEdit) {
+      const isCustomLocation = !campusLocations.includes(eventToEdit.location) && eventToEdit.location !== 'Online';
       form.reset({
         title: eventToEdit.title,
         type: eventToEdit.type,
         date: eventToEdit.date.toDate(),
         isOnline: eventToEdit.isOnline,
-        location: eventToEdit.isOnline ? '' : eventToEdit.location,
+        location: isCustomLocation ? 'Other' : eventToEdit.location,
+        customLocation: isCustomLocation ? eventToEdit.location : '',
         description: eventToEdit.description,
-        tags: eventToEdit.tags.join(', '),
+        tags: eventToEdit.tags,
       });
     } else {
       form.reset({
         title: '',
         isOnline: false,
         location: '',
+        customLocation: '',
         description: '',
-        tags: '',
+        tags: [],
         type: undefined,
         date: undefined
       });
@@ -102,6 +118,7 @@ export function CreateEventDialog({ open, onOpenChange, eventToEdit }: CreateEve
   }, [eventToEdit, form, open]);
   
   const isOnline = form.watch('isOnline');
+  const location = form.watch('location');
   const isEditing = !!eventToEdit;
   
   const onSubmit = async (values: EventFormValues) => {
@@ -111,14 +128,22 @@ export function CreateEventDialog({ open, onOpenChange, eventToEdit }: CreateEve
     }
 
     setIsSubmitting(true);
+
+    let finalLocation = 'Online';
+    if (!values.isOnline) {
+      finalLocation = values.location === 'Other' ? values.customLocation! : values.location!;
+    }
     
     const eventData = {
       ...values,
-      tags: values.tags.split(',').map(tag => tag.trim()),
-      location: values.isOnline ? 'Online' : values.location,
+      tags: values.tags,
+      location: finalLocation,
       organizerId: user.id,
       updatedAt: serverTimestamp(),
     };
+    
+    // Remove temporary fields
+    delete (eventData as any).customLocation;
 
     const promise = () => {
         if (isEditing) {
@@ -230,9 +255,7 @@ export function CreateEventDialog({ open, onOpenChange, eventToEdit }: CreateEve
                                 mode="single"
                                 selected={field.value}
                                 onSelect={field.onChange}
-                                disabled={(date) =>
-                                date < new Date() || date < new Date("1900-01-01")
-                                }
+                                disabled={(date) => date < startOfToday() }
                                 initialFocus
                             />
                             </PopoverContent>
@@ -264,19 +287,44 @@ export function CreateEventDialog({ open, onOpenChange, eventToEdit }: CreateEve
               />
 
               {!isOnline && (
-                 <FormField
-                    control={form.control}
-                    name="location"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Location</FormLabel>
-                        <FormControl>
-                            <Input placeholder="e.g., Main Auditorium" {...field} value={field.value ?? ''} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
+                <div className='space-y-4'>
+                    <FormField
+                        control={form.control}
+                        name="location"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Location</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a location" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {campusLocations.map(loc => <SelectItem key={loc} value={loc}>{loc}</SelectItem>)}
+                                        <SelectItem value="Other">Other</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    {location === 'Other' && (
+                        <FormField
+                            control={form.control}
+                            name="customLocation"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Custom Location</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Specify location" {...field} value={field.value ?? ''}/>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     )}
-                />
+                </div>
               )}
             <FormField
               control={form.control}
@@ -298,10 +346,15 @@ export function CreateEventDialog({ open, onOpenChange, eventToEdit }: CreateEve
                 <FormItem>
                   <FormLabel>Tags</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. AI, WebDev, Networking" {...field} />
+                     <MultiSelect
+                      placeholder="Add relevant tags..."
+                      selected={field.value}
+                      onChange={field.onChange}
+                      popularOptions={popularTags}
+                    />
                   </FormControl>
                   <FormDescription>
-                    Comma-separated list of relevant tags.
+                    Add relevant keywords to help people find your event.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
