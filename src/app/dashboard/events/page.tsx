@@ -217,8 +217,8 @@ export default function EventsPage() {
                 <ToggleGroupItem value="online" aria-label="Toggle online" className='gap-2 flex-1 sm:flex-initial'>
                     <Home className='size-4' /> Online
                 </ToggleGroupItem>
-                <ToggleGroupItem value="campus" aria-label="Toggle campus-based" className='gap-2 flex-1 sm:flex-initial'>
-                    <Building className='size-4' /> Campus
+                <ToggleGroupItem value="offline" aria-label="Toggle offline events" className='gap-2 flex-1 sm:flex-initial'>
+                    <Building className='size-4' /> Offline
                 </ToggleGroupItem>
             </ToggleGroup>
         </div>
