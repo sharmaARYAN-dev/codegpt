@@ -54,7 +54,8 @@ function ProjectWorkspaceSkeleton() {
 
 export default function ProjectWorkspacePage({ params }: { params: { id: string } }) {
   const { user } = useAuth();
-  const projectRef = useMemo(() => db ? doc(db, 'projects', params.id) : null, [params.id]);
+  const id = params.id;
+  const projectRef = useMemo(() => db ? doc(db, 'projects', id) : null, [id]);
   const { data: project, loading: loadingProject } = useDoc<Project>(projectRef);
 
   const usersQuery = useMemo(() => db ? collection(db, 'users') : null, [db]);

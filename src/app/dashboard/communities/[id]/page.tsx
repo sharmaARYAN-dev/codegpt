@@ -57,14 +57,15 @@ export default function PostPage({ params }: { params: { id: string } }) {
   const { user } = useAuth();
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const id = params.id;
   
-  const postRef = useMemo(() => db ? doc(db, 'forumPosts', params.id) : null, [params.id]);
+  const postRef = useMemo(() => db ? doc(db, 'forumPosts', id) : null, [id]);
   const { data: post, loading: loadingPost } = useDoc<ForumPost>(postRef);
 
   const authorRef = useMemo(() => (db && post) ? doc(db, 'users', post.authorId) : null, [post]);
   const { data: author, loading: loadingAuthor } = useDoc<StudentProfile>(authorRef);
 
-  const commentsPath = useMemo(() => `forumPosts/${params.id}/comments`, [params.id]);
+  const commentsPath = useMemo(() => `forumPosts/${id}/comments`, [id]);
   const commentsQuery = useMemo(() => db ? query(collection(db, commentsPath), orderBy('createdAt', 'asc')) : null, [db, commentsPath]);
   const { data: comments, loading: loadingComments } = useCollection<Comment>(commentsQuery, commentsPath);
 
@@ -82,8 +83,8 @@ export default function PostPage({ params }: { params: { id: string } }) {
       createdAt: serverTimestamp(),
     };
 
-    const collectionRef = collection(db, 'forumPosts', params.id, 'comments');
-    const postDocRef = doc(db, 'forumPosts', params.id);
+    const collectionRef = collection(db, 'forumPosts', id, 'comments');
+    const postDocRef = doc(db, 'forumPosts', id);
     
     const promise = () => addDoc(collectionRef, commentData).then(() => {
         return updateDoc(postDocRef, { comments: increment(1) });
