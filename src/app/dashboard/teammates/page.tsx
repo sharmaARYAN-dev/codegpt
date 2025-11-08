@@ -18,12 +18,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Award, ShieldCheck, Star, Trophy, Loader2 } from 'lucide-react';
+import { Search, Award, ShieldCheck, Star, Trophy, Loader2, Github, Linkedin } from 'lucide-react';
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import type { StudentProfile } from '@/lib/types';
 import { useMemo, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import Link from 'next/link';
 
 const reputationIcons = {
   'Top Contributor': Award,
@@ -134,6 +136,7 @@ export default function TeammatesPage() {
       {loading ? <TeammatesSkeleton /> :
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {teammates.map((student) => {
+            const hasSocials = student.socialLinks?.github || student.socialLinks?.linkedin;
             return (
               <Card key={student.id} className="flex flex-col text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-primary/20 hover:shadow-lg hover:border-primary/30">
                 <CardHeader className="items-center pt-8">
@@ -180,7 +183,29 @@ export default function TeammatesPage() {
                   </div>
                 </CardContent>
                 <CardFooter className='p-4'>
-                  <Button className="w-full">Connect</Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button className="w-full" disabled={!hasSocials}>Connect</Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56">
+                      {student.socialLinks?.github && (
+                        <Link href={student.socialLinks.github} target="_blank">
+                          <DropdownMenuItem>
+                            <Github className="mr-2 h-4 w-4" />
+                            <span>View GitHub</span>
+                          </DropdownMenuItem>
+                        </Link>
+                      )}
+                      {student.socialLinks?.linkedin && (
+                         <Link href={student.socialLinks.linkedin} target="_blank">
+                          <DropdownMenuItem>
+                            <Linkedin className="mr-2 h-4 w-4" />
+                            <span>View LinkedIn</span>
+                          </DropdownMenuItem>
+                        </Link>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </CardFooter>
               </Card>
             );
