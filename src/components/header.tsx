@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { Input } from './ui/input';
 import { useAuth, useUser } from '@/firebase';
 import { useTheme } from 'next-themes';
+import React from 'react';
 
 export function Header() {
   const { user } = useUser();
@@ -33,6 +34,15 @@ export function Header() {
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
+  }
+
+  const handleSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      const query = event.currentTarget.value;
+      if (query) {
+        router.push(`/dashboard/search?q=${encodeURIComponent(query)}`);
+      }
+    }
   }
 
   return (
@@ -53,7 +63,11 @@ export function Header() {
         <div className='hidden md:flex flex-1 justify-center px-4 lg:px-16'>
              <div className="relative w-full max-w-lg">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search anything..." className="pl-10 bg-muted/50 border-0 focus-visible:ring-primary/50 focus-visible:bg-card" />
+              <Input 
+                placeholder="Search anything..." 
+                className="pl-10 bg-muted/50 border-0 focus-visible:ring-primary/50 focus-visible:bg-card"
+                onKeyDown={handleSearch}
+              />
             </div>
         </div>
       
