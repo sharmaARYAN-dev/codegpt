@@ -49,6 +49,7 @@ export type Event = {
   organizerId: string;
   tags: string[];
   rating: number;
+  createdAt: any; // Can be Timestamp
 };
 
 export type ForumPost = {

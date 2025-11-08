@@ -167,7 +167,7 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
                 return (
                   <div key={member.id} className="flex items-center gap-4 p-3 rounded-md border bg-card hover:bg-muted/50 transition-colors">
                     <Avatar className="size-12">
-                      <AvatarImage src={member.photoURL} alt={member.displayName} />
+                      {member.photoURL && <AvatarImage src={member.photoURL} alt={member.displayName} />}
                       <AvatarFallback>
                         {member.displayName.substring(0, 2)}
                       </AvatarFallback>
@@ -208,7 +208,7 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
                 {openRoles.map((role) => (
                     <div key={role.title} className="flex items-start gap-4 p-3 rounded-md border bg-card hover:bg-muted/50 transition-colors">
                        <Avatar className='mt-1'>
-                            <AvatarImage src={role.avatar} />
+                            {role.avatar && <AvatarImage src={role.avatar} />}
                             <AvatarFallback>
                             {role.title.substring(0, 2)}
                             </AvatarFallback>

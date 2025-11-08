@@ -74,6 +74,10 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
       forks: 0,
       comments: 0,
       createdAt: serverTimestamp(),
+      links: {
+        repo: '',
+        demo: ''
+      }
     };
 
     const collectionRef = collection(firestore, 'projects');
