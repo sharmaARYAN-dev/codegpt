@@ -40,9 +40,6 @@ export function Header() {
          <Link href="/dashboard" className="flex items-center gap-2 md:hidden">
             <Orbit className="h-7 w-7 text-primary" />
         </Link>
-        <SidebarTrigger className="hidden md:flex">
-            <Menu className="h-5 w-5" />
-        </SidebarTrigger>
         <SidebarTrigger className="flex md:hidden">
             <Menu className="h-5 w-5" />
         </SidebarTrigger>
