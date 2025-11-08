@@ -112,6 +112,17 @@ const SidebarProvider = React.forwardRef<
       return () => window.removeEventListener('keydown', handleKeyDown);
     }, [toggleSidebar]);
 
+    React.useEffect(() => {
+        if (typeof document !== 'undefined') {
+          document.body.style.setProperty('--sidebar-width', SIDEBAR_WIDTH);
+          document.body.style.setProperty('--sidebar-width-icon', SIDEBAR_WIDTH_ICON);
+          document.body.classList.add(
+            'group/sidebar-wrapper',
+            'has-[[data-variant=inset]]:bg-sidebar'
+          );
+        }
+    }, [])
+
     // We add a state so that we can do data-state="expanded" or "collapsed".
     // This makes it easier to style the sidebar with Tailwind classes.
     const state = open ? 'expanded' : 'collapsed';
@@ -133,17 +144,7 @@ const SidebarProvider = React.forwardRef<
       <SidebarContext.Provider value={contextValue}>
         <TooltipProvider delayDuration={0}>
           <div
-            style={
-              {
-                '--sidebar-width': SIDEBAR_WIDTH,
-                '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
-                ...style,
-              } as React.CSSProperties
-            }
-            className={cn(
-              'group/sidebar-wrapper flex min-h-screen w-full has-[[data-variant=inset]]:bg-sidebar',
-              className
-            )}
+            className={cn('min-h-screen', className)}
             ref={ref}
             {...props}
           >
