@@ -9,9 +9,10 @@ import {
   SidebarFooter,
   SidebarContent,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Users, FolderKanban, MessageSquare, User, LogOut, Swords, Lightbulb } from 'lucide-react';
+import { LayoutDashboard, Users, FolderKanban, MessageSquare, LogOut, Swords, Lightbulb, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useAuth } from '@/firebase';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Home' },
@@ -20,11 +21,20 @@ const navItems = [
   { href: '/dashboard/hackathons', icon: Swords, label: 'Events' },
   { href: '/dashboard/teammates', icon: Users, label: 'Teammates' },
   { href: '/dashboard/ideas', icon: Lightbulb, label: 'Ideas' },
-  { href: '/dashboard/profile', icon: User, label: 'Profile' },
+  { href: '/dashboard/profile', icon: UserIcon, label: 'Profile' },
 ];
 
 export function AppNav() {
   const pathname = usePathname();
+  const auth = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    if (auth) {
+      await auth.signOut();
+      router.push('/login');
+    }
+  };
 
   return (
     <>
@@ -36,7 +46,7 @@ export function AppNav() {
             <SidebarMenuItem key={item.href}>
                 <Link href={item.href}>
                 <SidebarMenuButton
-                    isActive={pathname.startsWith(item.href) && (item.href === '/dashboard' ? pathname === item.href : true)}
+                    isActive={pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/dashboard')}
                     tooltip={item.label}
                 >
                     <item.icon />
@@ -50,12 +60,10 @@ export function AppNav() {
       <SidebarFooter className="p-2 border-t border-sidebar-border mt-auto">
         <SidebarMenu>
             <SidebarMenuItem>
-                 <Link href="/login" className='w-full'>
-                    <SidebarMenuButton tooltip="Logout">
-                        <LogOut/>
-                        <span>Logout</span>
-                    </SidebarMenuButton>
-                 </Link>
+                 <SidebarMenuButton tooltip="Logout" onClick={handleLogout}>
+                    <LogOut/>
+                    <span>Logout</span>
+                </SidebarMenuButton>
             </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

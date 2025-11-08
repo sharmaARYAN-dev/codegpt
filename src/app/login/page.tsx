@@ -3,17 +3,55 @@
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Orbit, Chrome } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { useAuth, useUser } from '@/firebase';
+import { useEffect } from 'react';
+import { doc, setDoc } from 'firebase/firestore';
+import { useFirestore } from '@/firebase';
 
 export default function LoginPage() {
   const router = useRouter();
+  const auth = useAuth();
+  const firestore = useFirestore();
+  const { user, loading } = useUser();
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    router.push('/dashboard');
+  useEffect(() => {
+    if (!loading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, loading, router]);
+
+
+  const handleGoogleLogin = async () => {
+    if (!auth || !firestore) return;
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      
+      // Create or update user profile in Firestore
+      const userRef = doc(firestore, 'users', user.uid);
+      await setDoc(userRef, {
+        id: user.uid,
+        displayName: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+      }, { merge: true });
+
+      router.push('/dashboard');
+    } catch (error) {
+      console.error("Error during Google login:", error);
+    }
+  };
+
+  if (loading || user) {
+     return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
   }
 
   return (
@@ -39,44 +77,18 @@ export default function LoginPage() {
       </header>
 
       <main className="flex-1 relative z-10 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-card/50 backdrop-blur-sm border-border/20">
+        <Card className="w-full max-w-sm bg-card/50 backdrop-blur-sm border-border/20">
           <CardHeader className="text-center">
-            <CardTitle className="font-headline text-3xl font-bold">Welcome Back</CardTitle>
-            <CardDescription>Enter your credentials to access your account.</CardDescription>
+            <CardTitle className="font-headline text-3xl font-bold">Join Universe</CardTitle>
+            <CardDescription>Sign in to connect, create, and collaborate.</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="name@university.edu" required defaultValue="alex@university.edu" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" placeholder="••••••••" required defaultValue="password"/>
-              </div>
-              <Button type="submit" className="w-full font-bold text-lg h-12">
-                Login
-              </Button>
-            </form>
-            <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-                </div>
-            </div>
-            <div className="text-center text-sm text-muted-foreground flex items-center justify-center gap-4">
-              <Button variant="outline" className="w-full" onClick={handleLogin}>
-                <Chrome className="mr-2 h-4 w-4" />
-                Continue with Google
-              </Button>
-            </div>
-             <div className="mt-6 text-center text-sm text-muted-foreground">
-              Don&apos;t have an account?{' '}
-              <Link href="#" className="font-semibold text-primary hover:underline">
-                Sign Up
-              </Link>
+            <Button variant="outline" className="w-full h-12 text-base" onClick={handleGoogleLogin}>
+              <Chrome className="mr-2 h-5 w-5" />
+              Continue with Google
+            </Button>
+            <div className="mt-4 text-center text-xs text-muted-foreground">
+              By continuing, you agree to our Terms of Service and Privacy Policy.
             </div>
           </CardContent>
         </Card>

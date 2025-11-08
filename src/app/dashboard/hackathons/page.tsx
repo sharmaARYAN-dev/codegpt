@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Card,
   CardContent,
@@ -6,19 +8,29 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { events } from '@/lib/data';
 import { Bookmark, Star, MapPin, Calendar, Home, Building } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Image from 'next/image';
-import { Separator } from '@/components/ui/separator';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-
+import { useCollection, useFirestore } from '@/firebase';
+import type { Event, StudentProfile } from '@/lib/types';
+import { useMemo } from 'react';
+import { collection } from 'firebase/firestore';
 
 export default function HackathonsPage() {
-  const allEvents = events;
-  const heroImage = PlaceHolderImages.find(p => p.id === 'event-conference');
+  const firestore = useFirestore();
+  const { data: allEvents } = useCollection<Event>(firestore ? collection(firestore, 'events') : null);
+  const { data: users } = useCollection<StudentProfile>(
+    firestore ? collection(firestore, 'users') : null
+  );
+  
+  const heroImage = {
+      "id": "event-conference",
+      "description": "Image for a conference event",
+      "imageUrl": "https://images.unsplash.com/photo-1664262283644-bfbc54a88c90?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwcmVzZW50YXRpb24lMjBzdGFnZXxlbnwwfHx8fDE3NjI1MTM1MDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "presentation stage"
+    };
 
   return (
     <div className="space-y-6">
@@ -71,20 +83,20 @@ export default function HackathonsPage() {
         </aside>
 
         <main className='md:col-span-3 grid grid-cols-1 lg:grid-cols-2 gap-6'>
-            {allEvents.map((event) => {
-                const ownerAvatar = PlaceHolderImages.find((p) => p.id === 'avatar-1');
+            {allEvents?.map((event) => {
+                const organizer = users?.find(u => u.id === event.organizerId);
                 return (
                 <Card key={event.id} className="flex flex-col overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:shadow-primary/20 hover:shadow-lg">
                     <CardHeader>
                         <div className='flex justify-between items-start'>
                              <div className='flex items-center gap-3'>
                                 <Avatar className='size-10'>
-                                    {ownerAvatar && <AvatarImage src={ownerAvatar.imageUrl} alt="Event organizer" />}
-                                    <AvatarFallback>EV</AvatarFallback>
+                                    {organizer?.photoURL && <AvatarImage src={organizer.photoURL} alt={organizer.displayName} />}
+                                    <AvatarFallback>{organizer?.displayName?.substring(0, 2) ?? 'EV'}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className="font-semibold text-sm">Organizers</p>
-                                    <p className="text-xs text-muted-foreground">College 1st Year</p>
+                                    <p className="font-semibold text-sm">{organizer?.displayName}</p>
+                                    <p className="text-xs text-muted-foreground">Organizer</p>
                                 </div>
                             </div>
                             <Button variant='ghost' size='icon'>
@@ -97,7 +109,7 @@ export default function HackathonsPage() {
                          <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
                             <div className='flex items-center gap-2'>
                                 <Calendar className='size-4' />
-                                <span>{event.date}</span>
+                                <span>{new Date(event.date).toLocaleDateString()}</span>
                             </div>
                              <div className='flex items-center gap-2'>
                                 <MapPin className='size-4' />
@@ -105,17 +117,13 @@ export default function HackathonsPage() {
                             </div>
                         </div>
                         <div className="flex items-center gap-1 text-yellow-400">
-                            <Star className='size-4 fill-current' />
-                            <Star className='size-4 fill-current' />
-                            <Star className='size-4 fill-current' />
-                            <Star className='size-4' />
-                            <Star className='size-4' />
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} className={`size-4 ${i < event.rating ? 'fill-current' : ''}`} />
+                            ))}
                         </div>
 
                         <div className="flex items-center gap-2 text-sm">
-                            <Badge>AI/ML</Badge>
-                            <Badge variant='outline'>React</Badge>
-                             <Badge variant='outline'>Python</Badge>
+                            {event.tags?.map(tag => <Badge key={tag}>{tag}</Badge>)}
                         </div>
                          <p className="text-sm text-muted-foreground pt-2 line-clamp-2">{event.description}</p>
                     </CardContent>

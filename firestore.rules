@@ -1,0 +1,53 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // USERS
+    // Users can read any profile.
+    // Users can only create and update their own profile.
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update: if isSignedIn() && isOwner(userId);
+    }
+    
+    // PROJECTS
+    // Any user can read projects.
+    // Signed-in users can create projects.
+    // Only the owner can update or delete their project.
+    match /projects/{projectId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && isOwner(resource.data.ownerId);
+    }
+
+    // EVENTS
+    // Any user can read events.
+    // Signed-in users can create events.
+    // Only the organizer can update or delete their event.
+    match /events/{eventId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && isOwner(resource.data.organizerId);
+    }
+
+    // FORUM POSTS
+    // Any user can read forum posts.
+    // Signed-in users can create posts.
+    // Only the author can update or delete their post.
+    match /forumPosts/{postId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && isOwner(resource.data.authorId);
+    }
+  }
+}

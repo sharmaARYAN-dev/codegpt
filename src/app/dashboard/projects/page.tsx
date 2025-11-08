@@ -1,3 +1,4 @@
+'use client';
 import {
   Card,
   CardContent,
@@ -6,20 +7,34 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { projects } from '@/lib/data';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Plus, Users, GitFork } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
+import { useCollection, useFirestore } from '@/firebase';
+import type { Project, StudentProfile } from '@/lib/types';
+import { useMemo } from 'react';
+import { collection } from 'firebase/firestore';
+
 
 export default function ProjectsPage() {
-  const allProjects = projects;
+  const firestore = useFirestore();
 
-  const renderProjectGrid = (projectList: typeof projects) => (
+  const projectsQuery = useMemo(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'projects');
+  }, [firestore]);
+  const { data: allProjects } = useCollection<Project>(projectsQuery);
+  
+  const usersQuery = useMemo(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'users');
+  }, [firestore]);
+  const { data: users } = useCollection<StudentProfile>(usersQuery);
+
+  const renderProjectGrid = (projectList: Project[]) => (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
       {projectList.map((project) => {
-        const owner = project.team[0];
-        const ownerAvatar = PlaceHolderImages.find((p) => p.id === owner.avatar);
+        const owner = users?.find(u => u.id === project.ownerId);
 
         return (
           <Link href={`/dashboard/projects/${project.id}`} key={project.id}>
@@ -27,12 +42,12 @@ export default function ProjectsPage() {
               <CardHeader>
                   <div className='flex items-center gap-3'>
                       <Avatar className='size-10'>
-                          {ownerAvatar && <AvatarImage src={ownerAvatar.imageUrl} alt={owner.name} />}
-                          <AvatarFallback>{owner.name.substring(0, 2)}</AvatarFallback>
+                          {owner?.photoURL && <AvatarImage src={owner.photoURL} alt={owner.displayName} />}
+                          <AvatarFallback>{owner?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
                       </Avatar>
                       <div>
                           <CardTitle className="font-headline text-lg">{project.name}</CardTitle>
-                          <p className="text-sm text-muted-foreground">by {owner.name}</p>
+                          <p className="text-sm text-muted-foreground">by {owner?.displayName}</p>
                       </div>
                   </div>
               </CardHeader>
@@ -49,11 +64,11 @@ export default function ProjectsPage() {
                   <div className='flex items-center gap-4 text-sm text-muted-foreground'>
                     <div className='flex items-center gap-1'>
                         <Users className='size-4'/>
-                        <span>{project.team.length}</span>
+                        <span>{project.memberIds?.length || 1}</span>
                     </div>
                      <div className='flex items-center gap-1'>
                         <GitFork className='size-4'/>
-                        <span>1.2k</span>
+                        <span>{project.forks || 0}</span>
                     </div>
                 </div>
                 <Button>View</Button>
@@ -87,7 +102,7 @@ export default function ProjectsPage() {
         <Button variant="ghost">Sort By: Newest</Button>
       </div>
       
-      {renderProjectGrid(allProjects)}
+      {allProjects && users && renderProjectGrid(allProjects)}
     </div>
   );
 }

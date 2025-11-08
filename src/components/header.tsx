@@ -12,15 +12,22 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Settings, LogOut, Bell, Search, Orbit, Menu } from 'lucide-react';
-import { usePathname } from 'next/navigation';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Input } from './ui/input';
+import { useAuth, useUser } from '@/firebase';
 
 export function Header() {
-  const pathname = usePathname();
-  const userAvatar = PlaceHolderImages.find((p) => p.id === 'avatar-1');
-
+  const { user } = useUser();
+  const auth = useAuth();
+  const router = useRouter();
+  
+  const handleLogout = async () => {
+    if (auth) {
+      await auth.signOut();
+      router.push('/login');
+    }
+  };
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-card px-4 md:px-6">
@@ -55,23 +62,25 @@ export function Header() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-9 w-9 rounded-full">
               <Avatar className="h-9 w-9">
-                {userAvatar && <AvatarImage src={userAvatar.imageUrl} alt="Alex Johnson" />}
-                <AvatarFallback>AJ</AvatarFallback>
+                {user?.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || "User"} />}
+                <AvatarFallback>{user?.displayName?.split(" ").map(n => n[0]).join("") ?? 'U'}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end">
             <DropdownMenuLabel>
-                <p>Alex Johnson</p>
-                <p className="text-xs text-muted-foreground font-normal">alex@university.edu</p>
+                <p>{user?.displayName}</p>
+                <p className="text-xs text-muted-foreground font-normal">{user?.email}</p>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
-            </DropdownMenuItem>
+             <Link href="/dashboard/profile">
+              <DropdownMenuItem>
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Profile</span>
+              </DropdownMenuItem>
+            </Link>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>
             </DropdownMenuItem>

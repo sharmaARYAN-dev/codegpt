@@ -1,20 +1,43 @@
+'use client';
+
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { forumPosts, projects } from '@/lib/data';
-import { ArrowBigUp, MessageSquare, Star } from 'lucide-react';
+import { ArrowBigUp, MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Link from 'next/link';
+import { useCollection } from '@/firebase';
+import type { ForumPost, Project, StudentProfile } from '@/lib/types';
+import { useMemo } from 'react';
+import { collection, query, limit, orderBy } from 'firebase/firestore';
+import { useFirestore }from '@/firebase';
 
 export default function CommunitiesPage() {
   const filters = ['All', 'AI/ML', 'WebDev', 'Design', 'Startups', 'Gaming'];
-  const suggestedProjects = projects.slice(0, 2);
+  const firestore = useFirestore();
+
+  const postsQuery = useMemo(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'forumPosts'), orderBy('createdAt', 'desc'));
+  }, [firestore]);
+  const { data: forumPosts } = useCollection<ForumPost>(postsQuery);
+
+  const projectsQuery = useMemo(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'projects'), limit(2));
+  }, [firestore]);
+  const { data: suggestedProjects } = useCollection<Project>(projectsQuery);
+
+  const { data: users } = useCollection<StudentProfile>(
+    firestore ? collection(firestore, 'users') : null
+  );
+
+  const getUserAvatar = (userId: string) => {
+    return users?.find((u) => u.id === userId)?.photoURL;
+  };
 
   return (
     <div className="space-y-6">
@@ -39,23 +62,23 @@ export default function CommunitiesPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div className="lg:col-span-2 space-y-4">
-          {forumPosts.map((post) => {
-            const authorAvatar = PlaceHolderImages.find((p) => p.id === 'avatar-2');
+          {forumPosts?.map((post) => {
+            const author = users?.find(u => u.id === post.authorId);
             return (
             <Card key={post.id} className="transition-shadow duration-300 hover:shadow-lg p-4 hover:border-primary/50">
                <div className='flex items-center gap-3 mb-3'>
                     <Avatar className='size-8'>
-                        {authorAvatar && <AvatarImage src={authorAvatar.imageUrl} alt={post.author} />}
-                        <AvatarFallback>{post.author.substring(0, 2)}</AvatarFallback>
+                        {author?.photoURL && <AvatarImage src={author.photoURL} alt={author.displayName} />}
+                        <AvatarFallback>{author?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
                     </Avatar>
                     <div>
-                        <p className="font-semibold text-sm">{post.author}</p>
-                        <p className="text-xs text-muted-foreground">{post.createdAt}</p>
+                        <p className="font-semibold text-sm">{author?.displayName}</p>
+                        <p className="text-xs text-muted-foreground">{new Date(post.createdAt).toLocaleDateString()}</p>
                     </div>
                     <Badge variant="secondary" className='ml-auto'>{post.community}</Badge>
                 </div>
               <h2 className="font-headline text-xl font-semibold mt-1">{post.title}</h2>
-              <p className='text-muted-foreground text-sm mt-2 line-clamp-2'>An intelligent platform that uses machine learning to optimize... This is an interesting topic, has anyone considered the privacy implications of using student data to train these models? Would love to hear some thoughts.</p>
+              <p className='text-muted-foreground text-sm mt-2 line-clamp-2'>{post.content}</p>
               <div className="flex items-center gap-4 text-sm text-muted-foreground mt-4">
                  <Button variant='outline' size='sm' className='text-primary hover:bg-primary/10 hover:text-primary'>
                     <ArrowBigUp className="h-4 w-4 mr-2" />
@@ -80,19 +103,18 @@ export default function CommunitiesPage() {
                     <CardTitle className="font-headline text-lg">Hot Projects</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {suggestedProjects.map((project) => {
-                        const owner = project.team[0];
-                        const ownerAvatar = PlaceHolderImages.find(p => p.id === owner.avatar);
+                    {suggestedProjects?.map((project) => {
+                        const owner = users?.find(u => u.id === project.ownerId);
                         return (
                         <div key={project.id}>
                             <div className='flex items-center gap-3'>
                                 <Avatar className='size-8'>
-                                    {ownerAvatar && <AvatarImage src={ownerAvatar.imageUrl} alt={owner.name} />}
-                                    <AvatarFallback>{owner.name.substring(0, 2)}</AvatarFallback>
+                                    {owner?.photoURL && <AvatarImage src={owner.photoURL} alt={owner.displayName} />}
+                                    <AvatarFallback>{owner?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
                                 </Avatar>
                                 <div>
                                     <p className="font-semibold text-sm">{project.name}</p>
-                                    <p className="text-xs text-muted-foreground">by {owner.name}</p>
+                                    <p className="text-xs text-muted-foreground">by {owner?.displayName}</p>
                                 </div>
                             </div>
                             <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{project.description}</p>

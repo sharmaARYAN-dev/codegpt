@@ -9,27 +9,49 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { projects } from '@/lib/data';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { MessageSquare, Users, GitFork, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
+import { useDoc, useCollection, useFirestore } from '@/firebase';
+import type { Project, StudentProfile } from '@/lib/types';
+import { useMemo } from 'react';
+import { doc, collection } from 'firebase/firestore';
 
 export default function ProjectWorkspacePage({ params }: { params: { id: string } }) {
-  const project = projects.find(p => p.id === params.id) || projects[0];
-  const teamMembers = project.team;
+  const firestore = useFirestore();
+
+  const projectRef = useMemo(() => {
+    if (!firestore || !params.id) return null;
+    return doc(firestore, 'projects', params.id);
+  }, [firestore, params.id]);
+  const { data: project } = useDoc<Project>(projectRef);
+  
+  const usersQuery = useMemo(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'users');
+  }, [firestore]);
+  const { data: users } = useCollection<StudentProfile>(usersQuery);
+
+  const teamMembers = useMemo(() => {
+    if (!project || !users) return [];
+    return users.filter(u => project.memberIds?.includes(u.id));
+  }, [project, users]);
 
   const openRoles = [
     {
       title: 'UI/UX Designer',
       description: 'Passionate about creating beautiful and intuitive user interfaces.',
-      avatar: 'avatar-3',
+      avatar: 'https://images.unsplash.com/photo-1643932919088-53349a7c3385?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwb3J0cmFpdCUyMHBlcnNvbnxlbnwwfHx8fDE3NjI1NTAyNzZ8MA&ixlib=rb-4.1.0&q=80&w=1080',
     },
     {
       title: 'ML Engineer',
       description: 'Experienced in building and deploying machine learning models.',
-      avatar: 'avatar-5',
+      avatar: 'https://images.unsplash.com/photo-1561740303-a0fd9fabc646?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxwb3J0cmFpdCUyMHBlcnNvbnxlbnwwfHx8fDE3NjI1NTAyNzZ8MA&ixlib=rb-4.1.0&q=80&w=1080',
     },
   ];
+
+  if (!project) {
+    return <div>Loading...</div>
+  }
 
   return (
     <div className="space-y-6">
@@ -59,15 +81,15 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
       <div className="flex items-center gap-4 text-sm text-muted-foreground">
         <div className='flex items-center gap-2'>
             <Users className='size-4' />
-            <span>{project.team.length} Members</span>
+            <span>{teamMembers.length} Members</span>
         </div>
         <div className='flex items-center gap-2'>
             <GitFork className='size-4' />
-            <span>1.2k Forks</span>
+            <span>{project.forks || 0} Forks</span>
         </div>
          <div className='flex items-center gap-2'>
             <MessageSquare className='size-4' />
-            <span>34 Comments</span>
+            <span>{project.comments || 0} Comments</span>
         </div>
       </div>
 
@@ -81,7 +103,7 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                {project.description} This project aims to create an intelligent platform that uses machine learning to generate personalized learning paths for students. By analyzing user-provided lecture notes and study materials, the application will create interactive flashcards, quizzes, and summaries to enhance the learning experience.
+                {project.description}
               </p>
             </CardContent>
           </Card>
@@ -94,21 +116,18 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
             </CardHeader>
             <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {teamMembers.map((member) => {
-                const avatar = PlaceHolderImages.find(
-                  (p) => p.id === member.avatar
-                );
                 return (
                   <div key={member.id} className="flex items-center gap-3 p-3 rounded-md border bg-card hover:bg-muted/50">
                     <Avatar className="size-10">
-                      {avatar && <AvatarImage src={avatar.imageUrl} alt={member.name} />}
+                      {member.photoURL && <AvatarImage src={member.photoURL} alt={member.displayName} />}
                       <AvatarFallback>
-                        {member.name.substring(0, 2)}
+                        {member.displayName.substring(0, 2)}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-semibold">{member.name}</p>
+                      <p className="font-semibold">{member.displayName}</p>
                       <p className="text-sm text-muted-foreground">
-                        Project Owner
+                        {project.ownerId === member.id ? 'Project Owner' : 'Member'}
                       </p>
                     </div>
                   </div>
@@ -142,12 +161,7 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
                 {openRoles.map((role) => (
                     <div key={role.title} className="flex items-center gap-3 p-3 rounded-md border bg-card hover:bg-muted/50">
                        <Avatar>
-                            <AvatarImage
-                            src={
-                                PlaceHolderImages.find((p) => p.id === role.avatar)
-                                ?.imageUrl
-                            }
-                            />
+                            <AvatarImage src={role.avatar} />
                             <AvatarFallback>
                             {role.title.substring(0, 2)}
                             </AvatarFallback>
