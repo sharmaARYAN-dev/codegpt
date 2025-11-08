@@ -9,7 +9,7 @@ import { Award, ShieldCheck, Star, Github, Linkedin, Loader2, FileCode2, Trash2,
 import type { StudentProfile, Project } from '@/lib/types';
 import { useMemo, useState } from 'react';
 import { EditProfileDialog } from '@/components/edit-profile-dialog';
-import { collection, doc, query, where, deleteDoc } from 'firebase/firestore';
+import { collection, doc, query, where, deleteDoc, arrayRemove, updateDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import { useCollection } from '@/firebase/firestore/use-collection';
@@ -19,6 +19,7 @@ import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialo
 import { toast } from 'sonner';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import { CreateProjectDialog } from '@/components/create-project-dialog';
 
 const reputationIcons = {
   'Top Contributor': Award,
@@ -51,6 +52,7 @@ function ProfileSkeleton() {
                     </div>
                     <div className="space-y-8">
                         <Card><CardHeader><Skeleton className="h-7 w-32"/></CardHeader><CardContent className="flex flex-wrap gap-2"><Skeleton className="h-6 w-20 rounded-full" /><Skeleton className="h-6 w-24 rounded-full" /></CardContent></Card>
+
                         <Card><CardHeader><Skeleton className="h-7 w-32"/></CardHeader><CardContent className="flex flex-wrap gap-2"><Skeleton className="h-6 w-16 rounded-full" /><Skeleton className="h-6 w-16 rounded-full" /></CardContent></Card>
                         <Card><CardHeader><Skeleton className="h-7 w-32"/></CardHeader><CardContent className="space-y-4"><Skeleton className="h-6 w-full" /><Skeleton className="h-6 w-full" /></CardContent></Card>
                     </div>
@@ -64,15 +66,16 @@ function ProfileSkeleton() {
 export default function ProfilePage() {
   const { user, loading: loadingUser } = useAuth();
   const [isEditProfileOpen, setEditProfileOpen] = useState(false);
+  const [isCreateProjectOpen, setCreateProjectOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<{ id: string, name: string } | null>(null);
 
   const userProfile = user;
 
-  const userProjectsQuery = useMemo(() => (db && user) ? query(collection(db, 'projects'), where('ownerId', '==', user.id)) : null, [user, db]);
+  const userProjectsQuery = useMemo(() => (db && user) ? query(collection(db, 'projects'), where('ownerId', '==', user.id)) : null, [user]);
   const { data: userProjects, loading: loadingProjects } = useCollection<Project>(userProjectsQuery, 'projects');
 
-  const bookmarkedProjectsQuery = useMemo(() => (db && user && user.bookmarks && user.bookmarks.length > 0) ? query(collection(db, 'projects'), where('id', 'in', user.bookmarks)) : null, [user, db]);
-  const { data: bookmarkedProjects, loading: loadingBookmarks } = useCollection<Project>(bookmarkedProjectsQuery, 'projects_bookmarks');
+  const bookmarkedProjectsQuery = useMemo(() => (db && user && user.bookmarks && user.bookmarks.length > 0) ? query(collection(db, 'projects'), where('__name__', 'in', user.bookmarks)) : null, [user]);
+  const { data: bookmarkedProjects, loading: loadingBookmarks } = useCollection<Project>(bookmarkedProjectsQuery, `users/${user?.id}/bookmarks`);
 
 
   const handleDeleteProject = (project: { id: string, name: string }) => {
@@ -96,6 +99,29 @@ export default function ProfilePage() {
     });
     setProjectToDelete(null);
   }
+  
+  const handleUnbookmark = (projectId: string, projectName: string) => {
+    if (!db || !user) return;
+    
+    const userRef = doc(db, 'users', user.id);
+    const promise = () => updateDoc(userRef, {
+        bookmarks: arrayRemove(projectId)
+    }).catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+            path: userRef.path,
+            operation: 'update',
+            requestResourceData: { bookmarks: `arrayRemove(${projectId})` },
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        throw serverError;
+    });
+
+    toast.promise(promise, {
+        loading: `Removing ${projectName} from bookmarks...`,
+        success: 'Project unbookmarked.',
+        error: 'Failed to unbookmark project.'
+    });
+  }
 
   if (loadingUser || !userProfile) {
     return <ProfileSkeleton />;
@@ -107,6 +133,10 @@ export default function ProfilePage() {
         isOpen={isEditProfileOpen} 
         onOpenChange={setEditProfileOpen} 
         userProfile={userProfile} 
+    />
+     <CreateProjectDialog 
+        open={isCreateProjectOpen} 
+        onOpenChange={setCreateProjectOpen} 
     />
     <DeleteConfirmationDialog 
         isOpen={!!projectToDelete}
@@ -176,21 +206,21 @@ export default function ProfilePage() {
                         <FileCode2 className="mx-auto h-12 w-12" />
                         <p className="mt-4 font-semibold">No projects yet.</p>
                         <p className="mt-1 text-sm">Start creating and share your work!</p>
-                        <Button asChild variant="secondary" className="mt-4">
-                           <Link href="/dashboard/projects">Create a Project</Link>
+                        <Button asChild variant="secondary" className="mt-4" onClick={() => setCreateProjectOpen(true)}>
+                           <p>Create a Project</p>
                         </Button>
                       </div>
                     ) : (
                       <div className='space-y-4'>
                         {userProjects.map(project => (
                             <div key={project.id} className="group flex items-center justify-between p-3 border rounded-md hover:bg-muted/50 hover:border-primary/30 transition-colors">
-                                <Link href={`/dashboard/projects/${project.id}`} className="flex-1">
-                                    <h3 className="font-semibold">{project.name}</h3>
+                                <Link href={`/dashboard/projects/${project.id}`} className="flex-1 min-w-0">
+                                    <h3 className="font-semibold truncate">{project.name}</h3>
                                     <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
                                 </Link>
-                                <div className='opacity-0 group-hover:opacity-100 transition-opacity'>
+                                <div className='opacity-0 group-hover:opacity-100 transition-opacity pl-2'>
                                     <ItemOptionsMenu 
-                                        onEdit={() => { toast.info("Edit not implemented yet.")}} 
+                                        onEdit={() => { toast.info("Edit your project from the project page.")}} 
                                         onDelete={() => handleDeleteProject({id: project.id, name: project.name})}
                                     />
                                 </div>
@@ -220,10 +250,15 @@ export default function ProfilePage() {
                       <div className='space-y-4'>
                         {bookmarkedProjects.map(project => (
                             <div key={project.id} className="group flex items-center justify-between p-3 border rounded-md hover:bg-muted/50 hover:border-primary/30 transition-colors">
-                                <Link href={`/dashboard/projects/${project.id}`} className="flex-1">
-                                    <h3 className="font-semibold">{project.name}</h3>
+                                <Link href={`/dashboard/projects/${project.id}`} className="flex-1 min-w-0">
+                                    <h3 className="font-semibold truncate">{project.name}</h3>
                                     <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
                                 </Link>
+                                <div className='opacity-0 group-hover:opacity-100 transition-opacity pl-2'>
+                                    <Button size="icon" variant="ghost" className='h-8 w-8' onClick={() => handleUnbookmark(project.id, project.name)}>
+                                        <Trash2 className="h-4 w-4 text-destructive" />
+                                    </Button>
+                                </div>
                           </div>
                         ))}
                       </div>
@@ -239,7 +274,7 @@ export default function ProfilePage() {
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
                   {userProfile.skills?.length > 0 ? userProfile.skills?.map((skill) => (
-                    <Badge key={skill} variant="secondary" className='text-sm'>
+                    <Badge key={skill} variant="secondary" className='text-sm capitalize'>
                       {skill}
                     </Badge>
                   )) : <p className="text-sm text-muted-foreground">No skills added yet.</p>}
@@ -251,7 +286,7 @@ export default function ProfilePage() {
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
                   {userProfile.interests?.length > 0 ? userProfile.interests?.map((interest) => (
-                    <Badge key={interest} variant="outline" className='text-sm'>
+                    <Badge key={interest} variant="outline" className='text-sm capitalize'>
                       {interest}
                     </Badge>
                   )) : <p className="text-sm text-muted-foreground">No interests added yet.</p>}

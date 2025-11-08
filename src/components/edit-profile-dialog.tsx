@@ -32,12 +32,13 @@ import type { StudentProfile } from '@/lib/types';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { Textarea } from './ui/textarea';
+import { MultiSelect } from './ui/multi-select';
 
 const profileSchema = z.object({
   displayName: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   bio: z.string().max(200, 'About me should not exceed 200 characters.').optional().or(z.literal('')),
-  skills: z.string().min(1, 'Please add at least one skill.'),
-  interests: z.string().min(1, 'Please add at least one interest.'),
+  skills: z.array(z.string()).min(1, 'Please add at least one skill.'),
+  interests: z.array(z.string()).min(1, 'Please add at least one interest.'),
   github: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
   linkedin: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
   portfolio: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
@@ -49,6 +50,10 @@ interface EditProfileDialogProps {
   userProfile: StudentProfile;
 }
 
+const popularSkills = ["React", "Next.js", "AI/ML", "Python", "TypeScript", "Node.js", "Firebase", "JavaScript", "Figma", "UI/UX"];
+const popularInterests = ["Web Development", "Artificial Intelligence", "Mobile Development", "UI/UX Design", "Gaming", "Startups", "Blockchain"];
+
+
 export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditProfileDialogProps) {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,8 +63,8 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
     defaultValues: {
       displayName: userProfile?.displayName || '',
       bio: userProfile?.bio || '',
-      skills: userProfile?.skills?.join(', ') || '',
-      interests: userProfile?.interests?.join(', ') || '',
+      skills: userProfile?.skills || [],
+      interests: userProfile?.interests || [],
       github: userProfile?.links?.github || '',
       linkedin: userProfile?.links?.linkedin || '',
       portfolio: userProfile?.links?.portfolio || '',
@@ -71,8 +76,8 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
       form.reset({
         displayName: userProfile.displayName || '',
         bio: userProfile.bio || '',
-        skills: userProfile.skills?.join(', ') || '',
-        interests: userProfile.interests?.join(', ') || '',
+        skills: userProfile.skills || [],
+        interests: userProfile.interests || [],
         github: userProfile.links?.github || '',
         linkedin: userProfile.links?.linkedin || '',
         portfolio: userProfile.links?.portfolio || '',
@@ -92,8 +97,8 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
     const updatedData = {
       displayName: values.displayName,
       bio: values.bio,
-      skills: values.skills.split(',').map(s => s.trim().toLowerCase()).filter(Boolean),
-      interests: values.interests.split(',').map(i => i.trim().toLowerCase()).filter(Boolean),
+      skills: values.skills.map(s => s.trim().toLowerCase()).filter(Boolean),
+      interests: values.interests.map(i => i.trim().toLowerCase()).filter(Boolean),
       links: {
         github: values.github || '',
         linkedin: values.linkedin || '',
@@ -164,30 +169,40 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
                 </FormItem>
               )}
             />
-            <FormField
+             <FormField
               control={form.control}
               name="skills"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Skills</FormLabel>
                   <FormControl>
-                    <Input placeholder="React, Python, Figma" {...field} />
+                     <MultiSelect
+                      placeholder="Add skills..."
+                      selected={field.value}
+                      onChange={field.onChange}
+                      popularOptions={popularSkills}
+                    />
                   </FormControl>
-                  <FormDescription>Comma-separated list of your skills.</FormDescription>
+                  <FormDescription>What are you good at?</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <FormField
+             <FormField
               control={form.control}
               name="interests"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Interests</FormLabel>
-                  <FormControl>
-                    <Input placeholder="AI, Music, Gaming" {...field} />
+                   <FormControl>
+                     <MultiSelect
+                      placeholder="Add interests..."
+                      selected={field.value}
+                      onChange={field.onChange}
+                      popularOptions={popularInterests}
+                    />
                   </FormControl>
-                   <FormDescription>Comma-separated list of your interests.</FormDescription>
+                   <FormDescription>What are you passionate about?</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
