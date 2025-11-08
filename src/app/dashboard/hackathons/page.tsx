@@ -20,11 +20,11 @@ export default function HackathonsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="relative flex min-h-[300px] items-end overflow-hidden rounded-lg bg-gradient-to-t from-black/80 via-transparent p-8">
+      <div className="relative flex min-h-[240px] md:min-h-[300px] items-end overflow-hidden rounded-lg bg-gradient-to-t from-black/80 via-transparent p-4 sm:p-8">
         {heroImage && <Image src={heroImage.imageUrl} alt={heroImage.description} fill className="-z-10 object-cover" data-ai-hint={heroImage.imageHint} />}
         <div className="text-white">
-          <h1 className="font-headline text-5xl font-bold tracking-tight">Explore Events</h1>
-          <p className="mt-2 text-lg text-white/80 max-w-lg">Find your next opportunity to innovate, learn, and connect with the brightest minds.</p>
+          <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">Explore Events</h1>
+          <p className="mt-2 text-base md:text-lg text-white/80 max-w-lg">Find your next opportunity to innovate, learn, and connect with the brightest minds.</p>
         </div>
       </div>
 
@@ -99,7 +99,7 @@ export default function HackathonsPage() {
                     ))}
                   </div>
 
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm flex-wrap">
                     {event.tags.map(tag => <Badge key={tag} variant='secondary'>{tag}</Badge>)}
                   </div>
                   <p className="text-muted-foreground pt-2 line-clamp-2 text-sm leading-relaxed">{event.description}</p>

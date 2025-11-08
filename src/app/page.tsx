@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Orbit, Users, Lightbulb, Trophy } from 'lucide-react';
+import { Orbit, Users, Lightbulb, Trophy, Menu } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 export default function LandingPage() {
@@ -34,8 +34,8 @@ export default function LandingPage() {
       />
       <div className="absolute inset-0 -z-20 h-full w-full bg-background bg-[url('https://res.cloudinary.com/dfhpkqrjw/image/upload/v1717438453/grid_y4h5x6.svg')] bg-repeat [background-position:calc(50%_+_1px)_calc(50%_+_1px)]" />
 
-      <header className="sticky top-0 z-50 backdrop-blur-sm bg-background/50 border-b">
-        <div className="container mx-auto px-4">
+      <header className="sticky top-0 z-50 border-b border-border/20 bg-background/50 backdrop-blur-sm">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex h-20 items-center justify-between">
                 <Link href="/" className="flex items-center gap-2">
                     <Orbit className="h-7 w-7 text-primary" />
@@ -55,30 +55,30 @@ export default function LandingPage() {
                     </Button>
                 </div>
                 <Button variant="ghost" size="icon" className="md:hidden">
-                    <Orbit className="h-6 w-6" />
+                    <Menu className="h-6 w-6" />
                     <span className="sr-only">Toggle Menu</span>
                 </Button>
             </div>
         </div>
       </header>
 
-      <main className="flex-1 relative z-10">
-        <section className="container mx-auto px-4 pt-20 pb-16 md:pt-32 md:pb-24 text-center">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                <div className="text-left">
-                    <h1 className="font-headline text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tighter !leading-[1.1]">
+      <main className="flex-1">
+        <section className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 md:pt-32 md:pb-24 text-center">
+            <div className="grid grid-cols-1 gap-12 items-center md:grid-cols-2">
+                <div className="text-center md:text-left">
+                    <h1 className="font-headline text-5xl font-extrabold tracking-tighter !leading-[1.1] sm:text-6xl lg:text-7xl">
                         Where Students <br/>
                         <span className="text-primary">Connect</span>, <span className="text-accent">Create</span><br/>
                         & Collaborate.
                     </h1>
-                    <p className="mt-6 text-lg md:text-xl max-w-xl text-foreground/70">
+                    <p className="mt-6 text-lg max-w-xl text-foreground/80 md:text-xl mx-auto md:mx-0">
                         The all-in-one platform for college innovators to find teammates, share ideas, and build the future.
                     </p>
-                    <div className="mt-8 flex flex-wrap gap-4">
-                        <Button asChild size="lg" className="font-bold text-lg px-8 py-6">
+                    <div className="mt-8 flex flex-wrap justify-center md:justify-start gap-4">
+                        <Button asChild size="lg" className="font-bold text-base sm:text-lg px-8 py-6">
                             <Link href="/register">Get Started for Free</Link>
                         </Button>
-                         <Button asChild size="lg" variant="outline" className="font-bold text-lg px-8 py-6">
+                         <Button asChild size="lg" variant="outline" className="font-bold text-base sm:text-lg px-8 py-6">
                             <Link href="/dashboard/projects">Explore Projects</Link>
                         </Button>
                     </div>
@@ -91,7 +91,7 @@ export default function LandingPage() {
             </div>
         </section>
 
-        <section id="features" className="container mx-auto px-4 py-20 md:py-32">
+        <section id="features" className="container mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
              <div className="text-center mb-16">
                 <h2 className="font-headline text-4xl font-bold">Why Universe?</h2>
                 <p className="text-muted-foreground mt-3 max-w-2xl mx-auto text-lg">Discover a universe of opportunities. Connect with peers, build amazing projects, and launch your career in tech.</p>
@@ -111,8 +111,8 @@ export default function LandingPage() {
             </div>
         </section>
       </main>
-      <footer className='border-t py-8 mt-16'>
-          <div className='container mx-auto px-4 text-center text-sm text-muted-foreground'>
+      <footer className='border-t border-border/20 py-8 mt-16'>
+          <div className='container mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-muted-foreground'>
               <p>&copy; {new Date().getFullYear()} Universe. All rights reserved.</p>
           </div>
       </footer>

@@ -18,7 +18,7 @@ export default function CommunitiesPage() {
     <>
       <CreatePostDialog open={isCreatePostOpen} onOpenChange={setCreatePostOpen} />
       <div className="space-y-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="font-headline text-3xl font-bold tracking-tight">Communities</h1>
             <p className="mt-1 text-muted-foreground">Connect, discuss, and grow with other innovators.</p>
@@ -41,7 +41,7 @@ export default function CommunitiesPage() {
               return (
                 <Card key={post.id} className="p-0 transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/10">
                   <CardContent className="p-6">
-                    <div className='mb-4 flex items-center gap-3'>
+                    <div className='mb-4 flex items-center gap-3 flex-wrap'>
                       <Avatar className='size-9'>
                         {author?.photoURL && <AvatarImage src={author.photoURL} alt={author.displayName} />}
                         <AvatarFallback>{author?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
@@ -50,12 +50,12 @@ export default function CommunitiesPage() {
                         <p className="text-sm font-semibold">{author?.displayName}</p>
                         <p className="text-xs text-muted-foreground">{new Date(post.createdAt).toLocaleDateString()}</p>
                       </div>
-                      <Badge variant="secondary" className='ml-auto'>{post.community}</Badge>
+                      <Badge variant="secondary" className='ml-0 sm:ml-auto'>{post.community}</Badge>
                     </div>
                     <h2 className="font-headline text-xl font-semibold">{post.title}</h2>
                     <p className='text-muted-foreground mt-2 line-clamp-2 text-sm leading-relaxed'>{post.content}</p>
                   </CardContent>
-                  <div className="px-6 pb-4 flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="px-6 pb-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                     <Button variant='outline' size='sm' className='text-primary border-primary/50 hover:bg-primary/10 hover:text-primary'>
                       <ArrowBigUp className="mr-2 h-4 w-4" />
                       Upvote ({post.upvotes})
@@ -64,7 +64,7 @@ export default function CommunitiesPage() {
                       <MessageSquare className="h-4 w-4" />
                       <span>{post.comments} Comments</span>
                     </div>
-                    <div className="flex-1"></div>
+                    <div className="flex-1 min-w-[10px]"></div>
                     <Button size='sm' asChild>
                       <Link href="#">Join Discussion</Link>
                     </Button>

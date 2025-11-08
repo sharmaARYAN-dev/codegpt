@@ -33,17 +33,29 @@ export default function DashboardPage() {
 
               return (
                 <Card key={project.id} className="transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/10">
-                  <CardContent className="p-6">
-                    <div className='flex items-start gap-4'>
-                        <Avatar className='mt-1'>
+                  <CardContent className="p-4 sm:p-6">
+                    <div className='flex flex-col sm:flex-row items-start gap-4'>
+                        <Avatar className='mt-1 hidden sm:block'>
                             {owner?.photoURL && <AvatarImage src={owner.photoURL} alt={owner.displayName} />}
                             <AvatarFallback>{owner?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
                         </Avatar>
                         <div className='flex-1'>
-                            <div className='flex items-center justify-between'>
+                            <div className='flex items-start justify-between gap-2'>
                                 <div>
-                                    <p className="font-semibold">{owner?.displayName}</p>
-                                    <p className="text-sm text-muted-foreground">Project Owner</p>
+                                    <div className='flex items-center gap-2 sm:hidden mb-3'>
+                                        <Avatar className='w-8 h-8'>
+                                            {owner?.photoURL && <AvatarImage src={owner.photoURL} alt={owner.displayName} />}
+                                            <AvatarFallback className='text-xs'>{owner?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <p className="font-semibold text-sm">{owner?.displayName}</p>
+                                            <p className="text-xs text-muted-foreground">Project Owner</p>
+                                        </div>
+                                    </div>
+                                    <div className='hidden sm:block'>
+                                        <p className="font-semibold">{owner?.displayName}</p>
+                                        <p className="text-sm text-muted-foreground">Project Owner</p>
+                                    </div>
                                 </div>
                                 <Button asChild size="sm" variant="secondary">
                                     <Link href={`/dashboard/projects/${project.id}`}>View Project</Link>

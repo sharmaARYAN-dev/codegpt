@@ -36,9 +36,9 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
 
   return (
     <div className="space-y-8">
-        <div className='flex justify-between items-start'>
+        <div className='flex flex-col sm:flex-row justify-between items-start gap-4'>
             <div>
-                <h1 className="font-headline text-4xl font-bold tracking-tight">
+                <h1 className="font-headline text-3xl md:text-4xl font-bold tracking-tight">
                 {project.name}
                 </h1>
                 <div className="flex flex-wrap gap-2 mt-3">
@@ -54,12 +54,12 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
                 ))}
                 </div>
             </div>
-             <Button size="lg">
+             <Button size="lg" className="w-full sm:w-auto">
                 Join Team
             </Button>
         </div>
       
-      <div className="flex items-center gap-6 text-sm text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-muted-foreground">
         <div className='flex items-center gap-2'>
             <Users className='size-4' />
             <span>{teamMembers.length} Members</span>

@@ -51,29 +51,29 @@ export default function ProfilePage() {
         onOpenChange={setEditProfileOpen} 
         userProfile={userProfile} 
     />
-    <div className="container mx-auto max-w-5xl py-2">
+    <div className="container mx-auto max-w-5xl px-0 sm:px-4 py-2">
       <Card className="overflow-hidden">
-        <div className="h-36 bg-gradient-to-r from-primary/70 to-accent/70" />
-        <CardContent className="p-6">
-          <div className="flex items-end -mt-20">
-            <Avatar className="h-32 w-32 border-4 border-background">
+        <div className="h-24 md:h-36 bg-gradient-to-r from-primary/70 to-accent/70" />
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-end -mt-16 sm:-mt-20">
+            <Avatar className="h-28 w-28 sm:h-32 sm:w-32 border-4 border-background">
               {userProfile.photoURL && (
                 <AvatarImage src={userProfile.photoURL} alt={userProfile.displayName || 'User'} />
               )}
-              <AvatarFallback className="text-5xl">
+              <AvatarFallback className="text-4xl sm:text-5xl">
                 {userProfile.displayName
                   ?.split(' ')
                   .map((n) => n[0])
                   .join('')}
               </AvatarFallback>
             </Avatar>
-            <div className="ml-6">
-              <h1 className="text-3xl font-bold font-headline">
+            <div className="mt-4 sm:ml-6 flex-grow">
+              <h1 className="text-2xl sm:text-3xl font-bold font-headline">
                 {userProfile.displayName}
               </h1>
-              <p className="text-muted-foreground">{userProfile.email}</p>
+              <p className="text-sm sm:text-base text-muted-foreground">{userProfile.email}</p>
             </div>
-            <Button variant="outline" className="ml-auto" onClick={() => setEditProfileOpen(true)}>
+            <Button variant="outline" className="mt-4 sm:mt-0 w-full sm:w-auto" onClick={() => setEditProfileOpen(true)}>
               Edit Profile
             </Button>
           </div>

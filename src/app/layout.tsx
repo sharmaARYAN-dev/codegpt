@@ -7,6 +7,7 @@ import { FirebaseClientProvider } from '@/firebase';
 export const metadata: Metadata = {
   title: 'Universe',
   description: 'The all-in-one platform for college innovators to find teammates, share ideas, and build the future.',
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
 };
 
 export default function RootLayout({
