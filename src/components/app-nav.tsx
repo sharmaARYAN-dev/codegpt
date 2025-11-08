@@ -10,13 +10,14 @@ import {
   SidebarContent,
   Sidebar,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Users, FolderKanban, MessageSquare, User, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, FolderKanban, MessageSquare, User, LogOut, Swords } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Home' },
   { href: '/dashboard/events', icon: FolderKanban, label: 'Projects' },
+  { href: '/dashboard/hackathons', icon: Swords, label: 'Hackathons' },
   { href: '/dashboard/forums', icon: MessageSquare, label: 'Communities' },
   { href: '/dashboard/teammates', icon: Users, label: 'Teammates' },
   { href: '/dashboard/profile', icon: User, label: 'Profile' },
