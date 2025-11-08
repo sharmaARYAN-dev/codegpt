@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/form';
 import { useFirestore, useUser } from '@/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -48,7 +48,6 @@ const communities = ['General', 'AI/ML', 'WebDev', 'Design', 'Startups', 'Gaming
 export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) {
   const firestore = useFirestore();
   const { user } = useUser();
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof postSchema>>({
@@ -62,9 +61,7 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
 
   const onSubmit = async (values: z.infer<typeof postSchema>) => {
     if (!firestore || !user) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
+      toast.error('Error', {
         description: 'You must be logged in to create a post.',
       });
       return;
@@ -78,9 +75,9 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
         comments: 0,
         createdAt: serverTimestamp(),
       };
-    try {
-      const collectionRef = collection(firestore, 'forumPosts');
-      addDoc(collectionRef, postData).catch(async (serverError) => {
+    
+    const collectionRef = collection(firestore, 'forumPosts');
+    const promise = () => addDoc(collectionRef, postData).catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
             path: collectionRef.path,
             operation: 'create',
@@ -88,26 +85,25 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
         });
         errorEmitter.emit('permission-error', permissionError);
         throw serverError; // re-throw to be caught by outer try-catch
-      });
+    });
 
-      toast({
-        title: 'Success!',
-        description: 'Your discussion has been started.',
-      });
-      form.reset();
-      onOpenChange(false);
-    } catch (error) {
-      console.error('Error creating post:', error);
-       if (!(error instanceof FirestorePermissionError)) {
-            toast({
-                variant: 'destructive',
-                title: 'Uh oh!',
-                description: 'There was a problem starting your discussion.',
-            });
-       }
-    } finally {
-      setIsSubmitting(false);
-    }
+    toast.promise(promise, {
+        loading: 'Starting your discussion...',
+        success: () => {
+            form.reset();
+            onOpenChange(false);
+            setIsSubmitting(false);
+            return 'Your discussion has been started.';
+        },
+        error: (err) => {
+            setIsSubmitting(false);
+            if (err instanceof FirestorePermissionError) {
+                // The global listener will show the toast
+                return 'Permission denied.'; 
+            }
+            return 'There was a problem starting your discussion.';
+        }
+    });
   };
 
   return (

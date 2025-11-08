@@ -28,7 +28,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Bot, Loader2, BookOpen } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { Separator } from './ui/separator';
 
 const formSchema = z.object({
@@ -44,7 +44,6 @@ const formSchema = z.object({
 export function ProjectIdeaGenerator() {
   const [ideas, setIdeas] = useState<GeneratePersonalizedProjectIdeasOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -58,26 +57,31 @@ export function ProjectIdeaGenerator() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     setIdeas(null);
-    try {
-      const skillsArray = values.skills.split(',').map(s => s.trim());
-      const interestsArray = values.interests.split(',').map(s => s.trim());
+    
+    const promise = async () => {
+        const skillsArray = values.skills.split(',').map(s => s.trim());
+        const interestsArray = values.interests.split(',').map(s => s.trim());
 
-      const result = await generatePersonalizedProjectIdeas({
-        skills: skillsArray,
-        interests: interestsArray,
-        projectPreferences: values.projectPreferences || 'Any type of project is fine.',
-      });
-      setIdeas(result);
-    } catch (error) {
-      console.error('Error generating ideas:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'There was a problem generating project ideas. Please try again.',
-      });
-    } finally {
-      setIsLoading(false);
+        return await generatePersonalizedProjectIdeas({
+            skills: skillsArray,
+            interests: interestsArray,
+            projectPreferences: values.projectPreferences || 'Any type of project is fine.',
+        });
     }
+
+    toast.promise(promise, {
+        loading: 'The AI is thinking...',
+        success: (result) => {
+            setIdeas(result);
+            setIsLoading(false);
+            return 'Here are your personalized project ideas!';
+        },
+        error: (error) => {
+            console.error('Error generating ideas:', error);
+            setIsLoading(false);
+            return 'There was a problem generating project ideas. Please try again.';
+        }
+    });
   }
 
   return (

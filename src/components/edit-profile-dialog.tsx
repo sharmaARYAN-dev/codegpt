@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/form';
 import { useFirestore, useUser } from '@/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { StudentProfile } from '@/lib/types';
@@ -50,7 +50,6 @@ interface EditProfileDialogProps {
 export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditProfileDialogProps) {
   const firestore = useFirestore();
   const { user } = useUser();
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof profileSchema>>({
@@ -82,9 +81,7 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
 
   const onSubmit = async (values: z.infer<typeof profileSchema>) => {
     if (!firestore || !user) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
+      toast.error('Error', {
         description: 'You must be logged in to edit your profile.',
       });
       return;
@@ -102,10 +99,9 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
         reddit: values.reddit || '',
       }
     };
-
-    try {
-      const userRef = doc(firestore, 'users', user.uid);
-      await updateDoc(userRef, updatedData).catch(async (serverError) => {
+    
+    const userRef = doc(firestore, 'users', user.uid);
+    const promise = () => updateDoc(userRef, updatedData).catch(async (serverError) => {
          const permissionError = new FirestorePermissionError({
           path: userRef.path,
           operation: 'update',
@@ -115,23 +111,22 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
         throw serverError;
       });
 
-      toast({
-        title: 'Profile Updated!',
-        description: 'Your changes have been saved.',
-      });
-      onOpenChange(false);
-    } catch (error) {
-      if (!(error instanceof FirestorePermissionError)) {
-          console.error('Error updating profile:', error);
-          toast({
-            variant: 'destructive',
-            title: 'Uh oh!',
-            description: 'There was a problem updating your profile.',
-          });
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+    toast.promise(promise, {
+        loading: 'Saving your changes...',
+        success: () => {
+            onOpenChange(false);
+            setIsSubmitting(false);
+            return 'Your profile has been updated.';
+        },
+        error: (err) => {
+            setIsSubmitting(false);
+            if (err instanceof FirestorePermissionError) {
+                // The global listener will show the toast
+                return 'Permission denied.'; 
+            }
+            return 'There was a problem updating your profile.';
+        }
+    })
   };
 
   return (

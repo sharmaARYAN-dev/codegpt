@@ -17,7 +17,7 @@ import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import type { Event, StudentProfile } from '@/lib/types';
 import { collection } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 function HackathonsSkeleton() {
   return (
@@ -41,7 +41,6 @@ function HackathonsSkeleton() {
 export default function HackathonsPage() {
   const heroImage = PlaceHolderImages.find(img => img.id === 'event-conference');
   const firestore = useFirestore();
-  const { toast } = useToast();
 
   const eventsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'events') : null, [firestore]);
   const { data: allEvents, loading: loadingEvents } = useCollection<Event>(eventsQuery);
@@ -50,8 +49,7 @@ export default function HackathonsPage() {
   const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery);
 
   const handleJoinEvent = (eventName: string) => {
-    toast({
-      title: 'Successfully Registered!',
+    toast.success('Successfully Registered!', {
       description: `You have joined the event: ${eventName}.`,
     });
   }

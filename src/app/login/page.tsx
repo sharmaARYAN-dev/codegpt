@@ -10,7 +10,7 @@ import { useAuth, useUser } from '@/firebase';
 import { useEffect } from 'react';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -19,7 +19,6 @@ export default function LoginPage() {
   const auth = useAuth();
   const firestore = useFirestore();
   const { user, loading } = useUser();
-  const { toast } = useToast();
 
   useEffect(() => {
     if (!loading && user) {
@@ -55,9 +54,7 @@ export default function LoginPage() {
       router.push('/dashboard');
     } catch (error: any) {
       console.error("Error during Google login:", error);
-      toast({
-        variant: "destructive",
-        title: "Login Failed",
+      toast.error("Login Failed", {
         description: error.message || "An unexpected error occurred during login.",
       });
     }
@@ -75,9 +72,7 @@ export default function LoginPage() {
       router.push('/dashboard');
     } catch (error: any) {
        console.error("Error during email login:", error);
-       toast({
-        variant: "destructive",
-        title: "Login Failed",
+       toast.error("Login Failed", {
         description: "Invalid email or password. Please try again.",
       });
     }

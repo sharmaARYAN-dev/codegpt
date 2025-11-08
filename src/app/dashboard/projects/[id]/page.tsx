@@ -16,7 +16,7 @@ import { collection, doc } from 'firebase/firestore';
 import type { Project, StudentProfile } from '@/lib/types';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useMemo } from 'react';
 
 function ProjectWorkspaceSkeleton() {
@@ -52,7 +52,6 @@ function ProjectWorkspaceSkeleton() {
 
 export default function ProjectWorkspacePage({ params }: { params: { id: string } }) {
   const firestore = useFirestore();
-  const { toast } = useToast();
   
   const projectRef = useMemoFirebase(() => firestore ? doc(firestore, 'projects', params.id) : null, [firestore, params.id]);
   const { data: project, loading: loadingProject } = useDoc<Project>(projectRef);
@@ -80,15 +79,13 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
   ];
 
   const handleJoinTeam = () => {
-    toast({
-      title: "Request Sent!",
+    toast.info("Request Sent!", {
       description: `Your request to join ${project?.name} has been sent to the project owner.`,
     });
   }
   
   const handleApply = (role: string) => {
-    toast({
-      title: "Application Sent!",
+    toast.info("Application Sent!", {
       description: `Your application for the ${role} role has been submitted.`,
     });
   }

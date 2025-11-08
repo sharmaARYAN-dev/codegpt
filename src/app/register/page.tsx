@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { useAuth, useFirestore, useUser } from '@/firebase';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { StudentProfile } from '@/lib/types';
@@ -30,7 +30,6 @@ export default function RegisterPage() {
   const auth = useAuth();
   const firestore = useFirestore();
   const { user, loading } = useUser();
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -51,7 +50,7 @@ export default function RegisterPage() {
     if (!auth || !firestore) return;
 
     setIsSubmitting(true);
-    try {
+    const promise = async () => {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const authUser = userCredential.user;
 
@@ -71,26 +70,23 @@ export default function RegisterPage() {
       };
       
       await setDoc(userRef, newUserProfile);
-
-      toast({
-        title: 'Account Created!',
-        description: "Welcome! We're redirecting you to your dashboard.",
-      });
-
-      setTimeout(() => router.push('/dashboard'), 1000);
-
-    } catch (error: any) {
-      console.error('Error during registration:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Registration Failed',
-        description: error.code === 'auth/email-already-in-use'
-          ? 'This email is already registered. Please log in.'
-          : 'An unexpected error occurred. Please try again.',
-      });
-    } finally {
-      setIsSubmitting(false);
+      return authUser;
     }
+
+    toast.promise(promise(), {
+      loading: 'Creating your account...',
+      success: (authUser) => {
+        setTimeout(() => router.push('/dashboard'), 1000);
+        return `Welcome, ${authUser.displayName}! Redirecting...`;
+      },
+      error: (error) => {
+        console.error('Error during registration:', error);
+        setIsSubmitting(false);
+        return error.code === 'auth/email-already-in-use'
+          ? 'This email is already registered. Please log in.'
+          : 'An unexpected error occurred. Please try again.';
+      }
+    });
   };
 
   if (loading || user) {

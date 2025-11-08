@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/form';
 import { useFirestore, useUser } from '@/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -45,7 +45,6 @@ interface CreateProjectDialogProps {
 export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogProps) {
   const firestore = useFirestore();
   const { user } = useUser();
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof projectSchema>>({
@@ -59,9 +58,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
 
   const onSubmit = async (values: z.infer<typeof projectSchema>) => {
     if (!firestore || !user) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
+      toast.error('Error', {
         description: 'You must be logged in to create a project.',
       });
       return;
@@ -79,37 +76,34 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
       createdAt: serverTimestamp(),
     };
 
-    try {
-      const collectionRef = collection(firestore, 'projects');
-      addDoc(collectionRef, projectData).catch(async (serverError) => {
+    const collectionRef = collection(firestore, 'projects');
+    const promise = () => addDoc(collectionRef, projectData).catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
           path: collectionRef.path,
           operation: 'create',
           requestResourceData: projectData,
         });
         errorEmitter.emit('permission-error', permissionError);
-        throw serverError; // re-throw to be caught by outer try-catch
+        throw serverError;
       });
-      
-      toast({
-        title: 'Project Created!',
-        description: `${values.name} has been successfully created.`,
-      });
-      form.reset();
-      onOpenChange(false);
-    } catch (error) {
-      console.error('Error creating project:', error);
-      // The toast will be shown by the FirebaseErrorListener if it's a permission error
-      if (!(error instanceof FirestorePermissionError)) {
-          toast({
-            variant: 'destructive',
-            title: 'Uh oh!',
-            description: 'There was a problem creating your project.',
-          });
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+
+    toast.promise(promise, {
+        loading: 'Creating your project...',
+        success: () => {
+            form.reset();
+            onOpenChange(false);
+            setIsSubmitting(false);
+            return `${values.name} has been successfully created.`;
+        },
+        error: (err) => {
+            setIsSubmitting(false);
+            if (err instanceof FirestorePermissionError) {
+                // The global listener will show the toast
+                return 'Permission denied.'; 
+            }
+            return 'There was a problem creating your project.';
+        }
+    });
   };
 
   return (
