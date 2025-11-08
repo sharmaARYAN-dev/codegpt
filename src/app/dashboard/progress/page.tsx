@@ -65,7 +65,7 @@ export default function ProgressPage() {
 
   const userProjectsQuery = useMemo(() => {
     if (!db || !user) return null;
-    return query(collection(db, 'projects'), where('members', 'array-contains', { uid: user.id, role: 'member', joinedAt: user.createdAt?.toDate() }));
+    return query(collection(db, 'projects'), where('ownerId', '==', user.id));
   }, [user, db]);
   
   const { data: userProjects, loading: loadingProjects } = useCollection<Project>(userProjectsQuery, `users/${user?.id}/projects`);
@@ -276,3 +276,5 @@ export default function ProgressPage() {
     </div>
   );
 }
+
+    
