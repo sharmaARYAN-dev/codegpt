@@ -137,7 +137,7 @@ export default function LoginPage() {
               Continue with Google
             </Button>
             <div className="mt-4 text-center text-sm text-muted-foreground">
-              <Link href="#" className="underline hover:text-primary">
+              <Link href="/register" className="underline hover:text-primary">
                 Create Account
               </Link>
             </div>
