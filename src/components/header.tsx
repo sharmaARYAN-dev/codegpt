@@ -12,10 +12,9 @@ import {
   DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Settings, LogOut, Bell, Search, Orbit, Menu, Sun, Moon, Check, UserPlus } from 'lucide-react';
+import { Settings, LogOut, Bell, Orbit, Menu, Sun, Moon, Check, UserPlus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Input } from './ui/input';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from 'next-themes';
 import React from 'react';
@@ -60,17 +59,6 @@ export function Header() {
 
        <div className="hidden items-center gap-2 md:ml-4 md:hidden">
             <h1 className="font-headline text-xl font-semibold tracking-tight">UniVerse</h1>
-        </div>
-
-        <div className='hidden md:flex flex-1 justify-center px-4 lg:px-16'>
-             <div className="relative w-full max-w-lg">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder="Search anything..." 
-                className="pl-10 bg-muted/50 border-0 focus-visible:ring-primary/50 focus-visible:bg-card"
-                onKeyDown={handleSearch}
-              />
-            </div>
         </div>
       
       <div className="flex flex-1 items-center justify-end gap-2">
