@@ -87,117 +87,119 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <div className='lg:col-span-2 space-y-6'>
-            <h1 className="font-headline text-3xl font-bold tracking-tight">Hey {user?.displayName?.split(' ')[0]}, here&apos;s what&apos;s happening</h1>
-            <div className='grid md:grid-cols-2 gap-6'>
-            {feedPosts?.map((post) => {
-                const author = users?.find(u => u.id === post.authorId);
-                return (
-                    <Card key={`post-${post.id}`} className="flex flex-col transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/10">
-                        <CardHeader>
-                            <div className="flex items-center gap-4">
-                                <Avatar className="size-11">
-                                    {author?.photoURL && <AvatarImage src={author.photoURL} alt={author.displayName} />}
-                                    <AvatarFallback>{author?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <p className="font-semibold">{author?.displayName}</p>
-                                    <p className="text-sm text-muted-foreground">Posted in <Link href="/dashboard/communities" className="font-medium text-primary hover:underline">{post.community}</Link></p>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="flex-grow space-y-4">
-                            <Link href={`/dashboard/communities/${post.id}`} className='space-y-2'>
-                                <h2 className="font-headline text-xl font-semibold hover:text-primary transition-colors">{post.title}</h2>
-                                <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{post.content}</p>
-                            </Link>
-                        </CardContent>
-                        <div className="p-6 pt-2 flex items-center gap-6 text-sm text-muted-foreground">
-                            <div className='flex items-center gap-1.5'>
-                                <ArrowBigUp className="size-4" />
-                                <span>{post.upvotes?.length || 0} Upvotes</span>
-                            </div>
-                            <div className='flex items-center gap-1.5'>
-                                <MessageSquare className="h-4 w-4" />
-                                <span>{post.comments} Comments</span>
-                            </div>
-                        </div>
-                    </Card>
-                );
-            })}
-            </div>
-        </div>
-        <div className="space-y-6 lg:sticky top-24">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline text-lg">Hot Projects</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                     {hotProjects?.map(project => {
-                         const owner = users?.find(u => u.id === project.ownerId);
-                         return (
-                            <div key={project.id} className="p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
-                                <div className="flex items-center gap-3">
-                                     <Avatar className='size-9'>
-                                        {owner?.photoURL && <AvatarImage src={owner.photoURL} alt={owner.displayName} />}
-                                        <AvatarFallback>{owner?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
-                                    </Avatar>
-                                    <div className='min-w-0'>
-                                        <p className="font-semibold text-sm truncate">{project.name}</p>
-                                        <p className="text-xs text-muted-foreground truncate">by {owner?.displayName}</p>
-                                    </div>
-                                </div>
-                                <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{project.description}</p>
-                                <Button variant="secondary" size="sm" className="mt-3 w-full" asChild>
-                                    <Link href={`/dashboard/projects/${project.id}`}>View Project</Link>
-                                </Button>
-                            </div>
-                         )
-                     })}
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline text-lg">Recommended Events</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                     {recommendedEvents?.map(event => (
-                        <div key={event.id} className="p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
-                            <p className="font-semibold text-sm">{event.title}</p>
-                            <p className="text-xs text-muted-foreground">{new Date(event.date.seconds * 1000).toLocaleDateString()}, {event.location}</p>
-                            <Button variant="outline" size="sm" className="mt-3 w-full" asChild>
-                                <Link href="/dashboard/events">Learn More</Link>
-                            </Button>
-                        </div>
-                    ))}
-                </CardContent>
-            </Card>
-             <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline text-lg">Suggested Connections</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                     {suggestedTeammates?.map((student) => {
-                        return (
-                            <div key={student.id} className="flex items-center gap-4">
-                            <Avatar>
-                                {student.photoURL && <AvatarImage src={student.photoURL} alt={student.displayName} />}
-                                <AvatarFallback>{student.displayName.substring(0, 2)}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                                <p className="font-semibold truncate">{student.displayName}</p>
-                                <p className="text-sm text-muted-foreground truncate">{student.skills?.slice(0,2).join(', ')}</p>
-                            </div>
-                            <Button variant="default" size="sm" asChild>
-                              <Link href="/dashboard/teammates">Connect</Link>
-                            </Button>
-                            </div>
-                        );
-                        })}
-                </CardContent>
-            </Card>
-        </div>
+    <div className="space-y-6">
+      <h1 className="font-headline text-3xl font-bold tracking-tight">Hey {user?.displayName?.split(' ')[0]}, here&apos;s what&apos;s happening</h1>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          <div className='lg:col-span-2 space-y-6'>
+              <div className='grid md:grid-cols-2 gap-6'>
+              {feedPosts?.map((post) => {
+                  const author = users?.find(u => u.id === post.authorId);
+                  return (
+                      <Card key={`post-${post.id}`} className="flex flex-col transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/10">
+                          <CardHeader>
+                              <div className="flex items-center gap-4">
+                                  <Avatar className="size-11">
+                                      {author?.photoURL && <AvatarImage src={author.photoURL} alt={author.displayName} />}
+                                      <AvatarFallback>{author?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
+                                  </Avatar>
+                                  <div>
+                                      <p className="font-semibold">{author?.displayName}</p>
+                                      <p className="text-sm text-muted-foreground">Posted in <Link href="/dashboard/communities" className="font-medium text-primary hover:underline">{post.community}</Link></p>
+                                  </div>
+                              </div>
+                          </CardHeader>
+                          <CardContent className="flex-grow space-y-4">
+                              <Link href={`/dashboard/communities/${post.id}`} className='space-y-2'>
+                                  <h2 className="font-headline text-xl font-semibold hover:text-primary transition-colors">{post.title}</h2>
+                                  <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{post.content}</p>
+                              </Link>
+                          </CardContent>
+                          <div className="p-6 pt-2 flex items-center gap-6 text-sm text-muted-foreground">
+                              <div className='flex items-center gap-1.5'>
+                                  <ArrowBigUp className="size-4" />
+                                  <span>{post.upvotes?.length || 0} Upvotes</span>
+                              </div>
+                              <div className='flex items-center gap-1.5'>
+                                  <MessageSquare className="h-4 w-4" />
+                                  <span>{post.comments} Comments</span>
+                              </div>
+                          </div>
+                      </Card>
+                  );
+              })}
+              </div>
+          </div>
+          <div className="space-y-6 lg:sticky top-24">
+              <Card>
+                  <CardHeader>
+                      <CardTitle className="font-headline text-lg">Hot Projects</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                      {hotProjects?.map(project => {
+                          const owner = users?.find(u => u.id === project.ownerId);
+                          return (
+                              <div key={project.id} className="p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
+                                  <div className="flex items-center gap-3">
+                                      <Avatar className='size-9'>
+                                          {owner?.photoURL && <AvatarImage src={owner.photoURL} alt={owner.displayName} />}
+                                          <AvatarFallback>{owner?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
+                                      </Avatar>
+                                      <div className='min-w-0'>
+                                          <p className="font-semibold text-sm truncate">{project.name}</p>
+                                          <p className="text-xs text-muted-foreground truncate">by {owner?.displayName}</p>
+                                      </div>
+                                  </div>
+                                  <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{project.description}</p>
+                                  <Button variant="secondary" size="sm" className="mt-3 w-full" asChild>
+                                      <Link href={`/dashboard/projects/${project.id}`}>View Project</Link>
+                                  </Button>
+                              </div>
+                          )
+                      })}
+                  </CardContent>
+              </Card>
+              <Card>
+                  <CardHeader>
+                      <CardTitle className="font-headline text-lg">Recommended Events</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                      {recommendedEvents?.map(event => (
+                          <div key={event.id} className="p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
+                              <p className="font-semibold text-sm">{event.title}</p>
+                              <p className="text-xs text-muted-foreground">{new Date(event.date.seconds * 1000).toLocaleDateString()}, {event.location}</p>
+                              <Button variant="outline" size="sm" className="mt-3 w-full" asChild>
+                                  <Link href="/dashboard/events">Learn More</Link>
+                              </Button>
+                          </div>
+                      ))}
+                  </CardContent>
+              </Card>
+              <Card>
+                  <CardHeader>
+                      <CardTitle className="font-headline text-lg">Suggested Connections</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                      {suggestedTeammates?.map((student) => {
+                          return (
+                              <div key={student.id} className="flex items-center gap-4">
+                              <Avatar>
+                                  {student.photoURL && <AvatarImage src={student.photoURL} alt={student.displayName} />}
+                                  <AvatarFallback>{student.displayName.substring(0, 2)}</AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                  <p className="font-semibold truncate">{student.displayName}</p>
+                                  <p className="text-sm text-muted-foreground truncate">{student.skills?.slice(0,2).join(', ')}</p>
+                              </div>
+                              <Button variant="default" size="sm" asChild>
+                                <Link href="/dashboard/teammates">Connect</Link>
+                              </Button>
+                              </div>
+                          );
+                          })}
+                  </CardContent>
+              </Card>
+          </div>
+      </div>
     </div>
   );
 }
