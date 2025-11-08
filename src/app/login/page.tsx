@@ -13,6 +13,7 @@ import { useFirestore } from '@/firebase';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import type { StudentProfile } from '@/lib/types';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -38,17 +39,23 @@ export default function LoginPage() {
       const userDoc = await getDoc(userRef);
 
       if (!userDoc.exists()) {
-          const userData = {
-            id: user.uid,
+          const newUserProfile: Omit<StudentProfile, 'id'> = {
             displayName: user.displayName || 'New User',
-            email: user.email,
+            email: user.email!,
             photoURL: user.photoURL || '',
             skills: [],
             interests: [],
             reputation: [],
+            socialLinks: {
+              github: '',
+              linkedin: '',
+              whatsapp: '',
+              instagram: '',
+              reddit: '',
+            }
           };
           
-          await setDoc(userRef, userData, { merge: true });
+          await setDoc(userRef, newUserProfile);
       }
 
       router.push('/dashboard');
