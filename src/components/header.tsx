@@ -11,10 +11,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Settings, LogOut, Bell } from 'lucide-react';
+import { Settings, LogOut, Bell, Search, Orbit } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Link from 'next/link';
+import { Input } from './ui/input';
 
 export function Header() {
   const pathname = usePathname();
@@ -24,7 +25,7 @@ export function Header() {
     if (pathname === '/dashboard') return 'Dashboard';
     if (pathname.startsWith('/dashboard/teammates')) return 'Find Teammates';
     if (pathname.startsWith('/dashboard/ideas')) return 'AI Project Ideas';
-    if (pathname.startsWith('/dashboard/events')) return 'Events';
+    if (pathname.startsWith('/dashboard/events')) return 'Discover Projects';
     if (pathname.startsWith('/dashboard/forums')) return 'Forums';
     if (pathname.startsWith('/dashboard/project')) return 'Project Workspace';
     return 'UniVerse';
@@ -32,17 +33,29 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-card px-4 md:px-6">
-      <div className="md:hidden">
-        <SidebarTrigger asChild>
-          <Button variant="outline" size="icon"><Settings className="h-4 w-4" /></Button>
+      <div className="flex items-center gap-2">
+         <Link href="/dashboard" className="flex items-center gap-2 md:hidden">
+            <Orbit className="h-7 w-7 text-primary" />
+        </Link>
+        <SidebarTrigger asChild className="md:hidden">
+          <Button variant="ghost" size="icon"><Settings className="h-4 w-4" /></Button>
         </SidebarTrigger>
       </div>
 
-      <div className="flex-1">
-        <h1 className="font-headline text-lg font-semibold">{getPageTitle()}</h1>
-      </div>
+       <div className="hidden md:flex items-center gap-2">
+            <Orbit className="w-7 h-7 text-primary" />
+            <h1 className="font-headline text-xl font-semibold tracking-tight">Universe</h1>
+        </div>
 
-      <div className="flex items-center gap-4">
+        <div className='flex-1 flex justify-center px-4 lg:px-16'>
+             <div className="relative w-full max-w-lg">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Search..." className="pl-10 bg-muted border-0" />
+            </div>
+        </div>
+
+
+      <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" className="rounded-full">
           <Bell className="h-5 w-5" />
           <span className="sr-only">Toggle notifications</span>

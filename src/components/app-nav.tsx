@@ -10,7 +10,7 @@ import {
   SidebarContent,
   Sidebar,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Users, Lightbulb, Calendar, MessageSquare, LogOut, Settings, BotMessageSquare } from 'lucide-react';
+import { LayoutDashboard, Users, Lightbulb, FolderKanban, MessageSquare, LogOut, Settings, BotMessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,7 @@ const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/dashboard/teammates', icon: Users, label: 'Find Teammates' },
   { href: '/dashboard/ideas', icon: BotMessageSquare, label: 'AI Project Ideas' },
-  { href: '/dashboard/events', icon: Calendar, label: 'Events' },
+  { href: '/dashboard/events', icon: FolderKanban, label: 'Projects' },
   { href: '/dashboard/forums', icon: MessageSquare, label: 'Forums' },
 ];
 
@@ -34,15 +34,7 @@ export function AppNav() {
 
   return (
     <>
-      <SidebarHeader className="border-b border-sidebar-border">
-        <div className="flex items-center gap-2 p-2">
-            <div className="p-2 bg-primary/20 rounded-lg">
-                <Lightbulb className="w-6 h-6 text-primary" />
-            </div>
-            <div className='group-data-[collapsible=icon]:hidden'>
-                <h2 className="font-headline text-lg font-semibold tracking-tight">UniVerse</h2>
-            </div>
-        </div>
+      <SidebarHeader className="border-b border-sidebar-border hidden md:flex">
       </SidebarHeader>
       <SidebarContent className="p-2">
         <SidebarMenu>
@@ -76,29 +68,15 @@ export function AppNav() {
             </SidebarMenu>
         </div>
       </SidebarContent>
-      <SidebarFooter className="p-2 border-t border-sidebar-border">
-        <div className="flex items-center gap-3">
-          <Avatar className='size-8'>
-            {userAvatar && <AvatarImage src={userAvatar.imageUrl} alt="Alex Johnson" />}
-            <AvatarFallback>AJ</AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-            <span className="text-sm font-medium">Alex Johnson</span>
-            <span className="text-xs text-muted-foreground">alex@university.edu</span>
-          </div>
-        </div>
+      <SidebarFooter className="p-2 border-t border-sidebar-border mt-auto">
         <SidebarMenu>
             <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Settings">
-                    <Settings/>
-                    <span>Settings</span>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Logout">
-                    <LogOut/>
-                    <span>Logout</span>
-                </SidebarMenuButton>
+                 <Link href="/login" className='w-full'>
+                    <SidebarMenuButton tooltip="Logout">
+                        <LogOut/>
+                        <span>Logout</span>
+                    </SidebarMenuButton>
+                 </Link>
             </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

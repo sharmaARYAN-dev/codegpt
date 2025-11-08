@@ -21,6 +21,7 @@ export type Project = {
   icon: string;
   progress: number;
   team: Pick<Student, 'id' | 'avatar' | 'name'>[];
+  tags?: string[];
 };
 
 export type Event = {
@@ -106,34 +107,69 @@ export const students: Student[] = [
 export const projects: Project[] = [
   {
     id: 'p1',
-    name: 'AI-Powered Course Planner',
-    description: 'A web app that helps students plan their university courses using AI.',
+    name: 'AI-Driven Flashcards',
+    description: 'An app that generates flashcards from lecture notes.',
     icon: 'project-icon-1',
     progress: 75,
     team: [
-      { id: '1', avatar: 'avatar-1', name: 'Alex Johnson' },
       { id: '2', avatar: 'avatar-2', name: 'Samantha Lee' },
+      { id: '1', avatar: 'avatar-1', name: 'Alex Johnson' },
     ],
+    tags: ['AI/ML', 'React', 'Python'],
   },
   {
     id: 'p2',
-    name: 'Campus AR Navigator',
-    description: 'A mobile app for navigating campus using augmented reality.',
+    name: 'Flashcards',
+    description: 'Tind leccoms sraay fis modt ait thais amd the terisignd trausley or buid it tordeent of the future.',
     icon: 'project-icon-2',
     progress: 40,
     team: [
         { id: '3', avatar: 'avatar-3', name: 'David Chen' },
-        { id: '6', avatar: 'avatar-6', name: 'Priya Sharma' },
     ],
+    tags: ['AI/ML', 'Python'],
   },
   {
     id: 'p3',
-    name: 'Decentralized Study Group',
-    description: 'A platform for forming study groups using blockchain technology.',
+    name: 'AI-Driven Study Buddy',
+    description: 'The tbs fiho dit ograithes the it yor the a desst gib unt the future.',
     icon: 'project-icon-3',
     progress: 15,
     team: [{ id: '4', avatar: 'avatar-4', name: 'Maria Garcia' }],
+    tags: ['AI/ML', 'Python'],
   },
+  {
+    id: 'p4',
+    name: 'AI-Driven Study Buddy with Solsa 2024',
+    description: 'Reast ang thd 2e',
+    icon: 'project-icon-1',
+    progress: 85,
+    team: [
+        { id: '5', avatar: 'avatar-5', name: 'Ken Adams' }
+    ],
+    tags: ['Anlact', 'Python'],
+  },
+  {
+    id: 'p5',
+    name: 'AI-Driven Study Buddy',
+    description: 'Sue the yoy ta rolliderte rot the tne sour wiettis at touf he future.',
+    icon: 'project-icon-2',
+    progress: 25,
+    team: [
+        { id: '6', avatar: 'avatar-6', name: 'Priya Sharma' }
+    ],
+    tags: ['Anlact', 'Python'],
+  },
+  {
+    id: 'p6',
+    name: 'Designten Thinking Basics',
+    description: 'Spolis sth et of eurjed ed tnogles at fircte.',
+    icon: 'project-icon-3',
+    progress: 50,
+    team: [
+        { id: '1', avatar: 'avatar-1', name: 'Alex Johnson' }
+    ],
+    tags: ['Anlaco', 'React'],
+  }
 ];
 
 export const events: Event[] = [
