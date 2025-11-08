@@ -76,7 +76,7 @@ export default function ProgressPage() {
   const userProfile = user;
 
   const userProjectsQuery = useMemo(() => (db && user) ? query(collection(db, 'projects'), where('members', 'array-contains', user.id)) : null, [user, db]);
-  const { data: userProjects, loading: loadingProjects } = useCollection<Project>(userProjectsQuery, 'projects');
+  const { data: userProjects, loading: loadingProjects } = useCollection<Project>(userProjectsQuery, `users/${user?.id}/projects`);
 
   const level = userProfile?.level || 1;
   const xp = userProfile?.xp || 0;
@@ -164,11 +164,14 @@ export default function ProgressPage() {
 
   return (
     <div className="space-y-8">
-      <div className='text-center'>
-        <h1 className="font-headline text-4xl font-bold tracking-tight">Your Progress</h1>
-        <p className="mt-2 text-lg text-muted-foreground">Level {level} &middot; {xp} / {xpForNextLevel} XP</p>
-        <Progress value={progressPercentage} className="w-1/2 mx-auto mt-4 h-3" />
-      </div>
+       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="font-headline text-3xl font-bold tracking-tight">Your Progress</h1>
+            <p className="mt-1 text-muted-foreground">Level {level} &middot; {xp} / {xpForNextLevel} XP to next level</p>
+          </div>
+          <Progress value={progressPercentage} className="w-full sm:w-48 h-3" />
+        </div>
+
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-center">
         <Card>

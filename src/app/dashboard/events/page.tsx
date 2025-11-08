@@ -10,9 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Bookmark, Star, MapPin, Calendar, Home, Building, Plus } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import Image from 'next/image';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import type { Event, StudentProfile } from '@/lib/types';
 import { collection, query, where, orderBy, type QueryConstraint, doc, deleteDoc } from 'firebase/firestore';
@@ -104,7 +102,6 @@ function EventCard({ event, users, onJoin, onEdit, onDelete }: { event: Event, u
 }
 
 export default function EventsPage() {
-  const heroImage = PlaceHolderImages.find(img => img.id === 'event-conference');
   const [activeType, setActiveType] = useState<EventType>('All');
   const [locationType, setLocationType] = useState('all');
   const [isCreateEventOpen, setCreateEventOpen] = useState(false);
@@ -187,13 +184,12 @@ export default function EventsPage() {
         itemName={eventToDelete?.name ?? 'event'}
       />
       <div className="space-y-8">
-        <div className="relative flex flex-col justify-end min-h-[240px] md:min-h-[300px] overflow-hidden rounded-lg bg-gradient-to-t from-black/80 via-transparent to-black/20 p-4 sm:p-8">
-          {heroImage && <Image src={heroImage.imageUrl} alt={heroImage.description} fill className="-z-10 object-cover" />}
-          <div className="text-white relative">
-            <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">Explore Events</h1>
-            <p className="mt-2 text-base md:text-lg text-white/80 max-w-lg">Find your next opportunity to innovate, learn, and connect with the brightest minds.</p>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="font-headline text-3xl font-bold tracking-tight">Explore Events</h1>
+            <p className="mt-1 text-muted-foreground">Find your next opportunity to innovate, learn, and connect.</p>
           </div>
-          <Button className='absolute top-4 right-4' onClick={() => handleCreateOrEdit()}>
+          <Button onClick={() => handleCreateOrEdit()}>
             <Plus className='mr-2' />
             Create Event
           </Button>

@@ -174,15 +174,21 @@ export default function ProjectsPage() {
             <h1 className="font-headline text-3xl font-bold tracking-tight">Discover Projects</h1>
             <p className="mt-1 text-muted-foreground">Find your next big idea or the people to build it with.</p>
           </div>
-          <div className="relative w-full max-w-xs">
+          <Button onClick={() => setCreateProjectOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> Create Project
+          </Button>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-6">
+           <div className="relative w-full max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Search projects..." className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {filters.map(filter => (
-            <Button key={filter} variant={activeFilter === filter ? 'default' : 'outline'} onClick={() => setActiveFilter(filter)}>{filter}</Button>
-          ))}
+          <div className="flex flex-wrap items-center gap-2">
+            {filters.map(filter => (
+              <Button key={filter} size="sm" variant={activeFilter === filter ? 'default' : 'outline'} onClick={() => setActiveFilter(filter)}>{filter}</Button>
+            ))}
+          </div>
         </div>
 
         {loadingProjects || loadingUsers ? <ProjectsSkeleton /> : renderProjectGrid(filteredProjects || [])}
