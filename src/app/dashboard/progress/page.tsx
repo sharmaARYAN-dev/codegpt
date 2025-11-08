@@ -116,9 +116,15 @@ export default function ProgressPage() {
        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="font-headline text-3xl font-bold tracking-tight">Your Progress</h1>
-            <p className="mt-1 text-muted-foreground">Level {level} &middot; {xp} / {xpForNextLevel} XP to next level</p>
+            <p className="mt-1 text-muted-foreground">Track your growth, skills, and contributions across the UniVerse.</p>
           </div>
-          <Progress value={progressPercentage} className="w-full sm:w-48 h-3" />
+          <div className='w-full sm:w-64 space-y-2'>
+            <div className="flex justify-between text-sm font-medium text-muted-foreground">
+                <span>Level {level}</span>
+                <span>{xp} / {xpForNextLevel} XP</span>
+            </div>
+            <Progress value={progressPercentage} className="h-3" />
+          </div>
         </div>
 
 

@@ -40,10 +40,10 @@ function DashboardSkeleton() {
 export default function DashboardPage() {
   const { user } = useAuth();
 
-  const postsQuery = useMemo(() => db ? query(collection(db, 'forumPosts'), orderBy('comments', 'desc'), limit(6)) : null, []);
+  const postsQuery = useMemo(() => db ? query(collection(db, 'forumPosts'), orderBy('createdAt', 'desc'), limit(6)) : null, []);
   const { data: feedPosts, loading: loadingPosts } = useCollection<ForumPost>(postsQuery, 'forumPosts');
 
-  const projectsQuery = useMemo(() => db ? query(collection(db, 'projects'), orderBy('createdAt', 'desc'), limit(3)) : null, []);
+  const projectsQuery = useMemo(() => db ? query(collection(db, 'projects'), orderBy('createdAt', 'desc'), limit(2)) : null, []);
   const { data: hotProjects, loading: loadingProjects } = useCollection<Project>(projectsQuery, 'projects');
   
   const eventsQuery = useMemo(() => {
@@ -87,8 +87,12 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="font-headline text-3xl font-bold tracking-tight">Hey {user?.displayName?.split(' ')[0]}, here&apos;s what&apos;s happening</h1>
+    <div className="space-y-8">
+       <div>
+        <h1 className="font-headline text-3xl font-bold tracking-tight">Hey {user?.displayName?.split(' ')[0]}, Welcome Back!</h1>
+        <p className="mt-1 text-muted-foreground">Here&apos;s a snapshot of what&apos;s happening in your UniVerse.</p>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           <div className='lg:col-span-2 space-y-6'>
               <div className='grid md:grid-cols-2 gap-6'>

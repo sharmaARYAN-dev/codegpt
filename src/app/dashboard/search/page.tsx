@@ -7,7 +7,7 @@ import type { Project, StudentProfile, Event, ForumPost } from '@/lib/types';
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FolderKanban, Users, Calendar, MessageSquare } from 'lucide-react';
+import { FolderKanban, Users, Calendar, MessageSquare, Search as SearchIcon } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -95,18 +95,24 @@ export default function SearchPage() {
     return <SearchSkeleton />;
   }
 
-  if (!query) {
-    return <div className="text-center text-muted-foreground">Please enter a search term in the header to begin.</div>
-  }
-
   return (
     <div className="space-y-8">
       <div>
         <h1 className="font-headline text-3xl font-bold tracking-tight">Search Results</h1>
-        <p className="mt-1 text-muted-foreground">Found {totalResults} results for &quot;{query}&quot;</p>
+        {query ? (
+             <p className="mt-1 text-muted-foreground">Found {totalResults} results for &quot;{query}&quot;</p>
+        ) : (
+            <p className="mt-1 text-muted-foreground">Enter a term in the search bar to find projects, people, events, and posts.</p>
+        )}
       </div>
 
-      {totalResults === 0 ? (
+      {!query ? (
+        <div className="text-center py-16 text-muted-foreground">
+            <SearchIcon className="mx-auto h-16 w-16" />
+            <p className="mt-4 text-lg font-semibold">Search the UniVerse</p>
+            <p className="mt-1 text-sm">Find exactly what you&apos;re looking for.</p>
+        </div>
+      ) : totalResults === 0 ? (
         <p className="text-center text-muted-foreground pt-16">No results found. Try a different search term.</p>
       ) : (
         <div className="space-y-12">

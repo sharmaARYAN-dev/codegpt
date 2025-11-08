@@ -33,7 +33,11 @@ const reputationIcons = {
 
 function ProfileSkeleton() {
     return (
-        <div className="container mx-auto max-w-5xl px-0 sm:px-4 py-2">
+        <div className="space-y-8">
+             <div>
+                <h1 className="font-headline text-3xl font-bold tracking-tight">My Profile</h1>
+                <p className="mt-1 text-muted-foreground">This is your personal space. Customize it to reflect who you are.</p>
+            </div>
             <Card className="overflow-hidden">
                 <Skeleton className="h-24 md:h-36" />
                 <CardContent className="p-4 sm:p-6">
@@ -173,7 +177,11 @@ export default function ProfilePage() {
         onConfirm={confirmDeleteProject}
         itemName={projectToDelete?.name ?? 'project'}
     />
-    <div className="container mx-auto max-w-5xl px-0 sm:px-4 py-2">
+    <div className="space-y-8">
+        <div>
+            <h1 className="font-headline text-3xl font-bold tracking-tight">My Profile</h1>
+            <p className="mt-1 text-muted-foreground">This is your personal space. Customize it to reflect who you are.</p>
+        </div>
       <Card className="overflow-hidden">
         <div className="h-24 md:h-36 bg-gradient-to-r from-primary/70 to-accent/70" />
         <CardContent className="p-4 sm:p-6">
