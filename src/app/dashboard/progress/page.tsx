@@ -91,13 +91,30 @@ export default function ProgressPage() {
   }, [userProjects]);
 
   const skillGrowth = useMemo(() => {
-    if (!userProfile || !userProfile.skills) return [];
-    // This is placeholder logic. In a real app, you'd track this more granularly.
-    return userProfile.skills.map(skill => ({
-      name: skill,
-      level: Math.floor(Math.random() * 80) + 20, // Random level between 20-100
-    }))
-  }, [userProfile]);
+    if (!userProfile || !userProfile.skills || !userProjects) return [];
+
+    const projectSkillCounts = userProjects.reduce((acc, project) => {
+      project.tags.forEach(tag => {
+        if (userProfile.skills.includes(tag)) {
+          acc[tag] = (acc[tag] || 0) + 1;
+        }
+      });
+      return acc;
+    }, {} as Record<string, number>);
+    
+    const maxCount = Math.max(...Object.values(projectSkillCounts), 1);
+
+    const allUserSkills = userProfile.skills.map(skill => {
+      const count = projectSkillCounts[skill] || 0;
+      return {
+        name: skill,
+        count: count,
+        level: (count / maxCount) * 100,
+      };
+    });
+
+    return allUserSkills.sort((a, b) => b.count - a.count);
+  }, [userProfile, userProjects]);
 
   const softSkillsData = useMemo(() => {
     if (!userProjects || !user || !userProfile) return [];
@@ -195,15 +212,17 @@ export default function ProgressPage() {
               <CardDescription>Your proficiency based on completed projects.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {skillGrowth.map(skill => (
+              {skillGrowth.length > 0 ? skillGrowth.map(skill => (
                 <div key={skill.name}>
                   <div className="flex justify-between mb-1">
                     <span className="text-base font-medium text-muted-foreground">{skill.name}</span>
-                    <span className="text-sm font-medium text-primary">{skill.level}%</span>
+                     <span className="text-sm font-medium text-primary">{skill.count} project{skill.count !== 1 && 's'}</span>
                   </div>
                   <Progress value={skill.level} />
                 </div>
-              ))}
+              )) : (
+                <p className="text-sm text-muted-foreground text-center py-4">Complete projects with skill tags to see your growth here!</p>
+              )}
             </CardContent>
           </Card>
           <Card>
