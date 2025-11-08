@@ -36,7 +36,7 @@ export default function LoginPage() {
       const userDoc = await getDoc(userRef);
 
       if (!userDoc.exists()) {
-          const newUserProfile: Omit<StudentProfile, 'id' | 'createdAt' | 'updatedAt'> = {
+          const newUserProfile: Omit<StudentProfile, 'id' | 'createdAt' | 'updatedAt' | 'level' | 'xp'> = {
             displayName: firebaseUser.displayName || 'New User',
             email: firebaseUser.email!,
             photoURL: firebaseUser.photoURL || '',
@@ -49,6 +49,8 @@ export default function LoginPage() {
           
           await setDoc(userRef, {
             ...newUserProfile,
+            level: 1,
+            xp: 0,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
           });
@@ -56,6 +58,10 @@ export default function LoginPage() {
 
       router.push('/dashboard');
     } catch (error: any) {
+      if (error.code === 'auth/popup-closed-by-user') {
+        console.log('Login popup closed by user.');
+        return;
+      }
       console.error("Error during Google login:", error);
       toast.error("Login Failed", {
         description: error.message || "An unexpected error occurred during login.",
