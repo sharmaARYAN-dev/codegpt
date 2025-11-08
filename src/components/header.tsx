@@ -15,21 +15,19 @@ import { Settings, LogOut, Bell, Search, Orbit, Menu, Sun, Moon } from 'lucide-r
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Input } from './ui/input';
-import { useAuth, useUser } from '@/firebase';
+import { useAuth } from '@/context/AuthContext';
 import { useTheme } from 'next-themes';
 import React from 'react';
+import { auth } from '@/lib/firebase';
 
 export function Header() {
-  const { user } = useUser();
-  const auth = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   
   const handleLogout = async () => {
-    if (auth) {
-      await auth.signOut();
-      router.push('/login');
-    }
+    await auth.signOut();
+    router.push('/login');
   };
 
   const toggleTheme = () => {

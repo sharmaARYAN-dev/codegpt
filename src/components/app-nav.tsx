@@ -11,7 +11,7 @@ import {
 import { LayoutDashboard, Users, FolderKanban, MessageSquare, LogOut, Calendar, Lightbulb, User as UserIcon, Orbit, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useAuth } from '@/firebase';
+import { auth } from '@/lib/firebase';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Home' },
@@ -26,14 +26,11 @@ const navItems = [
 
 export function AppNav() {
   const pathname = usePathname();
-  const auth = useAuth();
   const router = useRouter();
 
   const handleLogout = async () => {
-    if (auth) {
-      await auth.signOut();
-      router.push('/login');
-    }
+    await auth.signOut();
+    router.push('/login');
   };
 
   const isNavItemActive = (itemHref: string) => {

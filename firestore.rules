@@ -1,61 +1,46 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions
     function isSignedIn() {
       return request.auth != null;
     }
 
-    function isOwner(userId) {
-      return request.auth.uid == userId;
+    match /users/{uid} {
+      allow read: if isSignedIn();
+      allow create: if request.auth.uid == uid;
+      allow update: if request.auth.uid == uid;
+      allow delete: if false;
     }
 
-    // USERS
-    // Users can read any profile.
-    // Users can only create and update their own profile.
-    match /users/{userId} {
-      allow read: if true;
-      allow create, update: if isSignedIn() && isOwner(userId);
-    }
-    
-    // PROJECTS
-    // Any user can read projects.
-    // Signed-in users can create projects.
-    // Only the owner can update or delete their project.
     match /projects/{projectId} {
-      allow read: if true;
+      allow read: if isSignedIn();
       allow create: if isSignedIn();
-      allow update, delete: if isSignedIn() && isOwner(resource.data.ownerId);
-    }
-
-    // EVENTS
-    // Any user can read events.
-    // Signed-in users can create events.
-    // Only the organizer can update or delete their event.
-    match /events/{eventId} {
-      allow read: if true;
-      allow create: if isSignedIn();
-      allow update, delete: if isSignedIn() && isOwner(resource.data.organizerId);
-    }
-
-    // FORUM POSTS
-    // Any user can read forum posts.
-    // Signed-in users can create posts.
-    // Only the author can update or delete their post.
-    match /forumPosts/{postId} {
-      allow read: if true;
-      allow create: if isSignedIn();
-      allow update, delete: if isSignedIn() && isOwner(resource.data.authorId);
-
-      // COMMENTS on posts
-      // Anyone can read comments.
-      // Signed-in users can create comments.
-      match /comments/{commentId} {
-        allow read: if true;
-        allow create: if isSignedIn();
+      allow update: if request.auth.uid == resource.data.ownerId || request.auth.uid in resource.data.members.map(m => m.uid);
+      allow delete: if request.auth.uid == resource.data.ownerId;
+      match /chat/{msgId} {
+        allow read: if isSignedIn();
+        allow create: if request.auth.uid != null && (exists(/databases/$(database)/documents/projects/$(projectId)) &&
+            (request.auth.uid == resource.data.ownerId || request.auth.uid in get(/databases/$(database)/documents/projects/$(projectId)).data.members.map(m => m.uid)));
+        allow delete: if false;
       }
+    }
+
+    match /posts/{postId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if request.auth.uid == resource.data.authorId;
+      match /comments/{cId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn();
+        allow update, delete: if request.auth.uid == resource.data.authorId;
+      }
+    }
+
+    match /events/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if request.auth.uid == resource.data.organizerId;
     }
   }
 }

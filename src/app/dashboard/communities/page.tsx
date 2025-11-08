@@ -8,12 +8,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { CreatePostDialog } from '@/components/create-post-dialog';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection } from '@/firebase/firestore/use-collection';
 import type { ForumPost, Project, StudentProfile } from '@/lib/types';
 import { collection, query, orderBy, doc, updateDoc, increment, limit, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import { db } from '@/lib/firebase';
 
 function CommunitiesSkeleton() {
   return (
@@ -51,29 +52,28 @@ function CommunitiesSkeleton() {
 export default function CommunitiesPage() {
   const [isCreatePostOpen, setCreatePostOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState('All');
-  const firestore = useFirestore();
 
   const filters = ['All', 'AI/ML', 'WebDev', 'Design', 'Startups', 'Gaming', 'General'];
 
-  const postsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    const coll = collection(firestore, 'forumPosts');
+  const postsQuery = useMemo(() => {
+    if (!db) return null;
+    const coll = collection(db, 'forumPosts');
     if (activeFilter !== 'All') {
       return query(coll, where('community', '==', activeFilter), orderBy('createdAt', 'desc'));
     }
     return query(coll, orderBy('createdAt', 'desc'));
-  }, [firestore, activeFilter]);
+  }, [activeFilter]);
   const { data: forumPosts, loading: loadingPosts } = useCollection<ForumPost>(postsQuery);
 
-  const projectsQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'projects'), orderBy('rating', 'desc'), limit(2)) : null, [firestore]);
+  const projectsQuery = useMemo(() => db ? query(collection(db, 'projects'), orderBy('createdAt', 'desc'), limit(2)) : null, []);
   const { data: suggestedProjects, loading: loadingProjects } = useCollection<Project>(projectsQuery);
 
-  const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
+  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, []);
   const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery);
 
   const handleUpvote = (postId: string) => {
-    if (!firestore) return;
-    const postRef = doc(firestore, 'forumPosts', postId);
+    if (!db) return;
+    const postRef = doc(db, 'forumPosts', postId);
     updateDoc(postRef, { upvotes: increment(1) }).catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
             path: postRef.path,
@@ -131,7 +131,7 @@ export default function CommunitiesPage() {
                     <div className="px-6 pb-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                       <Button variant='outline' size='sm' className='text-primary border-primary/50 hover:bg-primary/10 hover:text-primary' onClick={() => handleUpvote(post.id)}>
                         <ArrowBigUp className="mr-2 h-4 w-4" />
-                        Upvote ({post.upvotes})
+                        Upvote ({post.upvotes.length})
                       </Button>
                       <div className='flex items-center gap-1.5'>
                         <MessageSquare className="h-4 w-4" />

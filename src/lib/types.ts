@@ -1,80 +1,96 @@
 import type { LucideIcon } from 'lucide-react';
+import type { Timestamp } from 'firebase/firestore';
 
-export type StudentProfile = {
-  id: string;
+export interface StudentProfile {
+  id: string; // Changed from uid to id to be consistent
   displayName: string;
   email: string;
-  photoURL: string;
+  photoURL?: string;
   aboutMe?: string;
-  skills: string[];
-  interests: string[];
-  reputation: {
-    label: string;
-    color: string;
-  }[];
+  skills: string[]; // normalized lowercase
+  interests: string[]; // normalized lowercase
+  bio?: string;
+  links?: { github?: string; linkedin?: string; portfolio?: string };
+  reputation?: number;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  college?: string;
+  branch?: string;
+  year?: string;
   xp?: number;
   level?: number;
-  socialLinks?: {
-    github?: string;
-    linkedin?: string;
-    whatsapp?: string;
-    instagram?: string;
-    reddit?: string;
-  };
   softSkills?: {
     leadership: number;
     innovation: number;
     problemSolving: number;
     teamwork: number;
     productivity: number;
-  }
+  };
 };
 
-export type Project = {
+export interface Project {
   id: string;
-  name: string;
+  name: string; // Changed from title to name
   description: string;
-  ownerId: string;
-  memberIds: string[];
-  tags: string[];
-  rating: number;
-  forks: number;
-  comments: number;
-  createdAt: any; // Can be Timestamp
+  tags: string[]; // e.g., ["webdev","ai"]
+  skillsNeeded: string[]; // normalized
+  ownerId: string; // Changed from createdBy to ownerId
+  members: { uid: string; role: string; joinedAt: Timestamp }[];
+  joinRequests?: { uid: string; message?: string; createdAt: Timestamp }[];
+  demoLink?: string;
+  repo?: string;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  // Fields to remove/change
+  memberIds?: string[];
+  rating?: number;
+  forks?: number;
+  comments?: number;
   links?: {
     repo?: string;
     demo?: string;
   };
 };
 
-export type Event = {
-  id: string;
-  title: string;
-  type: 'Hackathon' | 'Workshop' | 'Conference';
-  date: string; // ISO 8601 format
-  location: string;
-  isOnline: boolean;
-  description: string;
-  organizerId: string;
-  tags: string[];
-  rating: number;
-  createdAt: any; // Can be Timestamp
-};
-
-export type ForumPost = {
-  id: string;
-  title: string;
-  content: string;
-  authorId: string;
-  community: string;
-  upvotes: number;
-  comments: number;
-  createdAt: any; // Can be Timestamp
-};
-
-export type Comment = {
+export interface ChatMessage {
     id: string;
-    content: string;
+    senderUid: string;
+    body: string;
+    attachments?: string[]; // storage paths
+    createdAt: Timestamp;
+}
+
+export interface Event {
+  id: string;
+  title: string;
+  organizerId: string; // Changed from organizerUid
+  date: Timestamp;
+  type: 'Hackathon' | 'Workshop' | 'Conference'; // Changed from domain
+  isOnline: boolean; // changed from mode
+  location: string;
+  registrationLink?: string;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  description: string;
+  tags: string[];
+};
+
+export interface ForumPost {
+  id: string;
+  authorId: string; // Changed from authorUid
+  title: string;
+  content: string; // Changed from body
+  community: string; // Changed from category
+  upvotes: string[]; // array of uid
+  comments: number; // Changed from bookmarkCount
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};
+
+export interface Comment {
+    id: string;
+    content: string; // Changed from body
     authorId: string;
-    createdAt: any; // Can be Timestamp
+    createdAt: Timestamp;
+    parentId?: string;
 };

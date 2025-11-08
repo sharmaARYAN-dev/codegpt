@@ -23,7 +23,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useFirestore, useUser } from '@/firebase';
+import { db } from '@/lib/firebase';
+import { useAuth } from '@/context/AuthContext';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { toast } from 'sonner';
 import { useState } from 'react';
@@ -56,8 +57,7 @@ interface CreateEventDialogProps {
 }
 
 export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps) {
-  const firestore = useFirestore();
-  const { user } = useUser();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof eventSchema>>({
@@ -74,7 +74,7 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
   const isOnline = form.watch('isOnline');
   
   const onSubmit = async (values: z.infer<typeof eventSchema>) => {
-    if (!firestore || !user) {
+    if (!db || !user) {
       toast.error('Error', {
         description: 'You must be logged in to create an event.',
       });
@@ -86,12 +86,12 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
       ...values,
       tags: values.tags.split(',').map(tag => tag.trim()),
       location: values.isOnline ? 'Online' : values.location,
-      organizerId: user.uid,
-      rating: Math.floor(Math.random() * 3) + 3, // 3 to 5 stars
+      organizerId: user.id,
       createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     };
 
-    const collectionRef = collection(firestore, 'events');
+    const collectionRef = collection(db, 'events');
     const promise = () => addDoc(collectionRef, eventData).catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
           path: collectionRef.path,

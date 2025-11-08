@@ -10,16 +10,18 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowBigUp, MessageSquare, Loader2 } from 'lucide-react';
-import { useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
+import { useDoc } from '@/firebase/firestore/use-doc';
+import { db } from '@/lib/firebase';
 import { doc, collection, addDoc, serverTimestamp, updateDoc, increment, query, orderBy } from 'firebase/firestore';
 import type { Comment, ForumPost, StudentProfile } from '@/lib/types';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import { useAuth } from '@/context/AuthContext';
 
 function PostSkeleton() {
   return (
@@ -52,36 +54,35 @@ function PostSkeleton() {
 
 
 export default function PostPage({ params }: { params: { id: string } }) {
-  const firestore = useFirestore();
-  const { user } = useUser();
+  const { user } = useAuth();
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const postRef = useMemoFirebase(() => firestore ? doc(firestore, 'forumPosts', params.id) : null, [firestore, params.id]);
+  const postRef = useMemo(() => db ? doc(db, 'forumPosts', params.id) : null, [params.id]);
   const { data: post, loading: loadingPost } = useDoc<ForumPost>(postRef);
 
-  const authorRef = useMemoFirebase(() => (firestore && post) ? doc(firestore, 'users', post.authorId) : null, [firestore, post]);
+  const authorRef = useMemo(() => (db && post) ? doc(db, 'users', post.authorId) : null, [post]);
   const { data: author, loading: loadingAuthor } = useDoc<StudentProfile>(authorRef);
 
-  const commentsQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'forumPosts', params.id, 'comments'), orderBy('createdAt', 'asc')) : null, [firestore, params.id]);
+  const commentsQuery = useMemo(() => db ? query(collection(db, 'forumPosts', params.id, 'comments'), orderBy('createdAt', 'asc')) : null, [params.id]);
   const { data: comments, loading: loadingComments } = useCollection<Comment>(commentsQuery);
 
-  const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
+  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, []);
   const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery);
 
   const handleAddComment = async () => {
-    if (!comment.trim() || !user || !firestore) return;
+    if (!comment.trim() || !user || !db) return;
     
     setIsSubmitting(true);
     
     const commentData = {
       content: comment,
-      authorId: user.uid,
+      authorId: user.id,
       createdAt: serverTimestamp(),
     };
 
-    const collectionRef = collection(firestore, 'forumPosts', params.id, 'comments');
-    const postDocRef = doc(firestore, 'forumPosts', params.id);
+    const collectionRef = collection(db, 'forumPosts', params.id, 'comments');
+    const postDocRef = doc(db, 'forumPosts', params.id);
     
     const promise = () => addDoc(collectionRef, commentData).then(() => {
         return updateDoc(postDocRef, { comments: increment(1) });
@@ -111,8 +112,8 @@ export default function PostPage({ params }: { params: { id: string } }) {
   }
   
   const handleUpvote = (postId: string) => {
-    if (!firestore) return;
-    const postDocRef = doc(firestore, 'forumPosts', postId);
+    if (!db) return;
+    const postDocRef = doc(db, 'forumPosts', postId);
     updateDoc(postDocRef, { upvotes: increment(1) }).catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
             path: postDocRef.path,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection } from '@/firebase/firestore/use-collection';
 import { collection } from 'firebase/firestore';
 import type { Project, StudentProfile, Event, ForumPost } from '@/lib/types';
 import { useMemo } from 'react';
@@ -11,6 +11,7 @@ import { FolderKanban, Users, Calendar, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { db } from '@/lib/firebase';
 
 function SearchSkeleton() {
   return (
@@ -38,18 +39,17 @@ function SearchSkeleton() {
 export default function SearchPage() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
-  const firestore = useFirestore();
 
-  const projectsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'projects') : null, [firestore]);
+  const projectsQuery = useMemo(() => db ? collection(db, 'projects') : null, []);
   const { data: allProjects, loading: loadingProjects } = useCollection<Project>(projectsQuery);
 
-  const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
+  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, []);
   const { data: allUsers, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery);
   
-  const eventsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'events') : null, [firestore]);
+  const eventsQuery = useMemo(() => db ? collection(db, 'events') : null, []);
   const { data: allEvents, loading: loadingEvents } = useCollection<Event>(eventsQuery);
 
-  const postsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'forumPosts') : null, [firestore]);
+  const postsQuery = useMemo(() => db ? collection(db, 'forumPosts') : null, []);
   const { data: allPosts, loading: loadingPosts } = useCollection<ForumPost>(postsQuery);
 
   const searchResults = useMemo(() => {
@@ -165,7 +165,7 @@ export default function SearchPage() {
                                         <CardTitle className="font-headline text-lg">{event.title}</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <p className="text-sm text-muted-foreground">{new Date(event.date).toLocaleDateString()} &middot; {event.location}</p>
+                                        <p className="text-sm text-muted-foreground">{event.date.toDate().toLocaleDateString()} &middot; {event.location}</p>
                                     </CardContent>
                                 </Card>
                             </Link>

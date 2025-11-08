@@ -6,10 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Chrome } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword } from 'firebase/auth';
-import { useAuth, useUser } from '@/firebase';
+import { auth, db } from '@/lib/firebase';
+import { useAuth } from '@/context/AuthContext';
 import { useEffect } from 'react';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,9 +17,7 @@ import type { StudentProfile } from '@/lib/types';
 
 export default function LoginPage() {
   const router = useRouter();
-  const auth = useAuth();
-  const firestore = useFirestore();
-  const { user, loading } = useUser();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     if (!loading && user) {
@@ -29,33 +27,31 @@ export default function LoginPage() {
 
 
   const handleGoogleLogin = async () => {
-    if (!auth || !firestore) return;
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
-      const user = result.user;
+      const firebaseUser = result.user;
       
-      const userRef = doc(firestore, 'users', user.uid);
+      const userRef = doc(db, 'users', firebaseUser.uid);
       const userDoc = await getDoc(userRef);
 
       if (!userDoc.exists()) {
-          const newUserProfile: Omit<StudentProfile, 'id'> = {
-            displayName: user.displayName || 'New User',
-            email: user.email!,
-            photoURL: user.photoURL || '',
+          const newUserProfile: Omit<StudentProfile, 'id' | 'createdAt' | 'updatedAt'> = {
+            displayName: firebaseUser.displayName || 'New User',
+            email: firebaseUser.email!,
+            photoURL: firebaseUser.photoURL || '',
             skills: [],
             interests: [],
-            reputation: [],
-            socialLinks: {
-              github: '',
-              linkedin: '',
-              whatsapp: '',
-              instagram: '',
-              reddit: '',
-            }
+            reputation: 0,
+            bio: '',
+            links: { github: '', linkedin: '', portfolio: ''},
           };
           
-          await setDoc(userRef, newUserProfile);
+          await setDoc(userRef, {
+            ...newUserProfile,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          });
       }
 
       router.push('/dashboard');
@@ -69,7 +65,6 @@ export default function LoginPage() {
 
   const handleEmailLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!auth) return;
 
     const email = event.currentTarget.email.value;
     const password = event.currentTarget.password.value;

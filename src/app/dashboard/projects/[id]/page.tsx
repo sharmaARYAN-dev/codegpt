@@ -11,13 +11,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, Users, GitFork, ExternalLink, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import { useDoc } from '@/firebase/firestore/use-doc';
 import { collection, doc } from 'firebase/firestore';
 import type { Project, StudentProfile } from '@/lib/types';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { useMemo } from 'react';
+import { db } from '@/lib/firebase';
 
 function ProjectWorkspaceSkeleton() {
   return (
@@ -51,21 +52,19 @@ function ProjectWorkspaceSkeleton() {
 
 
 export default function ProjectWorkspacePage({ params }: { params: { id: string } }) {
-  const firestore = useFirestore();
-  
-  const projectRef = useMemoFirebase(() => firestore ? doc(firestore, 'projects', params.id) : null, [firestore, params.id]);
+  const projectRef = useMemo(() => db ? doc(db, 'projects', params.id) : null, [params.id]);
   const { data: project, loading: loadingProject } = useDoc<Project>(projectRef);
 
-  const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
+  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, []);
   const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery);
 
   const teamMembers = useMemo(() => {
     if (!project || !users) return [];
-    const memberIds = project.memberIds || [];
-    if (!memberIds.includes(project.ownerId)) {
-        memberIds.push(project.ownerId);
+    const memberUids = project.members?.map(m => m.uid) || [];
+    if (!memberUids.includes(project.ownerId)) {
+        memberUids.push(project.ownerId);
     }
-    return users.filter(u => memberIds.includes(u.id));
+    return users.filter(u => memberUids.includes(u.id));
   }, [project, users]);
 
   const openRoles = [
@@ -113,8 +112,9 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
                     <Badge
                     key={tag}
                     variant={
-                        tag === 'AI/ML' || tag === 'Python' ? 'default' : 'secondary'
+                        tag === 'ai/ml' || tag === 'python' ? 'default' : 'secondary'
                     }
+                    className="capitalize"
                     >
                     {tag}
                     </Badge>
@@ -133,11 +133,11 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
         </div>
         <div className='flex items-center gap-2'>
             <GitFork className='size-4' />
-            <span>{project.forks} Fork{project.forks !== 1 && 's'}</span>
+            <span>{project.repo ? 'Repository' : 'No Repository'}</span>
         </div>
          <div className='flex items-center gap-2'>
             <MessageSquare className='size-4' />
-            <span>{project.comments} Comment{project.comments !== 1 && 's'}</span>
+            <span>0 Comments</span>
         </div>
       </div>
 
@@ -229,19 +229,19 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
                 </CardTitle>
             </CardHeader>
             <CardContent className='space-y-2'>
-                {project.links?.demo ? (
-                  <Link href={project.links.demo} target="_blank" rel="noopener noreferrer" className='flex items-center gap-3 p-3 -mx-3 rounded-md text-sm text-muted-foreground hover:bg-muted/50 hover:text-primary transition-colors'>
+                {project.demoLink ? (
+                  <Link href={project.demoLink} target="_blank" rel="noopener noreferrer" className='flex items-center gap-3 p-3 -mx-3 rounded-md text-sm text-muted-foreground hover:bg-muted/50 hover:text-primary transition-colors'>
                       <ExternalLink className='size-4' />
                       <span>View Live Demo</span>
                   </Link>
                 ) : null}
-                 {project.links?.repo ? (
-                  <Link href={project.links.repo} target="_blank" rel="noopener noreferrer" className='flex items-center gap-3 p-3 -mx-3 rounded-md text-sm text-muted-foreground hover:bg-muted/50 hover:text-primary transition-colors'>
+                 {project.repo ? (
+                  <Link href={project.repo} target="_blank" rel="noopener noreferrer" className='flex items-center gap-3 p-3 -mx-3 rounded-md text-sm text-muted-foreground hover:bg-muted/50 hover:text-primary transition-colors'>
                       <GitFork className='size-4' />
                       <span>GitHub Repository</span>
                   </Link>
                  ) : null}
-                 {!project.links?.demo && !project.links?.repo && (
+                 {!project.demoLink && !project.repo && (
                     <p className="text-sm text-muted-foreground py-2">No links provided yet.</p>
                  )}
             </CardContent>

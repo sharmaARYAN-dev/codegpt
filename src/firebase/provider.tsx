@@ -1,63 +1,56 @@
 'use client';
+
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from 'react';
 import type { FirebaseApp } from 'firebase/app';
-import type { Auth } from 'firebase/auth';
+import { Auth, getAuth, onAuthStateChanged } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
-import { createContext, useContext, type ReactNode } from 'react';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 
-type FirebaseContextValue = {
-  firebaseApp: FirebaseApp | null;
+export interface FirebaseContextValue {
+  app: FirebaseApp | null;
+  db: Firestore | null;
   auth: Auth | null;
-  firestore: Firestore | null;
-};
+}
 
-const FirebaseContext = createContext<FirebaseContextValue>({
-  firebaseApp: null,
-  auth: null,
-  firestore: null,
-});
+const FirebaseContext = createContext<FirebaseContextValue | null>(null);
 
-export const FirebaseProvider = ({
-  children,
-  firebaseApp,
-  auth,
-  firestore,
-}: {
-  children: ReactNode;
-  firebaseApp: FirebaseApp | null;
-  auth: Auth | null;
-  firestore: Firestore | null;
-}) => {
+export interface FirebaseProviderProps {
+  app: FirebaseApp;
+  db: Firestore;
+  children?: ReactNode;
+}
+
+export function FirebaseProvider({ app, db, children }: FirebaseProviderProps) {
+  const [auth, setAuth] = useState<Auth | null>(() => getAuth(app));
+
+  const value: FirebaseContextValue = {
+    app,
+    db,
+    auth,
+  };
+
   return (
-    <FirebaseContext.Provider value={{ firebaseApp, auth, firestore }}>
+    <FirebaseContext.Provider value={value}>
       {children}
       <FirebaseErrorListener />
     </FirebaseContext.Provider>
   );
-};
+}
 
-export const useFirebase = () => useContext(FirebaseContext);
-
-export const useFirebaseApp = () => {
-  const { firebaseApp } = useFirebase();
-  if (!firebaseApp) {
-    throw new Error('useFirebaseApp must be used within a FirebaseProvider');
+export function useFirebase() {
+  const context = useContext(FirebaseContext);
+  if (!context) {
+    throw new Error('useFirebase must be used within a FirebaseProvider.');
   }
-  return firebaseApp;
-};
+  return context;
+}
 
-export const useAuth = () => {
-  const { auth } = useFirebase();
-  if (!auth) {
-    throw new Error('useAuth must be used within a FirebaseProvider');
-  }
-  return auth;
-};
-
-export const useFirestore = () => {
-  const { firestore } = useFirebase();
-  if (!firestore) {
-    throw new Error('useFirestore must be used within a FirebaseProvider');
-  }
-  return firestore;
-};
+export const useFirebaseApp = () => useFirebase().app;
+export const useFirestore = () => useFirebase().db;
+export const useAuth = () => useFirebase().auth;

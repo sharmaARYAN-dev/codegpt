@@ -11,11 +11,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Star } from 'lucide-react';
-import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { collection, query, limit, orderBy } from 'firebase/firestore';
 import type { Project, Event, StudentProfile } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMemo } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { db } from '@/lib/firebase';
+import { useCollection } from '@/firebase/firestore/use-collection';
 
 function DashboardSkeleton() {
   return (
@@ -45,21 +47,20 @@ function DashboardSkeleton() {
 }
 
 export default function DashboardPage() {
-  const { user } = useUser();
-  const firestore = useFirestore();
+  const { user } = useAuth();
 
-  const projectsQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'projects'), orderBy('createdAt', 'desc'), limit(3)) : null, [firestore]);
+  const projectsQuery = useMemo(() => db ? query(collection(db, 'projects'), orderBy('createdAt', 'desc'), limit(3)) : null, []);
   const { data: feedProjects, loading: loadingProjects } = useCollection<Project>(projectsQuery);
   
-  const eventsQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'events'), limit(2)) : null, [firestore]);
+  const eventsQuery = useMemo(() => db ? query(collection(db, 'events'), limit(2)) : null, []);
   const { data: recommendedEvents, loading: loadingEvents } = useCollection<Event>(eventsQuery);
 
-  const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
+  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, []);
   const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery);
 
   const suggestedTeammates = useMemo(() => {
     if (!user || !users) return [];
-    return users.filter(u => u.id !== user.uid).slice(0, 3);
+    return users.filter(u => u.id !== user.id).slice(0, 3);
   }, [user, users]);
 
   const getProjectOwner = (ownerId: string) => users?.find(u => u.id === ownerId);
@@ -122,7 +123,7 @@ export default function DashboardPage() {
                      {recommendedEvents?.map(event => (
                         <div key={event.id} className="p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
                             <p className="font-semibold">{event.title}</p>
-                            <p className="text-sm text-muted-foreground">{new Date(event.date).toLocaleDateString()}, {event.location}</p>
+                            <p className="text-sm text-muted-foreground">{new Date(event.date.seconds * 1000).toLocaleDateString()}, {event.location}</p>
                             <Button variant="outline" size="sm" className="mt-3 w-full" asChild>
                                 <Link href="/dashboard/events">Learn More</Link>
                             </Button>

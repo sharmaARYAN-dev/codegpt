@@ -2,10 +2,11 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/sonner';
-import { FirebaseClientProvider } from '@/firebase';
 import { ThemeProvider } from '@/components/theme-provider';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
+import { AuthProvider } from '@/context/AuthContext';
+import { FirebaseClientProvider } from '@/firebase';
 
 const fontHeadline = Inter({
   subsets: ['latin'],
@@ -40,11 +41,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SidebarProvider>
-            <FirebaseClientProvider>
-              {children}
-            </FirebaseClientProvider>
-          </SidebarProvider>
+          <FirebaseClientProvider>
+            <AuthProvider>
+              <SidebarProvider>
+                  {children}
+              </SidebarProvider>
+            </AuthProvider>
+          </FirebaseClientProvider>
           <Toaster />
         </ThemeProvider>
       </body>

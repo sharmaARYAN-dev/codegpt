@@ -13,10 +13,11 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { CreateProjectDialog } from '@/components/create-project-dialog';
 import { Input } from '@/components/ui/input';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection } from '@/firebase/firestore/use-collection';
 import type { Project, StudentProfile } from '@/lib/types';
 import { collection, query, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
+import { db } from '@/lib/firebase';
 
 function ProjectsSkeleton() {
   return (
@@ -68,12 +69,11 @@ export default function ProjectsPage() {
   const [isCreateProjectOpen, setCreateProjectOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
-  const firestore = useFirestore();
 
-  const projectsQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'projects'), orderBy('createdAt', 'desc')) : null, [firestore]);
+  const projectsQuery = useMemo(() => db ? query(collection(db, 'projects'), orderBy('createdAt', 'desc')) : null, []);
   const { data: allProjects, loading: loadingProjects } = useCollection<Project>(projectsQuery);
 
-  const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
+  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, []);
   const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery);
 
   const filters = ['All', 'Web Dev', 'AI/ML', 'Mobile', 'Game Dev'];
@@ -84,10 +84,10 @@ export default function ProjectsPage() {
     let projects = [...allProjects];
 
     if (activeFilter !== 'All') {
-        const filterTerms = activeFilter.toLowerCase().split(' ');
+        const filterTerm = activeFilter.toLowerCase();
         projects = projects.filter(p => {
             const projectTags = p.tags.map(tag => tag.toLowerCase());
-            return filterTerms.every(term => projectTags.some(tag => tag.includes(term)));
+            return projectTags.includes(filterTerm);
         });
     }
     
@@ -99,14 +99,7 @@ export default function ProjectsPage() {
       );
     }
     
-    // Ensure stable sort order after filtering
-    projects.sort((a, b) => {
-        if (a.createdAt && b.createdAt) {
-          // Assuming createdAt is a Firestore Timestamp
-          return b.createdAt.toMillis() - a.createdAt.toMillis();
-        }
-        return 0;
-    });
+    projects.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
 
     return projects;
   }, [allProjects, searchTerm, activeFilter]);
@@ -115,7 +108,7 @@ export default function ProjectsPage() {
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
       {projectList.map((project) => {
         const owner = users?.find(u => u.id === project.ownerId);
-        const memberCount = (project.memberIds?.length || 0) + 1;
+        const memberCount = (project.members?.length || 0);
 
         return (
           <Link href={`/dashboard/projects/${project.id}`} key={project.id} className="block group">
@@ -137,7 +130,7 @@ export default function ProjectsPage() {
                 <div className='space-y-3'>
                   <p className='text-xs font-semibold uppercase text-muted-foreground tracking-wider'>Tech Stack</p>
                   <div className="flex flex-wrap items-center gap-2 text-sm">
-                    {project.tags?.map(t => <Badge key={t} variant={t === 'AI/ML' ? 'default' : 'secondary'}>{t}</Badge>)}
+                    {project.tags?.map(t => <Badge key={t} variant={t === 'ai/ml' ? 'default' : 'secondary'}>{t}</Badge>)}
                   </div>
                 </div>
               </CardContent>
@@ -149,7 +142,7 @@ export default function ProjectsPage() {
                   </div>
                   <div className='flex items-center gap-1.5'>
                     <GitFork className='size-4' />
-                    <span>{project.forks || 0}</span>
+                    <span>{project.repo ? 1 : 0}</span>
                   </div>
                 </div>
                 <Button variant="secondary">View</Button>

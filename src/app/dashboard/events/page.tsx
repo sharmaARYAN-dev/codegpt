@@ -13,13 +13,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Image from 'next/image';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection } from '@/firebase/firestore/use-collection';
 import type { Event, StudentProfile } from '@/lib/types';
 import { collection, query, where, orderBy, type QueryConstraint } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { CreateEventDialog } from '@/components/create-event-dialog';
+import { db } from '@/lib/firebase';
 
 function EventsSkeleton() {
   return (
@@ -44,14 +45,13 @@ type EventType = 'All' | 'Hackathon' | 'Workshop' | 'Conference';
 
 export default function EventsPage() {
   const heroImage = PlaceHolderImages.find(img => img.id === 'event-conference');
-  const firestore = useFirestore();
   const [activeType, setActiveType] = useState<EventType>('All');
   const [locationType, setLocationType] = useState('all');
   const [isCreateEventOpen, setCreateEventOpen] = useState(false);
 
-  const eventsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    const baseColl = collection(firestore, 'events');
+  const eventsQuery = useMemo(() => {
+    if (!db) return null;
+    const baseColl = collection(db, 'events');
     const queries: QueryConstraint[] = [];
 
     if (activeType !== 'All') {
@@ -63,11 +63,11 @@ export default function EventsPage() {
     }
 
     return query(baseColl, ...queries, orderBy('date'));
-  }, [firestore, activeType, locationType]);
+  }, [activeType, locationType]);
 
   const { data: allEvents, loading: loadingEvents } = useCollection<Event>(eventsQuery);
 
-  const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
+  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, []);
   const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery);
 
   const handleJoinEvent = (eventName: string) => {
@@ -162,7 +162,7 @@ export default function EventsPage() {
                     <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
                       <div className='flex items-center gap-2'>
                         <Calendar className='size-4' />
-                        <span>{new Date(event.date).toLocaleDateString()}</span>
+                        <span>{event.date.toDate().toLocaleDateString()}</span>
                       </div>
                       <div className='flex items-center gap-2'>
                         <MapPin className='size-4' />

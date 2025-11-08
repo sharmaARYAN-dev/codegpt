@@ -10,8 +10,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useRouter } from 'next/navigation';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
-import { useAuth, useFirestore, useUser } from '@/firebase';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase';
+import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
@@ -27,9 +28,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const router = useRouter();
-  const auth = useAuth();
-  const firestore = useFirestore();
-  const { user, loading } = useUser();
+  const { user, loading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -47,8 +46,6 @@ export default function RegisterPage() {
   }, [user, loading, router]);
 
   const onSubmit: SubmitHandler<RegisterFormValues> = async (data) => {
-    if (!auth || !firestore) return;
-
     setIsSubmitting(true);
     const promise = async () => {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
@@ -58,25 +55,23 @@ export default function RegisterPage() {
         displayName: data.displayName,
       });
       
-      const userRef = doc(firestore, 'users', authUser.uid);
-      const newUserProfile: StudentProfile = {
-        id: authUser.uid,
+      const userRef = doc(db, 'users', authUser.uid);
+      const newUserProfile: Omit<StudentProfile, 'id' | 'createdAt' | 'updatedAt'> = {
         displayName: data.displayName,
         email: data.email,
-        photoURL: '',
+        photoURL: authUser.photoURL || "",
         skills: [],
         interests: [],
-        reputation: [],
-        socialLinks: {
-            github: '',
-            linkedin: '',
-            whatsapp: '',
-            instagram: '',
-            reddit: '',
-        }
+        bio: "",
+        links: { github: "", linkedin: "", portfolio: "" },
+        reputation: 0,
       };
       
-      await setDoc(userRef, newUserProfile);
+      await setDoc(userRef, {
+          ...newUserProfile,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+      });
       return authUser;
     }
 

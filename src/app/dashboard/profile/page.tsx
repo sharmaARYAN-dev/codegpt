@@ -1,19 +1,19 @@
 'use client';
 
-import { useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
+import { useAuth } from '@/context/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Award, ShieldCheck, Star, Github, Linkedin, Loader2, FileCode2, Instagram } from 'lucide-react';
+import { Award, ShieldCheck, Star, Github, Linkedin, Loader2, FileCode2 } from 'lucide-react';
 import type { StudentProfile, Project } from '@/lib/types';
 import { useMemo, useState } from 'react';
 import { EditProfileDialog } from '@/components/edit-profile-dialog';
 import { collection, doc, query, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
-import { RedditIcon, WhatsAppIcon } from '@/components/icons';
 import { useCollection } from '@/firebase/firestore/use-collection';
+import { db } from '@/lib/firebase';
 
 const reputationIcons = {
   'Top Contributor': Award,
@@ -57,17 +57,16 @@ function ProfileSkeleton() {
 }
 
 export default function ProfilePage() {
-  const { user, loading: loadingUser } = useUser();
-  const firestore = useFirestore();
+  const { user, loading: loadingUser } = useAuth();
   const [isEditProfileOpen, setEditProfileOpen] = useState(false);
 
-  const userProfileRef = useMemoFirebase(() => (firestore && user) ? doc(firestore, 'users', user.uid) : null, [firestore, user]);
-  const { data: userProfile, loading: loadingProfile } = useDoc<StudentProfile>(userProfileRef);
+  // user is StudentProfile, no need to fetch again
+  const userProfile = user;
 
-  const userProjectsQuery = useMemoFirebase(() => (firestore && user) ? query(collection(firestore, 'projects'), where('ownerId', '==', user.uid)) : null, [firestore, user]);
+  const userProjectsQuery = useMemo(() => (db && user) ? query(collection(db, 'projects'), where('ownerId', '==', user.id)) : null, [user]);
   const { data: userProjects, loading: loadingProjects } = useCollection<Project>(userProjectsQuery);
 
-  if (loadingUser || loadingProfile || !userProfile) {
+  if (loadingUser || !userProfile) {
     return <ProfileSkeleton />;
   }
 
@@ -100,29 +99,14 @@ export default function ProfilePage() {
               </h1>
               <p className="text-sm sm:text-base text-muted-foreground truncate">{userProfile.email}</p>
                 <div className="flex items-center gap-1 sm:gap-3 mt-2 -ml-2">
-                    {userProfile.socialLinks?.github && (
+                    {userProfile.links?.github && (
                         <Button variant="ghost" size="icon" asChild>
-                            <a href={userProfile.socialLinks.github} target="_blank" rel="noopener noreferrer"><Github className="h-5 w-5 text-muted-foreground" /></a>
+                            <a href={userProfile.links.github} target="_blank" rel="noopener noreferrer"><Github className="h-5 w-5 text-muted-foreground" /></a>
                         </Button>
                     )}
-                    {userProfile.socialLinks?.linkedin && (
+                    {userProfile.links?.linkedin && (
                         <Button variant="ghost" size="icon" asChild>
-                            <a href={userProfile.socialLinks.linkedin} target="_blank" rel="noopener noreferrer"><Linkedin className="h-5 w-5 text-muted-foreground" /></a>
-                        </Button>
-                    )}
-                    {userProfile.socialLinks?.instagram && (
-                        <Button variant="ghost" size="icon" asChild>
-                            <a href={userProfile.socialLinks.instagram} target="_blank" rel="noopener noreferrer"><Instagram className="h-5 w-5 text-muted-foreground" /></a>
-                        </Button>
-                    )}
-                    {userProfile.socialLinks?.reddit && (
-                        <Button variant="ghost" size="icon" asChild>
-                            <a href={userProfile.socialLinks.reddit} target="_blank" rel="noopener noreferrer"><RedditIcon className="h-5 w-5 text-muted-foreground" /></a>
-                        </Button>
-                    )}
-                    {userProfile.socialLinks?.whatsapp && (
-                        <Button variant="ghost" size="icon" asChild>
-                            <a href={`https://wa.me/${userProfile.socialLinks.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer"><WhatsAppIcon className="h-5 w-5 text-muted-foreground" /></a>
+                            <a href={userProfile.links.linkedin} target="_blank" rel="noopener noreferrer"><Linkedin className="h-5 w-5 text-muted-foreground" /></a>
                         </Button>
                     )}
                 </div>
@@ -140,7 +124,7 @@ export default function ProfilePage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground leading-relaxed">
-                    {userProfile.aboutMe || 'No bio added yet. Click "Edit Profile" to tell everyone about yourself!'}
+                    {userProfile.bio || 'No bio added yet. Click "Edit Profile" to tell everyone about yourself!'}
                   </p>
                 </CardContent>
               </Card>
@@ -198,22 +182,6 @@ export default function ProfilePage() {
                       {interest}
                     </Badge>
                   )) : <p className="text-sm text-muted-foreground">No interests added yet.</p>}
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="font-headline text-xl">Reputation</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {userProfile.reputation?.length > 0 ? userProfile.reputation?.map((rep) => {
-                    const Icon = reputationIcons[rep.label as keyof typeof reputationIcons] || Star;
-                    return (
-                      <div key={rep.label} className="flex items-center gap-3 text-sm">
-                        <Icon className={`h-5 w-5 ${rep.color}`} />
-                        <span className='font-medium'>{rep.label}</span>
-                      </div>
-                    )
-                  }) : <p className="text-sm text-muted-foreground">No reputation earned yet.</p>}
                 </CardContent>
               </Card>
             </div>

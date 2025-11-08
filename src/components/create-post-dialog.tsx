@@ -22,7 +22,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useFirestore, useUser } from '@/firebase';
+import { db } from '@/lib/firebase';
+import { useAuth } from '@/context/AuthContext';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { toast } from 'sonner';
 import { useState } from 'react';
@@ -46,8 +47,7 @@ interface CreatePostDialogProps {
 const communities = ['General', 'AI/ML', 'WebDev', 'Design', 'Startups', 'Gaming'];
 
 export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) {
-  const firestore = useFirestore();
-  const { user } = useUser();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof postSchema>>({
@@ -60,7 +60,7 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
   });
 
   const onSubmit = async (values: z.infer<typeof postSchema>) => {
-    if (!firestore || !user) {
+    if (!db || !user) {
       toast.error('Error', {
         description: 'You must be logged in to create a post.',
       });
@@ -70,13 +70,14 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
     setIsSubmitting(true);
     const postData = {
         ...values,
-        authorId: user.uid,
-        upvotes: 0,
+        authorId: user.id,
+        upvotes: [],
         comments: 0,
         createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       };
     
-    const collectionRef = collection(firestore, 'forumPosts');
+    const collectionRef = collection(db, 'forumPosts');
     const promise = () => addDoc(collectionRef, postData).catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
             path: collectionRef.path,
@@ -84,7 +85,7 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
             requestResourceData: postData,
         });
         errorEmitter.emit('permission-error', permissionError);
-        throw serverError; // re-throw to be caught by outer try-catch
+        throw serverError;
     });
 
     toast.promise(promise, {
@@ -98,7 +99,6 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
         error: (err) => {
             setIsSubmitting(false);
             if (err instanceof FirestorePermissionError) {
-                // The global listener will show the toast
                 return 'Permission denied.'; 
             }
             return 'There was a problem starting your discussion.';

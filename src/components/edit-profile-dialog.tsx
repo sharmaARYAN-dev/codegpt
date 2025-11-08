@@ -22,8 +22,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useFirestore, useUser } from '@/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { useAuth } from '@/context/AuthContext';
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
@@ -34,14 +35,12 @@ import { Textarea } from './ui/textarea';
 
 const profileSchema = z.object({
   displayName: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  aboutMe: z.string().max(200, 'About me should not exceed 200 characters.').optional().or(z.literal('')),
+  bio: z.string().max(200, 'About me should not exceed 200 characters.').optional().or(z.literal('')),
   skills: z.string().min(1, 'Please add at least one skill.'),
   interests: z.string().min(1, 'Please add at least one interest.'),
   github: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
   linkedin: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
-  whatsapp: z.string().optional().or(z.literal('')),
-  instagram: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
-  reddit: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
+  portfolio: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
 });
 
 interface EditProfileDialogProps {
@@ -51,22 +50,19 @@ interface EditProfileDialogProps {
 }
 
 export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditProfileDialogProps) {
-  const firestore = useFirestore();
-  const { user } = useUser();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       displayName: userProfile?.displayName || '',
-      aboutMe: userProfile?.aboutMe || '',
+      bio: userProfile?.bio || '',
       skills: userProfile?.skills?.join(', ') || '',
       interests: userProfile?.interests?.join(', ') || '',
-      github: userProfile?.socialLinks?.github || '',
-      linkedin: userProfile?.socialLinks?.linkedin || '',
-      whatsapp: userProfile?.socialLinks?.whatsapp || '',
-      instagram: userProfile?.socialLinks?.instagram || '',
-      reddit: userProfile?.socialLinks?.reddit || '',
+      github: userProfile?.links?.github || '',
+      linkedin: userProfile?.links?.linkedin || '',
+      portfolio: userProfile?.links?.portfolio || '',
     },
   });
 
@@ -74,20 +70,18 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
     if (userProfile && isOpen) {
       form.reset({
         displayName: userProfile.displayName || '',
-        aboutMe: userProfile.aboutMe || '',
+        bio: userProfile.bio || '',
         skills: userProfile.skills?.join(', ') || '',
         interests: userProfile.interests?.join(', ') || '',
-        github: userProfile.socialLinks?.github || '',
-        linkedin: userProfile.socialLinks?.linkedin || '',
-        whatsapp: userProfile.socialLinks?.whatsapp || '',
-        instagram: userProfile.socialLinks?.instagram || '',
-        reddit: userProfile.socialLinks?.reddit || '',
+        github: userProfile.links?.github || '',
+        linkedin: userProfile.links?.linkedin || '',
+        portfolio: userProfile.links?.portfolio || '',
       });
     }
   }, [userProfile, form, isOpen]);
 
   const onSubmit = async (values: z.infer<typeof profileSchema>) => {
-    if (!firestore || !user) {
+    if (!db || !user) {
       toast.error('Error', {
         description: 'You must be logged in to edit your profile.',
       });
@@ -97,19 +91,18 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
     setIsSubmitting(true);
     const updatedData = {
       displayName: values.displayName,
-      aboutMe: values.aboutMe,
-      skills: values.skills.split(',').map(s => s.trim()).filter(Boolean),
-      interests: values.interests.split(',').map(i => i.trim()).filter(Boolean),
-      socialLinks: {
+      bio: values.bio,
+      skills: values.skills.split(',').map(s => s.trim().toLowerCase()).filter(Boolean),
+      interests: values.interests.split(',').map(i => i.trim().toLowerCase()).filter(Boolean),
+      links: {
         github: values.github || '',
         linkedin: values.linkedin || '',
-        whatsapp: values.whatsapp || '',
-        instagram: values.instagram || '',
-        reddit: values.reddit || '',
-      }
+        portfolio: values.portfolio || '',
+      },
+      updatedAt: serverTimestamp(),
     };
     
-    const userRef = doc(firestore, 'users', user.uid);
+    const userRef = doc(db, 'users', user.id);
     const promise = () => updateDoc(userRef, updatedData).catch(async (serverError) => {
          const permissionError = new FirestorePermissionError({
           path: userRef.path,
@@ -129,7 +122,6 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
         },
         error: (err) => {
             setIsSubmitting(false);
-            // The global listener will show the permission error toast
             return 'There was a problem updating your profile.';
         }
     })
@@ -161,10 +153,10 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
             />
             <FormField
               control={form.control}
-              name="aboutMe"
+              name="bio"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>About Me</FormLabel>
+                  <FormLabel>Bio</FormLabel>
                   <FormControl>
                     <Textarea placeholder="Tell us a little bit about yourself..." className="resize-none" {...field} />
                   </FormControl>
@@ -226,42 +218,15 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="instagram"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Instagram URL</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://instagram.com/username" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
              <FormField
               control={form.control}
-              name="reddit"
+              name="portfolio"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Reddit URL</FormLabel>
+                  <FormLabel>Portfolio URL</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://reddit.com/user/username" {...field} />
+                    <Input placeholder="https://your.portfolio" {...field} />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-             <FormField
-              control={form.control}
-              name="whatsapp"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>WhatsApp Number</FormLabel>
-                  <FormControl>
-                    <Input placeholder="+1234567890" {...field} />
-                  </FormControl>
-                   <FormDescription>Include your country code.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

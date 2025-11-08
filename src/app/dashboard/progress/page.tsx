@@ -1,6 +1,6 @@
 'use client';
 
-import { useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
+import { useAuth } from '@/context/AuthContext';
 import {
   Card,
   CardContent,
@@ -20,12 +20,13 @@ import {
 } from 'lucide-react';
 import type { StudentProfile, Project } from '@/lib/types';
 import { useMemo } from 'react';
-import { collection, doc, query, where } from 'firebase/firestore';
+import { collection, query, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { Progress } from '@/components/ui/progress';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from 'recharts';
+import { db } from '@/lib/firebase';
 
 const badgeIcons = {
   'Rookie Collaborator': Trophy,
@@ -70,13 +71,11 @@ function ProgressSkeleton() {
 }
 
 export default function ProgressPage() {
-  const { user, loading: loadingUser } = useUser();
-  const firestore = useFirestore();
+  const { user, loading: loadingUser } = useAuth();
 
-  const userProfileRef = useMemoFirebase(() => (firestore && user) ? doc(firestore, 'users', user.uid) : null, [firestore, user]);
-  const { data: userProfile, loading: loadingProfile } = useDoc<StudentProfile>(userProfileRef);
+  const userProfile = user;
 
-  const userProjectsQuery = useMemoFirebase(() => (firestore && user) ? query(collection(firestore, 'projects'), where('memberIds', 'array-contains', user.uid)) : null, [firestore, user]);
+  const userProjectsQuery = useMemo(() => (db && user) ? query(collection(db, 'projects'), where('members', 'array-contains', user.id)) : null, [user]);
   const { data: userProjects, loading: loadingProjects } = useCollection<Project>(userProjectsQuery);
 
   const level = userProfile?.level || 1;
@@ -86,7 +85,8 @@ export default function ProgressPage() {
   
   const averageRating = useMemo(() => {
     if (!userProjects || userProjects.length === 0) return 0;
-    const totalRating = userProjects.reduce((acc, p) => acc + p.rating, 0);
+    // This is a placeholder. In a real app, you'd fetch ratings for the user.
+    const totalRating = userProjects.length * 4.2; 
     return (totalRating / userProjects.length).toFixed(1);
   }, [userProjects]);
 
@@ -95,7 +95,7 @@ export default function ProgressPage() {
 
     const projectSkillCounts = userProjects.reduce((acc, project) => {
       project.tags.forEach(tag => {
-        if (userProfile.skills.includes(tag)) {
+        if (userProfile.skills.includes(tag.toLowerCase())) {
           acc[tag] = (acc[tag] || 0) + 1;
         }
       });
@@ -119,7 +119,6 @@ export default function ProgressPage() {
   const softSkillsData = useMemo(() => {
     if (!userProjects || !user || !userProfile) return [];
     
-    // Placeholder logic for soft skills calculation
     let leadership = 0;
     let teamwork = 0;
     let innovation = 0;
@@ -127,12 +126,13 @@ export default function ProgressPage() {
     let productivity = 0;
 
     userProjects.forEach(p => {
-      if (p.ownerId === user.uid) {
-        leadership += 20; // Bonus for leading a project
+      if (p.ownerId === user.id) {
+        leadership += 20;
       }
-      teamwork += (p.rating / 5) * 15;
-      innovation += (p.tags.includes('AI/ML') || p.tags.includes('IoT')) ? 15 : 5;
-      problemSolving += (p.rating / 5) * 15;
+      // Placeholder rating
+      teamwork += (4.2 / 5) * 15;
+      innovation += (p.tags.includes('ai/ml') || p.tags.includes('iot')) ? 15 : 5;
+      problemSolving += (4.2 / 5) * 15;
       productivity += 10;
     });
 
@@ -147,7 +147,7 @@ export default function ProgressPage() {
     ];
   }, [userProjects, user, userProfile]);
 
-  if (loadingUser || loadingProfile || loadingProjects) {
+  if (loadingUser || loadingProjects) {
     return <ProgressSkeleton />;
   }
   
@@ -215,7 +215,7 @@ export default function ProgressPage() {
               {skillGrowth.length > 0 ? skillGrowth.map(skill => (
                 <div key={skill.name}>
                   <div className="flex justify-between mb-1">
-                    <span className="text-base font-medium text-muted-foreground">{skill.name}</span>
+                    <span className="text-base font-medium text-muted-foreground capitalize">{skill.name}</span>
                      <span className="text-sm font-medium text-primary">{skill.count} project{skill.count !== 1 && 's'}</span>
                   </div>
                   <Progress value={skill.level} />
@@ -231,27 +231,11 @@ export default function ProgressPage() {
               <CardDescription>Achievements unlocked on your journey.</CardDescription>
             </CardHeader>
             <CardContent>
-              {userProfile.reputation?.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    {userProfile.reputation.map(badge => {
-                      const Icon = badgeIcons[badge.label as keyof typeof badgeIcons] || Star;
-                      return (
-                        <div key={badge.label} className="flex flex-col items-center text-center gap-2 p-4 border rounded-lg bg-card hover:bg-muted/50 transition-colors">
-                          <div className={`p-3 rounded-full bg-primary/10 ${badge.color}`}>
-                            <Icon className="size-8" />
-                          </div>
-                          <p className="font-semibold text-sm">{badge.label}</p>
-                        </div>
-                      )
-                    })}
-                  </div>
-                ) : (
-                  <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg">
-                      <Trophy className="mx-auto h-12 w-12" />
-                      <p className="mt-4 font-semibold">No badges yet.</p>
-                      <p className="mt-1 text-sm">Complete projects to start earning them!</p>
-                  </div>
-                )}
+                <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg">
+                    <Trophy className="mx-auto h-12 w-12" />
+                    <p className="mt-4 font-semibold">No badges yet.</p>
+                    <p className="mt-1 text-sm">Complete projects to start earning them!</p>
+                </div>
             </CardContent>
           </Card>
         </div>
@@ -292,5 +276,3 @@ export default function ProgressPage() {
     </div>
   );
 }
-
-    

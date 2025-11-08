@@ -23,7 +23,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useFirestore, useUser } from '@/firebase';
+import { db } from '@/lib/firebase';
+import { useAuth } from '@/context/AuthContext';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { toast } from 'sonner';
 import { useState } from 'react';
@@ -47,8 +48,7 @@ const popularTags = ["React", "Next.js", "AI/ML", "Python", "TypeScript", "Node.
 
 
 export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogProps) {
-  const firestore = useFirestore();
-  const { user } = useUser();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof projectSchema>>({
@@ -61,7 +61,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
   });
 
   const onSubmit = async (values: z.infer<typeof projectSchema>) => {
-    if (!firestore || !user) {
+    if (!db || !user) {
       toast.error('Error', {
         description: 'You must be logged in to create a project.',
       });
@@ -70,20 +70,19 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
 
     setIsSubmitting(true);
     const projectData = {
-      ...values,
-      ownerId: user.uid,
-      memberIds: [],
-      rating: Math.floor(Math.random() * 5) + 1,
-      forks: 0,
-      comments: 0,
+      name: values.name,
+      description: values.description,
+      tags: values.tags.map(t => t.toLowerCase()),
+      skillsNeeded: values.tags.map(t => t.toLowerCase()),
+      ownerId: user.id,
+      members: [{ uid: user.id, role: 'owner', joinedAt: serverTimestamp() }],
       createdAt: serverTimestamp(),
-      links: {
-        repo: '',
-        demo: ''
-      }
+      updatedAt: serverTimestamp(),
+      repo: '',
+      demoLink: '',
     };
 
-    const collectionRef = collection(firestore, 'projects');
+    const collectionRef = collection(db, 'projects');
     const promise = () => addDoc(collectionRef, projectData).catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
           path: collectionRef.path,
@@ -105,7 +104,6 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
         error: (err) => {
             setIsSubmitting(false);
             if (err instanceof FirestorePermissionError) {
-                // The global listener will show the toast
                 return 'Permission denied.'; 
             }
             return 'There was a problem creating your project.';

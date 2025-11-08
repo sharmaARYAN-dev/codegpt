@@ -1,7 +1,7 @@
 'use client';
 
 import { AppShell } from '@/components/app-shell';
-import { useUser } from '@/firebase';
+import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -10,7 +10,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading, error } = useUser();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -23,14 +23,6 @@ export default function DashboardLayout({
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <p>Loading...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center">
-        <p>Something went wrong. Please try again later.</p>
       </div>
     );
   }
