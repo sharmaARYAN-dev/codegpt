@@ -80,25 +80,19 @@ export default function DashboardPage() {
               return (
                 <Card key={project.id} className="transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/10">
                   <CardContent className="p-4 sm:p-6">
-                    <div className='flex flex-col sm:flex-row items-start gap-4'>
-                        <Avatar className='mt-1 hidden sm:block'>
+                    <div className='flex items-start gap-4'>
+                        <Avatar className='hidden sm:block size-11 mt-1'>
                             {owner?.photoURL && <AvatarImage src={owner.photoURL} alt={owner.displayName} />}
                             <AvatarFallback>{owner?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
                         </Avatar>
                         <div className='flex-1'>
-                            <div className='flex items-start justify-between gap-2'>
-                                <div>
-                                    <div className='flex items-center gap-2 sm:hidden mb-3'>
-                                        <Avatar className='w-8 h-8'>
-                                            {owner?.photoURL && <AvatarImage src={owner.photoURL} alt={owner.displayName} />}
-                                            <AvatarFallback className='text-xs'>{owner?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
-                                        </Avatar>
-                                        <div>
-                                            <p className="font-semibold text-sm">{owner?.displayName}</p>
-                                            <p className="text-xs text-muted-foreground">Project Owner</p>
-                                        </div>
-                                    </div>
-                                    <div className='hidden sm:block'>
+                            <div className='flex items-center justify-between gap-2'>
+                                <div className='flex items-center gap-3'>
+                                    <Avatar className='sm:hidden size-10'>
+                                        {owner?.photoURL && <AvatarImage src={owner.photoURL} alt={owner.displayName} />}
+                                        <AvatarFallback className='text-sm'>{owner?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
                                         <p className="font-semibold">{owner?.displayName}</p>
                                         <p className="text-sm text-muted-foreground">Project Owner</p>
                                     </div>
