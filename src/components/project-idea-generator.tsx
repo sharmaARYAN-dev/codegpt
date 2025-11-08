@@ -1,13 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
   generatePersonalizedProjectIdeas,
   type GeneratePersonalizedProjectIdeasOutput,
-  type GeneratePersonalizedProjectIdeasInput,
 } from '@/ai/flows/generate-personalized-project-ideas';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,7 +27,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Bot, Loader2, BookOpen, Share2 } from 'lucide-react';
+import { Bot, Loader2, BookOpen, Share2, History, Trash2, CheckSquare, Square, Download, X } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -44,6 +43,8 @@ import { db } from '@/lib/firebase';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import type { GeneratePersonalizedProjectIdeasInput } from '@/ai/flows/generate-personalized-project-ideas';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
 
 const formSchema = z.object({
   skills: z.string().min(2, {
@@ -70,7 +71,43 @@ interface ShareIdeaDialogProps {
   onPost: () => void;
 }
 
+interface GenerationHistoryItem {
+    id: string;
+    timestamp: number;
+    input: GeneratePersonalizedProjectIdeasInput;
+    output: GeneratePersonalizedProjectIdeasOutput;
+}
+
 const communities = ['General', 'AI/ML', 'WebDev', 'Design', 'Startups', 'Gaming'];
+
+function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void] {
+    const [storedValue, setStoredValue] = useState<T>(() => {
+        if (typeof window === 'undefined') {
+            return initialValue;
+        }
+        try {
+            const item = window.localStorage.getItem(key);
+            return item ? JSON.parse(item) : initialValue;
+        } catch (error) {
+            console.error(error);
+            return initialValue;
+        }
+    });
+
+    const setValue = (value: T | ((val: T) => T)) => {
+        try {
+            const valueToStore = value instanceof Function ? value(storedValue) : value;
+            setStoredValue(valueToStore);
+            if (typeof window !== 'undefined') {
+                window.localStorage.setItem(key, JSON.stringify(valueToStore));
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+    return [storedValue, setValue];
+}
+
 
 function ShareIdeaDialog({ idea, isOpen, onOpenChange, onPost }: ShareIdeaDialogProps) {
   const { user } = useAuth();
@@ -85,7 +122,7 @@ function ShareIdeaDialog({ idea, isOpen, onOpenChange, onPost }: ShareIdeaDialog
     },
   });
 
-   useState(() => {
+   useEffect(() => {
     if (idea) {
       form.reset({
         title: idea.title,
@@ -93,7 +130,7 @@ function ShareIdeaDialog({ idea, isOpen, onOpenChange, onPost }: ShareIdeaDialog
         community: 'General',
       });
     }
-  });
+   }, [idea, form]);
 
   const handleSubmit = async (values: z.infer<typeof shareFormSchema>) => {
     if (!db || !user || !idea) return;
@@ -209,6 +246,10 @@ export function ProjectIdeaGenerator() {
   const [isLoading, setIsLoading] = useState(false);
   const [ideaToShare, setIdeaToShare] = useState<ProjectIdea | null>(null);
   const [postedIdeas, setPostedIdeas] = useState<string[]>([]);
+  const [history, setHistory] = useLocalStorage<GenerationHistoryItem[]>('idea-generation-history', []);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -219,27 +260,35 @@ export function ProjectIdeaGenerator() {
     },
   });
 
+  const saveToHistory = useCallback((input: GeneratePersonalizedProjectIdeasInput, output: GeneratePersonalizedProjectIdeasOutput) => {
+      const newHistoryItem: GenerationHistoryItem = {
+          id: `gen_${Date.now()}`,
+          timestamp: Date.now(),
+          input,
+          output,
+      };
+      setHistory(prev => [newHistoryItem, ...prev.slice(0, 9)]); // Keep last 10
+  }, [setHistory]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     setIdeas(null);
     
-    const promise = async () => {
-        const skillsArray = values.skills.split(',').map(s => s.trim());
-        const interestsArray = values.interests.split(',').map(s => s.trim());
+    const inputData = {
+        skills: values.skills.split(',').map(s => s.trim()),
+        interests: values.interests.split(',').map(s => s.trim()),
+        projectPreferences: values.projectPreferences || 'Any type of project is fine.',
+    };
 
-        return await generatePersonalizedProjectIdeas({
-            skills: skillsArray,
-            interests: interestsArray,
-            projectPreferences: values.projectPreferences || 'Any type of project is fine.',
-        });
-    }
-
+    const promise = generatePersonalizedProjectIdeas(inputData);
+    
     toast.promise(promise, {
         loading: 'The AI is thinking...',
         success: (result) => {
             setIdeas(result);
             setIsLoading(false);
             setPostedIdeas([]);
+            saveToHistory(inputData, result);
             return 'Here are your personalized project ideas!';
         },
         error: (error) => {
@@ -260,8 +309,56 @@ export function ProjectIdeaGenerator() {
     }
   };
 
+  const loadFromHistory = (item: GenerationHistoryItem) => {
+    form.reset({
+        skills: item.input.skills.join(', '),
+        interests: item.input.interests.join(', '),
+        projectPreferences: item.input.projectPreferences,
+    });
+    setIdeas(item.output);
+    toast.success('Loaded previous generation from history.');
+  };
+
+  const deleteFromHistory = (id: string) => {
+    setHistory(prev => prev.filter(item => item.id !== id));
+    toast.success('Removed item from history.');
+    setItemToDelete(null);
+  };
+  
+  const clearHistory = () => {
+    setHistory([]);
+    toast.success('Cleared generation history.');
+    setShowClearConfirm(false);
+  }
+
   return (
     <>
+      <AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>This will permanently delete this item from your generation history.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => itemToDelete && deleteFromHistory(itemToDelete)}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+       <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Clear entire history?</AlertDialogTitle>
+                <AlertDialogDescription>This will permanently delete all of your generated ideas history. This action cannot be undone.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={clearHistory}>Clear History</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <ShareIdeaDialog
         idea={ideaToShare}
         isOpen={!!ideaToShare}
@@ -388,6 +485,50 @@ export function ProjectIdeaGenerator() {
               </Accordion>
           </div>
         )}
+
+        <div className="space-y-4">
+          <div className='flex justify-between items-center'>
+            <h2 className="font-headline text-3xl font-bold flex items-center gap-2">
+              <History className='size-7' />
+              Generation History
+            </h2>
+            {history.length > 0 && (
+              <Button variant="destructive" size="sm" onClick={() => setShowClearConfirm(true)}>
+                <Trash2 className="mr-2 h-4 w-4" /> Clear History
+              </Button>
+            )}
+          </div>
+            {history.length > 0 ? (
+                <Card>
+                    <CardContent className="p-4 space-y-2">
+                        {history.map(item => (
+                            <div key={item.id} className="group flex items-center justify-between p-3 rounded-md hover:bg-muted/50">
+                                <div>
+                                    <p className="font-semibold">{new Date(item.timestamp).toLocaleString()}</p>
+                                    <p className="text-sm text-muted-foreground truncate">
+                                        Skills: {item.input.skills.join(', ')} &middot; Interests: {item.input.interests.join(', ')}
+                                    </p>
+                                </div>
+                                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Button size="sm" variant="outline" onClick={() => loadFromHistory(item)}>
+                                        <Download className="mr-2 h-4 w-4" /> Load
+                                    </Button>
+                                    <Button size="sm" variant="destructive" onClick={() => setItemToDelete(item.id)}>
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </div>
+                        ))}
+                    </CardContent>
+                </Card>
+            ) : (
+                <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg">
+                    <History className="mx-auto h-12 w-12" />
+                    <p className="mt-4 font-semibold">No history yet.</p>
+                    <p className="mt-1 text-sm">Your generated ideas will appear here.</p>
+                </div>
+            )}
+        </div>
       </div>
     </>
   );
