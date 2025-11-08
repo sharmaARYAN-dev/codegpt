@@ -7,21 +7,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Award, ShieldCheck, Star } from 'lucide-react';
 import type { StudentProfile } from '@/lib/types';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { doc } from 'firebase/firestore';
+import { EditProfileDialog } from '@/components/edit-profile-dialog';
 
 const reputationIcons = {
-    'Top Contributor': Award,
-    'Bug Squasher': ShieldCheck,
-    'Rising Star': Star,
-    'Hackathon Winner': Award,
-    'Code Guardian': ShieldCheck,
-    'Community Helper': Star
-  } as const;
+  'Top Contributor': Award,
+  'Bug Squasher': ShieldCheck,
+  'Rising Star': Star,
+  'Hackathon Winner': Award,
+  'Code Guardian': ShieldCheck,
+  'Community Helper': Star
+} as const;
 
 export default function ProfilePage() {
   const { user } = useUser();
   const firestore = useFirestore();
+  const [isEditProfileOpen, setEditProfileOpen] = useState(false);
 
   const userProfileRef = useMemo(() => {
     if (!firestore || !user) return null;
@@ -31,10 +33,20 @@ export default function ProfilePage() {
   const { data: userProfile } = useDoc<StudentProfile>(userProfileRef);
 
   if (!user || !userProfile) {
-    return null;
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <p>Loading profile...</p>
+      </div>
+    );
   }
 
   return (
+    <>
+    <EditProfileDialog 
+        isOpen={isEditProfileOpen} 
+        onOpenChange={setEditProfileOpen} 
+        userProfile={userProfile} 
+    />
     <div className="container mx-auto max-w-4xl py-2">
       <Card className="overflow-hidden">
         <div className="h-32 bg-gradient-to-r from-primary to-accent" />
@@ -57,7 +69,7 @@ export default function ProfilePage() {
               </h1>
               <p className="text-muted-foreground">{userProfile.email}</p>
             </div>
-            <Button variant="outline" className="ml-auto">
+            <Button variant="outline" className="ml-auto" onClick={() => setEditProfileOpen(true)}>
               Edit Profile
             </Button>
           </div>
@@ -110,19 +122,20 @@ export default function ProfilePage() {
                   ))}
                 </CardContent>
               </Card>
-               <Card>
+              <Card>
                 <CardHeader>
                   <CardTitle>Reputation</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {userProfile.reputation?.map((rep) => {
-                     const Icon = reputationIcons[rep.label as keyof typeof reputationIcons] || Star;
-                     return (
-                     <div key={rep.label} className="flex items-center gap-2 text-sm">
+                    const Icon = reputationIcons[rep.label as keyof typeof reputationIcons] || Star;
+                    return (
+                      <div key={rep.label} className="flex items-center gap-2 text-sm">
                         <Icon className={`h-5 w-5 ${rep.color}`} />
                         <span>{rep.label}</span>
-                    </div>
-                  )})}
+                      </div>
+                    )
+                  })}
                 </CardContent>
               </Card>
             </div>
@@ -130,5 +143,6 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 }

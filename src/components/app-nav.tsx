@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -36,35 +35,41 @@ export function AppNav() {
     }
   };
 
+  const isNavItemActive = (itemHref: string) => {
+    if (itemHref === '/dashboard') {
+      return pathname === itemHref;
+    }
+    return pathname.startsWith(itemHref);
+  }
+
   return (
     <>
-      <SidebarHeader className="border-b border-sidebar-border hidden md:flex">
-      </SidebarHeader>
+      <SidebarHeader className="hidden border-b border-sidebar-border md:flex" />
       <SidebarContent className="p-2">
         <SidebarMenu>
-            {navItems.map((item) => (
+          {navItems.map((item) => (
             <SidebarMenuItem key={item.href}>
-                <Link href={item.href}>
+              <Link href={item.href}>
                 <SidebarMenuButton
-                    isActive={pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/dashboard')}
-                    tooltip={item.label}
+                  isActive={isNavItemActive(item.href)}
+                  tooltip={item.label}
                 >
-                    <item.icon />
-                    <span>{item.label}</span>
+                  <item.icon />
+                  <span>{item.label}</span>
                 </SidebarMenuButton>
-                </Link>
+              </Link>
             </SidebarMenuItem>
-            ))}
+          ))}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter className="p-2 border-t border-sidebar-border mt-auto">
+      <SidebarFooter className="mt-auto border-t border-sidebar-border p-2">
         <SidebarMenu>
-            <SidebarMenuItem>
-                 <SidebarMenuButton tooltip="Logout" onClick={handleLogout}>
-                    <LogOut/>
-                    <span>Logout</span>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip="Logout" onClick={handleLogout}>
+              <LogOut />
+              <span>Logout</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
     </>
