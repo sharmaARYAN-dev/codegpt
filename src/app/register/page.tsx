@@ -16,8 +16,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { StudentProfile } from '@/lib/types';
-import { FirestorePermissionError } from '@/firebase/errors';
-import { errorEmitter } from '@/firebase/error-emitter';
 
 const registerSchema = z.object({
   displayName: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -75,14 +73,7 @@ export default function RegisterPage() {
         reputation: [],
       };
       
-      setDoc(userRef, newUserProfile).catch(async () => {
-          const permissionError = new FirestorePermissionError({
-            path: userRef.path,
-            operation: 'create',
-            requestResourceData: newUserProfile,
-          });
-          errorEmitter.emit('permission-error', permissionError);
-      });
+      await setDoc(userRef, newUserProfile);
 
       toast({
         title: 'Account Created!',

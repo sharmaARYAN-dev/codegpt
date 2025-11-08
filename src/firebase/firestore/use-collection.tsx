@@ -8,13 +8,8 @@ export function useCollection<T>(query: Query<DocumentData> | null) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Re-create a stable query object only when the path or constraints change
-  const stableQuery = useMemoFirebase(() => {
-    return query;
-  }, [query ? JSON.stringify(query) : '']);
-
   useEffect(() => {
-    if (!stableQuery) {
+    if (!query) {
       setLoading(false);
       return;
     };
@@ -22,7 +17,7 @@ export function useCollection<T>(query: Query<DocumentData> | null) {
     setLoading(true);
 
     const unsubscribe = onSnapshot(
-      stableQuery,
+      query,
       (snapshot) => {
         const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as T));
         setData(docs);
@@ -36,12 +31,7 @@ export function useCollection<T>(query: Query<DocumentData> | null) {
     );
 
     return () => unsubscribe();
-  }, [stableQuery]); // Use the memoized query
+  }, [query]);
 
   return { data, loading, error };
-}
-
-export function useMemoFirebase<T>(factory: () => T, deps: React.DependencyList): T {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  return useMemo(factory, deps);
 }

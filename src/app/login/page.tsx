@@ -10,8 +10,6 @@ import { useAuth, useUser } from '@/firebase';
 import { useEffect } from 'react';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
-import { FirestorePermissionError } from '@/firebase/errors';
-import { errorEmitter } from '@/firebase/error-emitter';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -51,17 +49,9 @@ export default function LoginPage() {
             interests: [],
             reputation: [],
           };
-
-          setDoc(userRef, userData, { merge: true }).catch(async () => {
-              const permissionError = new FirestorePermissionError({
-                path: userRef.path,
-                operation: 'create',
-                requestResourceData: userData,
-              });
-              errorEmitter.emit('permission-error', permissionError);
-          });
+          
+          await setDoc(userRef, userData, { merge: true });
       }
-
 
       router.push('/dashboard');
     } catch (error: any) {
