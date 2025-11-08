@@ -22,7 +22,7 @@ import { db } from '@/lib/firebase';
 function ProjectsSkeleton() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-      {Array.from({ length: 5 }).map((_, i) => (
+      {Array.from({ length: 6 }).map((_, i) => (
         <Card key={i} className="flex h-full flex-col">
           <CardHeader>
             <div className='flex items-center gap-4'>
@@ -55,12 +55,6 @@ function ProjectsSkeleton() {
           </div>
         </Card>
       ))}
-      <Card
-        className="flex min-h-[350px] flex-col items-center justify-center border-2 border-dashed bg-card/50">
-          <Skeleton className="size-20 rounded-full mb-4" />
-          <Skeleton className="h-6 w-40 mb-2" />
-          <Skeleton className="h-4 w-32" />
-      </Card>
     </div>
   )
 }
@@ -81,7 +75,6 @@ export default function ProjectsPage() {
 
     const tagCounts = allProjects.reduce((acc, project) => {
         project.tags.forEach(tag => {
-            const formattedTag = tag.toLowerCase().replace(/\s+/g, '-');
             const displayName = tag.split(/[\s-]+/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
             if (!acc[displayName]) {
                 acc[displayName] = 0;
@@ -174,15 +167,6 @@ export default function ProjectsPage() {
             </Card>
         );
       })}
-      <Card
-        onClick={() => setCreateProjectOpen(true)}
-        className="flex min-h-[350px] cursor-pointer flex-col items-center justify-center border-2 border-dashed bg-card/50 transition-colors duration-300 hover:border-primary/70 hover:bg-primary/5 hover:text-primary hover:shadow-xl hover:shadow-primary/10">
-        <div className='flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 mb-4'>
-          <Plus className="h-10 w-10 text-primary" />
-        </div>
-        <p className="text-lg font-semibold">Create New Project</p>
-        <p className="text-sm text-muted-foreground">Bring your idea to life</p>
-      </Card>
     </div>
   );
 
@@ -200,29 +184,35 @@ export default function ProjectsPage() {
           </Button>
         </div>
 
-        <div className="flex flex-col sm:flex-row flex-wrap items-center gap-6">
-           <div className="relative w-full sm:w-auto sm:max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search projects..." className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {Object.entries(filters).map(([filter, count]) => {
-                if (filter !== 'All' && count === 0) return null;
-                return (
-                    <Button 
-                        key={filter} 
-                        size="sm" 
-                        variant={activeFilter === filter ? 'default' : 'outline'} 
-                        onClick={() => setActiveFilter(filter)}
-                        className="flex items-center gap-2"
-                    >
-                        <span>{filter}</span>
-                        <Badge variant={activeFilter === filter ? 'secondary' : 'default'} className="rounded-full">{count}</Badge>
-                    </Button>
-                )
-            })}
-          </div>
-        </div>
+        <Card>
+            <CardContent className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="relative md:col-span-3">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input placeholder="Search by name, description, or tag..." className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                    </div>
+                </div>
+            </CardContent>
+            <div className="p-4 pt-0">
+                <div className="flex flex-wrap items-center gap-2">
+                    {Object.entries(filters).map(([filter, count]) => {
+                        if (filter !== 'All' && count === 0) return null;
+                        return (
+                            <Button 
+                                key={filter} 
+                                size="sm" 
+                                variant={activeFilter === filter ? 'default' : 'outline'} 
+                                onClick={() => setActiveFilter(filter)}
+                                className="flex items-center gap-2"
+                            >
+                                <span>{filter}</span>
+                                <Badge variant={activeFilter === filter ? 'secondary' : 'default'} className="rounded-full">{count}</Badge>
+                            </Button>
+                        )
+                    })}
+                </div>
+            </div>
+        </Card>
 
         {loadingProjects || loadingUsers ? <ProjectsSkeleton /> : renderProjectGrid(filteredProjects || [])}
       </div>

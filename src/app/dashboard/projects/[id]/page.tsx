@@ -9,10 +9,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, Users, GitFork, ExternalLink, Loader2, Share2, Send } from 'lucide-react';
+import { MessageSquare, Users, GitFork, ExternalLink, Loader2, Share2, Send, Bookmark } from 'lucide-react';
 import Link from 'next/link';
 import { useDoc } from '@/firebase/firestore/use-doc';
-import { collection, doc, query, orderBy, addDoc, serverTimestamp, updateDoc, increment, arrayUnion } from 'firebase/firestore';
+import { collection, doc, query, orderBy, addDoc, serverTimestamp, updateDoc, increment, arrayUnion, arrayRemove } from 'firebase/firestore';
 import type { Project, StudentProfile, ChatMessage } from '@/lib/types';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -122,6 +122,25 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
       description: `Your application for the ${role} role has been submitted.`,
     });
   }
+  
+  const handleBookmark = () => {
+    if (!db || !user || !project) {
+        toast.error("You must be logged in to bookmark a project.");
+        return;
+    }
+    const userDocRef = doc(db, 'users', user.id);
+    const isBookmarked = user.bookmarks?.includes(project.id);
+
+    const promise = updateDoc(userDocRef, {
+        bookmarks: isBookmarked ? arrayRemove(project.id) : arrayUnion(project.id)
+    });
+
+    toast.promise(promise, {
+        loading: isBookmarked ? "Removing bookmark..." : "Adding bookmark...",
+        success: isBookmarked ? "Project removed from your bookmarks." : "Project bookmarked successfully!",
+        error: "Failed to update bookmarks."
+    });
+  }
 
   const handleShareProject = async () => {
     if (!project) return;
@@ -182,6 +201,7 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
   }
 
   const isOwner = user && project && user.id === project.ownerId;
+  const isBookmarked = user && project && user.bookmarks?.includes(project.id);
   const isLoading = loadingProject || loadingUsers || loadingChat;
 
   if (isLoading) {
@@ -215,20 +235,22 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
             </div>
             <div className='flex w-full sm:w-auto items-center gap-2'>
               {isOwner ? (
-                  <>
-                    <Button size="lg" variant="outline" className="w-full sm:w-auto" onClick={handleShareProject}>
-                        <Share2 className="mr-2 h-4 w-4" />
-                        Share
-                    </Button>
                     <Button size="lg" className="w-full sm:w-auto" disabled>
                         Manage Project
                     </Button>
-                  </>
               ) : (
                 <Button size="lg" className="w-full sm:w-auto shrink-0" onClick={handleJoinTeam}>
                     Request to Join
                 </Button>
               )}
+                <Button size="lg" variant="outline" className="w-full sm:w-auto" onClick={handleBookmark}>
+                    <Bookmark className={`mr-2 h-4 w-4 ${isBookmarked ? 'fill-current' : ''}`} />
+                    {isBookmarked ? 'Bookmarked' : 'Bookmark'}
+                </Button>
+                <Button size="lg" variant="outline" className="w-full sm:w-auto" onClick={handleShareProject}>
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Share
+                </Button>
             </div>
         </div>
       

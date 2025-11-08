@@ -13,13 +13,13 @@ export interface StudentProfile {
   reputation?: number;
   createdAt: Timestamp;
   updatedAt: Timestamp;
-  college?: string;
-  branch?: string;
-  year?: string;
+  college: string;
+  branch: string;
+  year: string;
   rollNumber?: string;
   address?: string;
-  xp?: number;
-  level?: number;
+  xp: number;
+  level: number;
   softSkills?: {
     leadership: number;
     innovation: number;
@@ -30,6 +30,7 @@ export interface StudentProfile {
   connections?: string[];
   incomingRequests?: string[];
   sentRequests?: string[];
+  bookmarks?: string[];
 };
 
 export interface Project {

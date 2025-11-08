@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Award, ShieldCheck, Star, Github, Linkedin, Loader2, FileCode2, Trash2 } from 'lucide-react';
+import { Award, ShieldCheck, Star, Github, Linkedin, Loader2, FileCode2, Trash2, Bookmark } from 'lucide-react';
 import type { StudentProfile, Project } from '@/lib/types';
 import { useMemo, useState } from 'react';
 import { EditProfileDialog } from '@/components/edit-profile-dialog';
@@ -66,11 +66,14 @@ export default function ProfilePage() {
   const [isEditProfileOpen, setEditProfileOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<{ id: string, name: string } | null>(null);
 
-  // user is StudentProfile, no need to fetch again
   const userProfile = user;
 
   const userProjectsQuery = useMemo(() => (db && user) ? query(collection(db, 'projects'), where('ownerId', '==', user.id)) : null, [user, db]);
   const { data: userProjects, loading: loadingProjects } = useCollection<Project>(userProjectsQuery, 'projects');
+
+  const bookmarkedProjectsQuery = useMemo(() => (db && user && user.bookmarks && user.bookmarks.length > 0) ? query(collection(db, 'projects'), where('id', 'in', user.bookmarks)) : null, [user, db]);
+  const { data: bookmarkedProjects, loading: loadingBookmarks } = useCollection<Project>(bookmarkedProjectsQuery, 'projects_bookmarks');
+
 
   const handleDeleteProject = (project: { id: string, name: string }) => {
     setProjectToDelete(project);
@@ -187,10 +190,40 @@ export default function ProfilePage() {
                                 </Link>
                                 <div className='opacity-0 group-hover:opacity-100 transition-opacity'>
                                     <ItemOptionsMenu 
-                                        onEdit={() => { /* TODO: Implement Edit Project */ toast.info("Edit not implemented yet.")}} 
+                                        onEdit={() => { toast.info("Edit not implemented yet.")}} 
                                         onDelete={() => handleDeleteProject({id: project.id, name: project.name})}
                                     />
                                 </div>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  }
+                </CardContent>
+              </Card>
+               <Card>
+                <CardHeader>
+                  <CardTitle className="font-headline text-xl">Bookmarked Projects</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loadingBookmarks ? <Loader2 className="animate-spin" /> : 
+                    !bookmarkedProjects || bookmarkedProjects.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
+                        <Bookmark className="mx-auto h-12 w-12" />
+                        <p className="mt-4 font-semibold">No bookmarked projects.</p>
+                        <p className="mt-1 text-sm">Explore projects and bookmark your favorites!</p>
+                         <Button asChild variant="secondary" className="mt-4">
+                           <Link href="/dashboard/projects">Explore Projects</Link>
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className='space-y-4'>
+                        {bookmarkedProjects.map(project => (
+                            <div key={project.id} className="group flex items-center justify-between p-3 border rounded-md hover:bg-muted/50 hover:border-primary/30 transition-colors">
+                                <Link href={`/dashboard/projects/${project.id}`} className="flex-1">
+                                    <h3 className="font-semibold">{project.name}</h3>
+                                    <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
+                                </Link>
                           </div>
                         ))}
                       </div>
