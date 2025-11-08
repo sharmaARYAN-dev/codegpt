@@ -128,7 +128,7 @@ export default function RegisterPage() {
         <Card className="w-full max-w-lg bg-card/60 backdrop-blur-lg border-border/30">
           <CardHeader className="text-center">
             <CardTitle className="font-headline text-3xl font-bold">Create an Account</CardTitle>
-            <CardDescription>Join uniVerse and start your journey.</CardDescription>
+            <CardDescription>Join UniVerse and start your journey.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

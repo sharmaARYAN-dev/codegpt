@@ -45,7 +45,7 @@ export default function LandingPage() {
             <div className="flex h-20 items-center justify-between">
                 <Link href="/" className="flex items-center gap-2">
                     <Orbit className="h-7 w-7 text-primary" />
-                    <span className="text-xl font-bold tracking-tighter">uniVerse</span>
+                    <span className="text-xl font-bold tracking-tighter">UniVerse</span>
                 </Link>
                 <nav className="hidden items-center gap-8 text-sm font-medium md:flex">
                     <Link href="#features" className="text-foreground/70 transition-colors hover:text-foreground">Features</Link>
@@ -109,7 +109,7 @@ export default function LandingPage() {
 
         <section id="features" className="container mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
              <div className="text-center mb-16">
-                <h2 className="font-headline text-4xl font-bold">Why uniVerse?</h2>
+                <h2 className="font-headline text-4xl font-bold">Why UniVerse?</h2>
                 <p className="text-muted-foreground mt-3 max-w-2xl mx-auto text-lg">Discover a universe of opportunities. Connect with peers, build amazing projects, and launch your career in tech.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -129,7 +129,7 @@ export default function LandingPage() {
       </main>
       <footer className='border-t border-border/20 py-8 mt-16'>
           <div className='container mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-muted-foreground'>
-              <p>&copy; {new Date().getFullYear()} uniVerse. All rights reserved.</p>
+              <p>&copy; {new Date().getFullYear()} UniVerse. All rights reserved.</p>
           </div>
       </footer>
     </div>
