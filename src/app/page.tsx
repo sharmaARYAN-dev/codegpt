@@ -84,8 +84,8 @@ export default function LandingPage() {
                     </div>
                 </div>
 
-                 <div className="hidden md:flex items-center justify-center -mr-12">
-                     <Image src="https://www.genkit.dev/images/gemini-orbit.svg" alt="Orbit graphic" width={500} height={500} className="opacity-70 animate-[spin_30s_linear_infinite]" data-ai-hint="orbit space"/>
+                 <div className="hidden md:flex items-center justify-center">
+                     <Image src="https://img.freepik.com/free-vector/classic-solar-system-scheme-with-flat-design_23-2147921420.jpg?w=740" alt="Solar System" width={500} height={500} className="rounded-full" data-ai-hint="solar system"/>
                 </div>
 
             </div>
