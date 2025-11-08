@@ -127,7 +127,7 @@ export default function LoginPage() {
               Continue with Google
             </Button>
             <div className="mt-6 text-center text-sm text-muted-foreground">
-              Don&apos;t have an account?{' '}
+              Don't have an account?{' '}
               <Link href="/register" className="underline hover:text-primary font-medium">
                 Create Account
               </Link>
