@@ -10,7 +10,7 @@ import { useState } from 'react';
 import { CreatePostDialog } from '@/components/create-post-dialog';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import type { ForumPost, Project, StudentProfile } from '@/lib/types';
-import { collection, query, orderBy, doc, updateDoc, increment } from 'firebase/firestore';
+import { collection, query, orderBy, doc, updateDoc, increment, limit, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
