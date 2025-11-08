@@ -27,12 +27,16 @@ import { FirestorePermissionError } from '@/firebase/errors';
 
 function EventsSkeleton() {
   return (
-    <div className='grid grid-cols-1 gap-8 md:grid-cols-4 items-start'>
-      <aside className='space-y-6 md:col-span-1 md:sticky top-24'>
-        <Card><CardHeader><Skeleton className="h-6 w-3/4"/></CardHeader><CardContent className="space-y-4"><Skeleton className="h-10 w-full" /><Skeleton className="h-24 w-full" /></CardContent></Card>
-      </aside>
-      <main className='grid grid-cols-1 gap-6 md:col-span-3 lg:grid-cols-2'>
-        {Array.from({ length: 4 }).map((_, i) => (
+    <div className='space-y-8'>
+        <div className='flex items-center gap-4'>
+            <Skeleton className="h-10 w-24" />
+            <Skeleton className="h-10 w-24" />
+            <Skeleton className="h-10 w-24" />
+            <div className='flex-grow'></div>
+            <Skeleton className="h-10 w-48" />
+        </div>
+      <main className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
+        {Array.from({ length: 6 }).map((_, i) => (
           <Card key={i} className="flex flex-col">
             <CardHeader><div className="flex items-center gap-4"><Skeleton className="size-12 rounded-full" /><div className="space-y-2"><Skeleton className="h-5 w-32" /><Skeleton className="h-4 w-20" /></div></div><Skeleton className="h-6 w-3/4 mt-4" /></CardHeader>
             <CardContent className="flex-grow space-y-4"><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-1/2" /><Skeleton className="h-4 w-1/3" /></CardContent>
@@ -123,11 +127,11 @@ export default function EventsPage() {
     }
 
     return query(baseColl, ...queries, orderBy('date'));
-  }, [activeType, locationType, db]);
+  }, [activeType, locationType]);
 
   const { data: allEvents, loading: loadingEvents } = useCollection<Event>(eventsQuery, 'events');
 
-  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, [db]);
+  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, []);
   const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery, 'users');
   
   const handleCreateOrEdit = (event?: Event) => {
@@ -194,53 +198,39 @@ export default function EventsPage() {
             Create Event
           </Button>
         </div>
-
-        <div className='grid grid-cols-1 gap-8 md:grid-cols-4 items-start'>
-          <aside className='space-y-6 md:col-span-1 md:sticky top-24'>
-            <Card>
-              <CardHeader>
-                <CardTitle className='font-headline text-lg'>Filters</CardTitle>
-              </CardHeader>
-              <CardContent className='space-y-4'>
-                <div>
-                  <h3 className="text-sm font-semibold mb-2 text-muted-foreground">Location</h3>
-                  <ToggleGroup type="single" value={locationType} onValueChange={(v) => setLocationType(v || 'all')} className="grid w-full grid-cols-2 gap-2">
-                    <ToggleGroupItem value="online" aria-label="Toggle online" className='gap-2'>
-                      <Home className='size-4' /> Online
-                    </ToggleGroupItem>
-                    <ToggleGroupItem value="campus" aria-label="Toggle campus-based" className='gap-2'>
-                      <Building className='size-4' /> Campus
-                    </ToggleGroupItem>
-                  </ToggleGroup>
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold mb-2 text-muted-foreground">Event Type</h3>
-                  <div className='flex flex-col gap-2'>
-                    {eventTypes.map(type => (
-                      <Button 
+        
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+            <div className='flex items-center gap-2'>
+                 {eventTypes.map(type => (
+                    <Button 
                         key={type}
-                        variant={activeType === type ? 'secondary' : 'ghost'} 
-                        className='justify-start'
+                        variant={activeType === type ? 'default' : 'outline'} 
+                        size="sm"
                         onClick={() => setActiveType(type)}
-                      >
+                    >
                         {type === 'All' ? 'All Types' : type}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </aside>
-
-          <main className='grid grid-cols-1 gap-6 md:col-span-3 lg:grid-cols-2'>
-            {isLoading ? Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-96" />) :
-                allEvents?.map((event) => (
-                  <EventCard key={event.id} event={event} users={users} onJoin={handleJoinEvent} onEdit={handleCreateOrEdit} onDelete={handleDelete} />
-                ))
-            }
-          </main>
+                    </Button>
+                ))}
+            </div>
+            <div className='flex-grow'></div>
+            <ToggleGroup type="single" value={locationType} onValueChange={(v) => setLocationType(v || 'all')} className="w-full sm:w-auto">
+                <ToggleGroupItem value="online" aria-label="Toggle online" className='gap-2 flex-1 sm:flex-initial'>
+                    <Home className='size-4' /> Online
+                </ToggleGroupItem>
+                <ToggleGroupItem value="campus" aria-label="Toggle campus-based" className='gap-2 flex-1 sm:flex-initial'>
+                    <Building className='size-4' /> Campus
+                </ToggleGroupItem>
+            </ToggleGroup>
         </div>
 
+
+        {isLoading ? <EventsSkeleton /> : (
+            <main className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
+                {allEvents?.map((event) => (
+                  <EventCard key={event.id} event={event} users={users} onJoin={handleJoinEvent} onEdit={handleCreateOrEdit} onDelete={handleDelete} />
+                ))}
+            </main>
+        )}
       </div>
     </>
   );
