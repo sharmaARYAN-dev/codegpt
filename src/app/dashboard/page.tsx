@@ -7,150 +7,101 @@ import {
 } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { projects, students, events, forumPosts } from '@/lib/data';
+import { projects, students, events } from '@/lib/data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, MessageSquare, PlusCircle } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
+import { Star } from 'lucide-react';
 
 export default function DashboardPage() {
+  const feedProjects = projects.slice(0, 3);
+  
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      <Card className="lg:col-span-2_  row-span-2 flex flex-col transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-        <CardHeader>
-          <CardTitle>My Projects</CardTitle>
-          <CardDescription>An overview of your current projects.</CardDescription>
-        </CardHeader>
-        <CardContent className="flex-1 flex flex-col">
-          <div className="space-y-6">
-            {projects.map((project) => {
-              const projectIcon = PlaceHolderImages.find((p) => p.id === project.icon);
-              return (
-                <div key={project.id}>
-                    <Link href="/dashboard/project" className="block p-4 -m-4 rounded-lg hover:bg-muted/50">
-                        <div className="flex items-center gap-4">
-                            {projectIcon && (
-                            <Image
-                                src={projectIcon.imageUrl}
-                                alt={project.name}
-                                width={40}
-                                height={40}
-                                className="rounded-md"
-                                data-ai-hint={projectIcon.imageHint}
-                            />
-                            )}
-                            <div className="flex-1">
-                            <p className="font-semibold">{project.name}</p>
-                            <p className="text-sm text-muted-foreground">{project.description}</p>
-                            </div>
-                            <div className="flex -space-x-2">
-                                {project.team.map(member => {
-                                    const memberAvatar = PlaceHolderImages.find(p => p.id === member.avatar);
-                                    return (
-                                        <Avatar key={member.id} className="size-6 border-2 border-card">
-                                            {memberAvatar && <AvatarImage src={memberAvatar.imageUrl} alt={member.name} />}
-                                            <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                                        </Avatar>
-                                    )
-                                })}
-                            </div>
-                        </div>
-                        <div className="mt-4 flex items-center gap-4">
-                            <Progress value={project.progress} className="h-2" />
-                            <span className="text-sm font-medium text-muted-foreground">{project.progress}%</span>
-                        </div>
-                    </Link>
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-        <CardHeader>
-          <CardTitle>Suggested Teammates</CardTitle>
-          <CardDescription>Connect with students matching your skills.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {students.slice(0, 3).map((student) => {
-              const studentAvatar = PlaceHolderImages.find((p) => p.id === student.avatar);
-              return (
-                <div key={student.id} className="flex items-center gap-4">
-                  <Avatar>
-                    {studentAvatar && <AvatarImage src={studentAvatar.imageUrl} alt={student.name} data-ai-hint="person portrait" />}
-                    <AvatarFallback>{student.name.substring(0, 2)}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <p className="font-semibold">{student.name}</p>
-                    <p className="text-sm text-muted-foreground truncate">{student.skills.join(', ')}</p>
-                  </div>
-                  <Button variant="outline" size="sm">Connect</Button>
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-        <CardHeader>
-          <CardTitle>Upcoming Events</CardTitle>
-          <CardDescription>Don&apos;t miss these opportunities.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {events.slice(0, 2).map(event => (
-              <div key={event.id} className="flex items-start gap-4">
-                <div className="text-center w-12 flex-shrink-0">
-                  <p className="font-bold text-lg">{new Date(event.date).getDate()}</p>
-                  <p className="text-xs text-muted-foreground uppercase">{new Date(event.date).toLocaleString('default', { month: 'short' })}</p>
-                </div>
-                <div>
-                  <p className="font-semibold">{event.title}</p>
-                  <p className="text-sm text-muted-foreground">{event.location}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        <div className='lg:col-span-2 space-y-6'>
+            <h1 className="font-headline text-2xl font-bold tracking-tight">Hey Alex, here&apos;s what&apos;s happening</h1>
+            <div className='space-y-4'>
+            {feedProjects.map((project) => {
+              const owner = project.team[0];
+              const ownerAvatar = PlaceHolderImages.find((p) => p.id === owner.avatar);
 
-      <Card className="lg:col-span-3 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-        <CardHeader>
-          <CardTitle>Community Activity</CardTitle>
-          <CardDescription>Latest discussions from the forums.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-4">
-            {forumPosts.map((post) => (
-              <li key={post.id}>
-                <Link href="/dashboard/forums" className="flex items-center gap-4 group p-2 -m-2 rounded-lg hover:bg-muted/50">
-                  <div className="flex-1">
-                    <p className="font-semibold group-hover:text-primary">{post.title}</p>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                        <span>{post.community}</span>
-                        <span>&middot;</span>
-                        <span>by {post.author}</span>
-                        <span>&middot;</span>
-                        <div className='flex items-center gap-1'>
-                            <MessageSquare className='size-3'/>
-                            {post.comments} comments
+              return (
+                <Card key={project.id} className="transition-shadow duration-300 hover:shadow-lg">
+                  <CardContent className="p-6">
+                    <div className='flex items-start gap-4'>
+                        <Avatar>
+                            {ownerAvatar && <AvatarImage src={ownerAvatar.imageUrl} alt={owner.name} />}
+                            <AvatarFallback>{owner.name.substring(0, 2)}</AvatarFallback>
+                        </Avatar>
+                        <div className='flex-1'>
+                            <p className="font-semibold">{owner.name}</p>
+                            <p className="text-sm text-muted-foreground">College 1st Year</p>
+                            <h2 className="font-headline text-lg font-semibold mt-2">{project.name}</h2>
+                            <p className="text-sm text-muted-foreground mt-1">{project.description}</p>
+                            <div className="flex flex-wrap gap-2 mt-3">
+                                {project.tags?.map((tag) => (
+                                    <Badge key={tag} variant={tag === 'AI/ML' ? 'default' : 'secondary'}>{tag}</Badge>
+                                ))}
+                            </div>
+                            <div className='flex items-center justify-between mt-4'>
+                                <div className='flex items-center gap-2 text-muted-foreground'>
+                                    <Star className='size-4'/>
+                                    <Star className='size-4'/>
+                                    <Star className='size-4'/>
+                                    <Star className='size-4 text-primary'/>
+                                    <Star className='size-4 text-primary'/>
+                                </div>
+                                <Button asChild size="sm">
+                                    <Link href="/dashboard/project">Join</Link>
+                                </Button>
+                            </div>
                         </div>
                     </div>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
-
+                  </CardContent>
+                </Card>
+              );
+            })}
+            </div>
+        </div>
+        <div className="space-y-6 lg:sticky top-20">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline text-lg">Recommended Events</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                     {events.slice(0, 2).map(event => (
+                        <div key={event.id} className="p-3 rounded-lg border bg-card hover:bg-muted/50">
+                            <p className="font-semibold">{event.title}</p>
+                            <p className="text-sm text-muted-foreground">{event.date}, {event.location}</p>
+                            <Button variant="outline" size="sm" className="mt-2 w-full">Learn More</Button>
+                        </div>
+                    ))}
+                </CardContent>
+            </Card>
+             <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline text-lg">Suggested Teammates</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                     {students.slice(0, 2).map((student) => {
+                        const studentAvatar = PlaceHolderImages.find((p) => p.id === student.avatar);
+                        return (
+                            <div key={student.id} className="flex items-center gap-4">
+                            <Avatar>
+                                {studentAvatar && <AvatarImage src={studentAvatar.imageUrl} alt={student.name} data-ai-hint="person portrait" />}
+                                <AvatarFallback>{student.name.substring(0, 2)}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                                <p className="font-semibold">{student.name}</p>
+                                <p className="text-sm text-muted-foreground truncate">{student.skills.slice(0,2).join(', ')}</p>
+                            </div>
+                            <Button variant="default" size="sm">Connect</Button>
+                            </div>
+                        );
+                        })}
+                </CardContent>
+            </Card>
+        </div>
     </div>
   );
 }

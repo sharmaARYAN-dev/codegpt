@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Settings, LogOut, Bell, Search, Orbit } from 'lucide-react';
+import { Settings, LogOut, Bell, Search, Orbit, Menu } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Link from 'next/link';
@@ -21,15 +21,6 @@ export function Header() {
   const pathname = usePathname();
   const userAvatar = PlaceHolderImages.find((p) => p.id === 'avatar-1');
 
-  const getPageTitle = () => {
-    if (pathname === '/dashboard') return 'Dashboard';
-    if (pathname.startsWith('/dashboard/teammates')) return 'Find Teammates';
-    if (pathname.startsWith('/dashboard/ideas')) return 'AI Project Ideas';
-    if (pathname.startsWith('/dashboard/events')) return 'Discover Projects';
-    if (pathname.startsWith('/dashboard/forums')) return 'Forums';
-    if (pathname.startsWith('/dashboard/project')) return 'Project Workspace';
-    return 'UniVerse';
-  };
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-card px-4 md:px-6">
@@ -38,7 +29,7 @@ export function Header() {
             <Orbit className="h-7 w-7 text-primary" />
         </Link>
         <SidebarTrigger asChild className="md:hidden">
-          <Button variant="ghost" size="icon"><Settings className="h-4 w-4" /></Button>
+          <Button variant="ghost" size="icon"><Menu className="h-5 w-5" /></Button>
         </SidebarTrigger>
       </div>
 
