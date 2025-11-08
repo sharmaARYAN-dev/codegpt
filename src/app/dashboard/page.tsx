@@ -80,38 +80,32 @@ export default function DashboardPage() {
               return (
                 <Card key={project.id} className="transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/10">
                   <CardContent className="p-4 sm:p-6">
-                    <div className='flex items-start gap-4'>
-                        <div className='flex-1'>
-                            <div className='flex items-center justify-between gap-2'>
-                                <div className='flex items-center gap-3'>
-                                    <Avatar className='sm:hidden size-10'>
-                                        {owner?.photoURL && <AvatarImage src={owner.photoURL} alt={owner.displayName} />}
-                                        <AvatarFallback className='text-sm'>{owner?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
-                                    </Avatar>
-                                     <div className="flex items-center gap-4">
-                                        <Avatar className="hidden sm:block size-11">
-                                            {owner?.photoURL && <AvatarImage src={owner.photoURL} alt={owner.displayName} />}
-                                            <AvatarFallback>{owner?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
-                                        </Avatar>
-                                        <div>
-                                            <p className="font-semibold">{owner?.displayName}</p>
-                                            <p className="text-sm text-muted-foreground">Project Owner</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <Button asChild size="sm" variant="secondary">
-                                    <Link href={`/dashboard/projects/${project.id}`}>View Project</Link>
-                                </Button>
-                            </div>
-                            <h2 className="font-headline text-xl font-semibold mt-4">{project.name}</h2>
-                            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{project.description}</p>
-                            <div className="flex flex-wrap gap-2 mt-4">
-                                {project.tags?.map((tag) => (
-                                    <Badge key={tag} variant={tag === 'AI/ML' ? 'default' : 'secondary'}>{tag}</Badge>
-                                ))}
-                            </div>
+                    <div className='flex items-center justify-between gap-4 mb-4'>
+                      <div className="flex items-center gap-4">
+                        <Avatar className="size-11">
+                            {owner?.photoURL && <AvatarImage src={owner.photoURL} alt={owner.displayName} />}
+                            <AvatarFallback>{owner?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                            <p className="font-semibold">{owner?.displayName}</p>
+                            <p className="text-sm text-muted-foreground">Project Owner</p>
                         </div>
+                      </div>
+                      <Button asChild size="sm" variant="secondary" className='shrink-0'>
+                        <Link href={`/dashboard/projects/${project.id}`}>View Project</Link>
+                      </Button>
                     </div>
+
+                    <div className='pl-0 sm:pl-[60px]'>
+                      <h2 className="font-headline text-xl font-semibold">{project.name}</h2>
+                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{project.description}</p>
+                      <div className="flex flex-wrap gap-2 mt-4">
+                          {project.tags?.map((tag) => (
+                              <Badge key={tag} variant={tag === 'AI/ML' ? 'default' : 'secondary'}>{tag}</Badge>
+                          ))}
+                      </div>
+                    </div>
+
                   </CardContent>
                 </Card>
               );
