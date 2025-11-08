@@ -27,6 +27,15 @@ function initializeFirebase() {
   return { app, auth, firestore };
 }
 
+// A custom hook for memoizing Firebase queries.
+// This is important to prevent infinite loops in components that use useCollection or useDoc.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const useMemoFirebase = <T>(factory: () => T, deps: any[]): T | null => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return useMemo(factory, deps);
+};
+
+
 export {
   initializeFirebase,
   FirebaseProvider,
@@ -38,4 +47,5 @@ export {
   useFirebaseApp,
   useFirestore,
   useAuth,
+  useMemoFirebase,
 };

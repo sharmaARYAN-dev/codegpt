@@ -51,7 +51,7 @@ export default function LandingPage() {
                         <Link href="/login">Login</Link>
                     </Button>
                     <Button asChild>
-                        <Link href="/login">Get Started</Link>
+                        <Link href="/register">Get Started</Link>
                     </Button>
                 </div>
                 <Button variant="ghost" size="icon" className="md:hidden">
@@ -76,7 +76,7 @@ export default function LandingPage() {
                     </p>
                     <div className="mt-8 flex flex-wrap gap-4">
                         <Button asChild size="lg" className="font-bold text-lg px-8 py-6">
-                            <Link href="/login">Get Started for Free</Link>
+                            <Link href="/register">Get Started for Free</Link>
                         </Button>
                          <Button asChild size="lg" variant="outline" className="font-bold text-lg px-8 py-6">
                             <Link href="/dashboard/projects">Explore Projects</Link>
@@ -85,7 +85,7 @@ export default function LandingPage() {
                 </div>
 
                  <div className="hidden md:flex items-center justify-center">
-                     <Image src="https://www.genkit.dev/images/gemini-orbit.svg" alt="Orbit graphic" width={500} height={500} className="opacity-70" />
+                     <Image src="https://www.genkit.dev/images/gemini-orbit.svg" alt="Orbit graphic" width={500} height={500} className="opacity-70" data-ai-hint="orbit space"/>
                 </div>
 
             </div>
