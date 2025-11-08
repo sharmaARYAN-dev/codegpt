@@ -16,6 +16,8 @@ export interface StudentProfile {
   college?: string;
   branch?: string;
   year?: string;
+  rollNumber?: string;
+  address?: string;
   xp?: number;
   level?: number;
   softSkills?: {

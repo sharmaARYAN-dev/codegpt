@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { StudentProfile } from '@/lib/types';
+import { Textarea } from '@/components/ui/textarea';
 
 const registerSchema = z.object({
   displayName: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -24,6 +25,8 @@ const registerSchema = z.object({
   college: z.string().min(3, { message: 'College name is required.' }),
   branch: z.string().min(2, { message: 'Branch/Major is required.' }),
   year: z.string().min(1, { message: 'Year of study is required.' }),
+  rollNumber: z.string().optional().or(z.literal('')),
+  address: z.string().optional().or(z.literal('')),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
 });
 
@@ -66,6 +69,8 @@ export default function RegisterPage() {
         college: data.college,
         branch: data.branch,
         year: data.year,
+        rollNumber: data.rollNumber || "",
+        address: data.address || "",
         skills: [],
         interests: [],
         bio: "",
@@ -120,49 +125,65 @@ export default function RegisterPage() {
 
 
       <main className="flex-1 relative z-10 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-card/60 backdrop-blur-lg border-border/30">
+        <Card className="w-full max-w-lg bg-card/60 backdrop-blur-lg border-border/30">
           <CardHeader className="text-center">
             <CardTitle className="font-headline text-3xl font-bold">Create an Account</CardTitle>
             <CardDescription>Join uniVerse and start your journey.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="displayName">Full Name</Label>
+                  <Input
+                    id="displayName"
+                    type="text"
+                    placeholder="Your Name"
+                    {...register('displayName')}
+                    className="bg-background"
+                    aria-invalid={errors.displayName ? 'true' : 'false'}
+                  />
+                  {errors.displayName && <p className="text-sm text-destructive">{errors.displayName.message}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    {...register('email')}
+                    className="bg-background"
+                    aria-invalid={errors.email ? 'true' : 'false'}
+                  />
+                  {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
+                </div>
+              </div>
+              
               <div className="space-y-2">
-                <Label htmlFor="displayName">Full Name</Label>
+                <Label htmlFor="college">College/University</Label>
                 <Input
-                  id="displayName"
+                  id="college"
                   type="text"
-                  placeholder="Your Name"
-                  {...register('displayName')}
+                  placeholder="e.g. Stanford University"
+                  {...register('college')}
                   className="bg-background"
-                  aria-invalid={errors.displayName ? 'true' : 'false'}
+                  aria-invalid={errors.college ? 'true' : 'false'}
                 />
-                {errors.displayName && <p className="text-sm text-destructive">{errors.displayName.message}</p>}
+                {errors.college && <p className="text-sm text-destructive">{errors.college.message}</p>}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  {...register('email')}
-                  className="bg-background"
-                  aria-invalid={errors.email ? 'true' : 'false'}
-                />
-                {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
-              </div>
+
                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                  <div className="space-y-2">
-                  <Label htmlFor="college">College/University</Label>
+                  <Label htmlFor="branch">Branch / Major</Label>
                   <Input
-                    id="college"
+                    id="branch"
                     type="text"
-                    placeholder="e.g. Stanford University"
-                    {...register('college')}
+                    placeholder="e.g. Computer Science"
+                    {...register('branch')}
                     className="bg-background"
-                    aria-invalid={errors.college ? 'true' : 'false'}
+                    aria-invalid={errors.branch ? 'true' : 'false'}
                   />
-                  {errors.college && <p className="text-sm text-destructive">{errors.college.message}</p>}
+                  {errors.branch && <p className="text-sm text-destructive">{errors.branch.message}</p>}
                 </div>
                  <div className="space-y-2">
                   <Label htmlFor="year">Year</Label>
@@ -177,18 +198,32 @@ export default function RegisterPage() {
                   {errors.year && <p className="text-sm text-destructive">{errors.year.message}</p>}
                 </div>
               </div>
-               <div className="space-y-2">
-                <Label htmlFor="branch">Branch / Major</Label>
+
+              <div className="space-y-2">
+                <Label htmlFor="rollNumber">Roll Number (Optional)</Label>
                 <Input
-                  id="branch"
+                  id="rollNumber"
                   type="text"
-                  placeholder="e.g. Computer Science"
-                  {...register('branch')}
+                  placeholder="Your university roll number"
+                  {...register('rollNumber')}
                   className="bg-background"
-                  aria-invalid={errors.branch ? 'true' : 'false'}
+                  aria-invalid={errors.rollNumber ? 'true' : 'false'}
                 />
-                {errors.branch && <p className="text-sm text-destructive">{errors.branch.message}</p>}
+                {errors.rollNumber && <p className="text-sm text-destructive">{errors.rollNumber.message}</p>}
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="address">Address (Optional)</Label>
+                <Textarea
+                  id="address"
+                  placeholder="Your current address"
+                  {...register('address')}
+                  className="bg-background"
+                  aria-invalid={errors.address ? 'true' : 'false'}
+                />
+                {errors.address && <p className="text-sm text-destructive">{errors.address.message}</p>}
+              </div>
+              
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <Input
