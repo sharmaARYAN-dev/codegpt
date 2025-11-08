@@ -176,7 +176,11 @@ export default function ProjectsPage() {
       <div className="space-y-8">
         <div className='flex flex-wrap justify-between items-center gap-4'>
           <div>
-            <h1 className="font-headline text-3xl font-bold tracking-tight">Discover Projects</h1>
+            <h1 className="font-headline text-3xl font-bold tracking-tight">
+              <span className="animate-twinkle bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Discover Projects
+              </span>
+            </h1>
             <p className="mt-1 text-muted-foreground">Find your next big idea or the people to build it with.</p>
           </div>
           <Button onClick={() => setCreateProjectOpen(true)}>
