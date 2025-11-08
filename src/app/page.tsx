@@ -1,8 +1,8 @@
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Orbit, Users, Lightbulb, Trophy, Menu } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { SolarSystem } from '@/components/solar-system';
 
 export default function LandingPage() {
   const features = [
@@ -84,8 +84,8 @@ export default function LandingPage() {
                     </div>
                 </div>
 
-                 <div className="hidden md:flex items-center justify-center">
-                     <Image src="https://img.freepik.com/free-vector/classic-solar-system-scheme-with-flat-design_23-2147921420.jpg?w=740" alt="Solar System" width={500} height={500} className="rounded-full" data-ai-hint="solar system"/>
+                 <div className="hidden md:flex items-center justify-center relative -top-16">
+                     <SolarSystem />
                 </div>
 
             </div>
