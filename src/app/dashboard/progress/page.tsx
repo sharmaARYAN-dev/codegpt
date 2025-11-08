@@ -264,7 +264,7 @@ export default function ProgressPage() {
               <CardContent>
                   <ChartContainer
                       config={chartConfig}
-                      className="mx-auto aspect-square max-h-[350px]"
+                      className="mx-auto aspect-square max-h-[400px]"
                     >
                       <RadarChart data={softSkillsData}>
                         <ChartTooltip
@@ -292,3 +292,5 @@ export default function ProgressPage() {
     </div>
   );
 }
+
+    
