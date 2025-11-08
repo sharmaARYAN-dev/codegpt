@@ -25,11 +25,11 @@ import { collection, doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/fi
 import type { StudentProfile } from '@/lib/types';
 import { useMemo, useState, useCallback } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import Link from 'next/link';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { createNotification } from '@/lib/notification-services';
+import { TeammateProfileDialog } from '@/components/teammate-profile-dialog';
 
 function TeammatesSkeleton() {
   return (
@@ -185,12 +185,50 @@ function ConnectionRequestCard({ request, onAccept, onDecline }: { request: Stud
     )
 }
 
+function TeammateCard({ student, onConnect, buttonState, onCardClick }: { student: StudentProfile, onConnect: () => void, buttonState: 'CONNECT' | 'PENDING' | 'CONNECTED', onCardClick: () => void }) {
+  return (
+    <Card className="flex flex-col text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-primary/20 hover:shadow-lg hover:border-primary/30 group">
+      <CardContent className="p-6 pb-2 flex-1 cursor-pointer" onClick={onCardClick}>
+        <Avatar className="h-28 w-28 border-4 border-muted mx-auto">
+          <AvatarImage src={student.photoURL} alt={student.displayName} />
+          <AvatarFallback className='text-3xl'>{student.displayName.substring(0, 2)}</AvatarFallback>
+        </Avatar>
+        <h3 className="mt-4 font-headline text-xl">{student.displayName}</h3>
+        <p className="text-sm text-muted-foreground">{student.college}</p>
+        <div className="mt-4">
+          <h4 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">Skills</h4>
+          <div className="flex flex-wrap justify-center gap-1.5 mt-2">
+            {student.skills.slice(0, 3).map((skill) => (
+              <Badge key={skill} variant="secondary" className="capitalize">
+                {skill}
+              </Badge>
+            ))}
+            {student.skills.length > 3 && <Badge variant="secondary">...</Badge>}
+          </div>
+        </div>
+      </CardContent>
+      <CardFooter className='p-4 pt-2'>
+        <Button 
+            className="w-full" 
+            disabled={buttonState !== 'CONNECT'}
+            onClick={onConnect}
+        >
+            {buttonState === 'CONNECT' && <><UserPlus className="mr-2 h-4 w-4" /> Connect</>}
+            {buttonState === 'PENDING' && <><Clock className="mr-2 h-4 w-4" /> Pending</>}
+            {buttonState === 'CONNECTED' && <><Check className="mr-2 h-4 w-4" /> Connected</>}
+        </Button>
+      </CardFooter>
+    </Card>
+  )
+}
+
 export default function ConnectionsPage() {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedInterest, setSelectedInterest] = useState('all');
   const [sortBy, setSortBy] = useState('relevance');
   const { sendRequest, acceptRequest, declineRequest } = useConnection(user);
+  const [selectedStudent, setSelectedStudent] = useState<StudentProfile | null>(null);
 
   const usersQuery = useMemo(() => db ? collection(db, 'users') : null, [db]);
   const { data: users, loading } = useCollection<StudentProfile>(usersQuery, 'users');
@@ -213,7 +251,6 @@ export default function ConnectionsPage() {
       );
     }
     
-    // Scoring and Sorting
     const scoredUsers = filteredUsers.map(u => {
         let score = 0;
         if (user) {
@@ -260,136 +297,93 @@ export default function ConnectionsPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="font-headline text-3xl font-bold tracking-tight">Find Connections</h1>
-        <p className="text-muted-foreground mt-1">Browse and connect with talented students across the university.</p>
-      </div>
-
-      <Card>
-        <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative md:col-span-2">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search by name, skill, interest, or college..." className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-                <Select value={selectedInterest} onValueChange={setSelectedInterest}>
-                <SelectTrigger>
-                    <SelectValue placeholder="Filter by interest" />
-                </SelectTrigger>
-                <SelectContent>
-                    {interests.map((interest) => (
-                    <SelectItem key={interest} value={interest} className="capitalize">
-                        {interest === 'all' ? 'All Interests' : interest}
-                    </SelectItem>
-                    ))}
-                </SelectContent>
-                </Select>
-                 <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger>
-                        <SelectValue placeholder="Sort by" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="relevance">Sort by: Relevance</SelectItem>
-                        <SelectItem value="xp">Sort by: Experience</SelectItem>
-                        <SelectItem value="name">Sort by: Name</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {loading ? <TeammatesSkeleton /> :
-      <>
-        {connectionRequests.length > 0 && (
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline text-xl">Connection Requests</CardTitle>
-                    <CardDescription>You have {connectionRequests.length} pending connection request{connectionRequests.length > 1 && 's'}.</CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {connectionRequests.map(req => (
-                        <ConnectionRequestCard 
-                            key={req.id} 
-                            request={req}
-                            onAccept={() => acceptRequest(req)}
-                            onDecline={() => declineRequest(req.id)}
-                        />
-                    ))}
-                </CardContent>
-            </Card>
-        )}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {connections.map((student) => {
-            if (user?.incomingRequests?.includes(student.id)) return null;
-
-            const buttonState = getButtonState(student.id);
-
-            return (
-              <Card key={student.id} className="flex flex-col text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-primary/20 hover:shadow-lg hover:border-primary/30 group">
-                <CardHeader className="flex-1 flex flex-col items-center pt-8">
-                  <Avatar className="h-28 w-28 border-4 border-muted">
-                    <AvatarImage src={student.photoURL} alt={student.displayName} />
-                    <AvatarFallback className='text-3xl'>{student.displayName.substring(0, 2)}</AvatarFallback>
-                  </Avatar>
-                  <CardTitle className="mt-4 font-headline text-xl">{student.displayName}</CardTitle>
-                  <p className="text-sm text-muted-foreground">{student.college}</p>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <div className="space-y-4">
-                      <div>
-                          <h4 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">Skills</h4>
-                          <div className="flex flex-wrap justify-center gap-1.5 mt-2">
-                              {student.skills.slice(0, 3).map((skill) => (
-                              <Badge key={skill} variant="secondary">
-                                  {skill}
-                              </Badge>
-                              ))}
-                          </div>
-                      </div>
-                       <div>
-                          <h4 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">Interests</h4>
-                          <div className="flex flex-wrap justify-center gap-1.5 mt-2">
-                              {student.interests.slice(0, 3).map((interest) => (
-                              <Badge key={interest} variant="outline">
-                                  {interest}
-                              </Badge>
-                              ))}
-                          </div>
-                      </div>
-                  </div>
-                </CardContent>
-                <CardFooter className='p-4 flex-col gap-2'>
-                    <Button 
-                        className="w-full" 
-                        disabled={buttonState !== 'CONNECT'}
-                        onClick={() => sendRequest(student)}
-                    >
-                       {buttonState === 'CONNECT' && <><UserPlus className="mr-2 h-4 w-4" /> Connect</>}
-                       {buttonState === 'PENDING' && <><Clock className="mr-2 h-4 w-4" /> Pending</>}
-                       {buttonState === 'CONNECTED' && <><Check className="mr-2 h-4 w-4" /> Connected</>}
-                    </Button>
-                    <div className="flex w-full gap-2">
-                      {student.links?.github && (
-                        <Button className="flex-1" variant="secondary" asChild>
-                           <Link href={student.links.github} target="_blank" rel="noopener noreferrer"><Github className="mr-2 h-4 w-4" /> GitHub</Link>
-                        </Button>
-                      )}
-                      {student.links?.linkedin && (
-                         <Button className="flex-1" variant="secondary" asChild>
-                           <Link href={student.links.linkedin} target="_blank" rel="noopener noreferrer"><Linkedin className="mr-2 h-4 w-4" /> LinkedIn</Link>
-                        </Button>
-                      )}
-                    </div>
-                </CardFooter>
-              </Card>
-            );
-          })}
+    <>
+      <TeammateProfileDialog
+        student={selectedStudent}
+        isOpen={!!selectedStudent}
+        onOpenChange={() => setSelectedStudent(null)}
+        onConnect={() => selectedStudent && sendRequest(selectedStudent)}
+        buttonState={selectedStudent ? getButtonState(selectedStudent.id) : 'CONNECT'}
+      />
+      <div className="space-y-8">
+        <div>
+          <h1 className="font-headline text-3xl font-bold tracking-tight">Find Connections</h1>
+          <p className="text-muted-foreground mt-1">Browse and connect with talented students across the university.</p>
         </div>
-      </>
-      }
-    </div>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="relative md:col-span-2">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Search by name, skill, interest, or college..." className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                  <Select value={selectedInterest} onValueChange={setSelectedInterest}>
+                  <SelectTrigger>
+                      <SelectValue placeholder="Filter by interest" />
+                  </SelectTrigger>
+                  <SelectContent>
+                      {interests.map((interest) => (
+                      <SelectItem key={interest} value={interest} className="capitalize">
+                          {interest === 'all' ? 'All Interests' : interest}
+                      </SelectItem>
+                      ))}
+                  </SelectContent>
+                  </Select>
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                      <SelectTrigger>
+                          <SelectValue placeholder="Sort by" />
+                      </SelectTrigger>
+                      <SelectContent>
+                          <SelectItem value="relevance">Sort by: Relevance</SelectItem>
+                          <SelectItem value="xp">Sort by: Experience</SelectItem>
+                          <SelectItem value="name">Sort by: Name</SelectItem>
+                      </SelectContent>
+                  </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {loading ? <TeammatesSkeleton /> :
+        <>
+          {connectionRequests.length > 0 && (
+              <Card>
+                  <CardHeader>
+                      <CardTitle className="font-headline text-xl">Connection Requests</CardTitle>
+                      <CardDescription>You have {connectionRequests.length} pending connection request{connectionRequests.length > 1 && 's'}.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {connectionRequests.map(req => (
+                          <ConnectionRequestCard 
+                              key={req.id} 
+                              request={req}
+                              onAccept={() => acceptRequest(req)}
+                              onDecline={() => declineRequest(req.id)}
+                          />
+                      ))}
+                  </CardContent>
+              </Card>
+          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {connections.map((student) => {
+              if (user?.incomingRequests?.includes(student.id)) return null;
+
+              return (
+                <TeammateCard 
+                  key={student.id} 
+                  student={student}
+                  onConnect={() => sendRequest(student)}
+                  buttonState={getButtonState(student.id)}
+                  onCardClick={() => setSelectedStudent(student)}
+                />
+              );
+            })}
+          </div>
+        </>
+        }
+      </div>
+    </>
   );
 }
