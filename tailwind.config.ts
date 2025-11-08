@@ -87,13 +87,16 @@ export default {
         },
         'twinkle': {
           '0%': {
-            boxShadow: 'var(--box-shadow), 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff',
+            transform: 'scale(0.9)',
+            opacity: '0.9'
           },
           '50%': {
-            boxShadow: 'var(--box-shadow), 0 0 10px #ffc, 0 0 20px #ffc, 0 0 30px #f99, 0 0 40px #f99, 0 0 50px #f99',
+            transform: 'scale(1)',
+            opacity: '1'
           },
           '100%': {
-            boxShadow: 'var(--box-shadow), 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff',
+            transform: 'scale(0.9)',
+            opacity: '0.9'
           },
         },
       },

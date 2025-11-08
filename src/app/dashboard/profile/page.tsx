@@ -151,9 +151,10 @@ export default function ProfilePage() {
                 <CardContent>
                   {loadingProjects ? <Loader2 className="animate-spin" /> : 
                     !userProjects || userProjects.length === 0 ? (
-                      <div className="text-center py-8 text-muted-foreground">
+                      <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
                         <FileCode2 className="mx-auto h-12 w-12" />
-                        <p className="mt-4">No projects yet. Start creating!</p>
+                        <p className="mt-4 font-semibold">No projects yet.</p>
+                        <p className="mt-1 text-sm">Start creating and share your work!</p>
                         <Button asChild variant="secondary" className="mt-4">
                            <Link href="/dashboard/projects">Create a Project</Link>
                         </Button>
@@ -161,8 +162,8 @@ export default function ProfilePage() {
                     ) : (
                       <div className='space-y-4'>
                         {userProjects.map(project => (
-                          <Link href={`/dashboard/projects/${project.id}`} key={project.id} className="block">
-                            <div className="p-3 border rounded-md hover:bg-muted/50 transition-colors">
+                          <Link href={`/dashboard/projects/${project.id}`} key={project.id} className="block group">
+                            <div className="p-3 border rounded-md group-hover:bg-muted/50 group-hover:border-primary/30 transition-colors">
                               <h3 className="font-semibold">{project.name}</h3>
                               <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
                             </div>

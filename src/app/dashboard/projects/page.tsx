@@ -105,8 +105,8 @@ export default function ProjectsPage() {
         const memberCount = (project.memberIds?.length || 0) + 1;
 
         return (
-          <Link href={`/dashboard/projects/${project.id}`} key={project.id}>
-            <Card className="flex h-full flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20 hover:border-primary/30">
+          <Link href={`/dashboard/projects/${project.id}`} key={project.id} className="block group">
+            <Card className="flex h-full flex-col overflow-hidden transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg group-hover:shadow-primary/20 group-hover:border-primary/30">
               <CardHeader>
                 <div className='flex items-center gap-4'>
                   <Avatar className='size-12'>

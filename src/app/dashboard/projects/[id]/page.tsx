@@ -228,21 +228,21 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
                     Project Links
                 </CardTitle>
             </CardHeader>
-            <CardContent className='space-y-4'>
-                {project.links?.demo && (
-                  <Link href={project.links.demo} target="_blank" rel="noopener noreferrer" className='flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors'>
+            <CardContent className='space-y-2'>
+                {project.links?.demo ? (
+                  <Link href={project.links.demo} target="_blank" rel="noopener noreferrer" className='flex items-center gap-3 p-3 -mx-3 rounded-md text-sm text-muted-foreground hover:bg-muted/50 hover:text-primary transition-colors'>
                       <ExternalLink className='size-4' />
                       <span>View Live Demo</span>
                   </Link>
-                )}
-                 {project.links?.repo && (
-                  <Link href={project.links.repo} target="_blank" rel="noopener noreferrer" className='flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors'>
+                ) : null}
+                 {project.links?.repo ? (
+                  <Link href={project.links.repo} target="_blank" rel="noopener noreferrer" className='flex items-center gap-3 p-3 -mx-3 rounded-md text-sm text-muted-foreground hover:bg-muted/50 hover:text-primary transition-colors'>
                       <GitFork className='size-4' />
                       <span>GitHub Repository</span>
                   </Link>
-                 )}
+                 ) : null}
                  {!project.links?.demo && !project.links?.repo && (
-                    <p className="text-sm text-muted-foreground">No links provided yet.</p>
+                    <p className="text-sm text-muted-foreground py-2">No links provided yet.</p>
                  )}
             </CardContent>
           </Card>

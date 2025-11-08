@@ -99,7 +99,7 @@ export default function LoginPage() {
         className="absolute inset-0 -z-10 opacity-20"
         style={{
           backgroundImage:
-            'radial-gradient(circle at 25% 25%, hsl(var(--primary) / 0.3), rgba(255, 255, 255, 0) 35%), radial-gradient(circle at 75% 75%, hsl(var(--accent) / 0.3), rgba(255, 255, 255, 0) 35%)',
+            'radial-gradient(circle at 25% 25%, hsl(var(--primary) / 0.2), rgba(255, 255, 255, 0) 35%), radial-gradient(circle at 75% 75%, hsl(var(--accent) / 0.2), rgba(255, 255, 255, 0) 35%)',
         }}
       />
       <div className="absolute inset-0 -z-20 h-full w-full bg-background bg-[url('https://res.cloudinary.com/dfhpkqrjw/image/upload/v1717438453/grid_y4h5x6.svg')] bg-repeat [background-position:calc(50%_+_1px)_calc(50%_+_1px)]" />

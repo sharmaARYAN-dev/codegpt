@@ -112,7 +112,7 @@ export default function CommunitiesPage() {
               {forumPosts?.map((post) => {
                 const author = users?.find(u => u.id === post.authorId);
                 return (
-                  <Card key={post.id} className="p-0 transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/10">
+                  <Card key={post.id} className="p-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20">
                     <CardContent className="p-6">
                       <div className='mb-4 flex items-start sm:items-center gap-3 flex-wrap'>
                         <Avatar className='size-9'>

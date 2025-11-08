@@ -138,9 +138,9 @@ export default function TeammatesPage() {
       {loading ? <TeammatesSkeleton /> :
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {teammates.map((student) => {
-            const hasSocials = student.socialLinks && Object.values(student.socialLinks).some(link => link);
+            const hasSocials = student.socialLinks && Object.values(student.socialLinks).some(link => !!link);
             return (
-              <Card key={student.id} className="flex flex-col text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-primary/20 hover:shadow-lg hover:border-primary/30">
+              <Card key={student.id} className="flex flex-col text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-primary/20 hover:shadow-lg hover:border-primary/30 group">
                 <CardHeader className="flex-1 flex flex-col items-center pt-8">
                   <Avatar className="h-28 w-28 border-4 border-muted">
                     <AvatarImage src={student.photoURL} alt={student.displayName} data-ai-hint="person portrait" />

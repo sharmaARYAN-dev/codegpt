@@ -139,7 +139,7 @@ export default function EventsPage() {
             {allEvents?.map((event) => {
               const organizer = users?.find(u => u.id === event.organizerId);
               return (
-                <Card key={event.id} className="flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20 hover:border-primary/30">
+                <Card key={event.id} className="flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20 hover:border-primary/30 group">
                   <CardHeader>
                     <div className='flex items-start justify-between'>
                       <div className='flex items-center gap-4'>
