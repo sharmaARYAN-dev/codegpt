@@ -9,7 +9,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, Users, GitFork, ExternalLink, Loader2 } from 'lucide-react';
+import { MessageSquare, Users, GitFork, ExternalLink, Loader2, Share2 } from 'lucide-react';
 import Link from 'next/link';
 import { useDoc } from '@/firebase/firestore/use-doc';
 import { collection, doc } from 'firebase/firestore';
@@ -19,6 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { useMemo } from 'react';
 import { db } from '@/lib/firebase';
+import { useAuth } from '@/context/AuthContext';
 
 function ProjectWorkspaceSkeleton() {
   return (
@@ -52,6 +53,7 @@ function ProjectWorkspaceSkeleton() {
 
 
 export default function ProjectWorkspacePage({ params }: { params: { id: string } }) {
+  const { user } = useAuth();
   const projectRef = useMemo(() => db ? doc(db, 'projects', params.id) : null, [params.id]);
   const { data: project, loading: loadingProject } = useDoc<Project>(projectRef);
 
@@ -92,6 +94,28 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
     });
   }
 
+  const handleShareProject = async () => {
+    if (!project) return;
+    const shareData = {
+      title: `Check out this project on uniVerse: ${project.name}`,
+      text: project.description,
+      url: window.location.href,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success("Project link copied to clipboard!");
+      }
+    } catch (error) {
+      console.error("Error sharing:", error);
+      toast.error("Could not share project.");
+    }
+  };
+
+  const isOwner = user && project && user.id === project.ownerId;
+
   if (loadingProject || loadingUsers) {
     return <ProjectWorkspaceSkeleton />;
   }
@@ -121,9 +145,23 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
                 ))}
                 </div>
             </div>
-             <Button size="lg" className="w-full sm:w-auto shrink-0" onClick={handleJoinTeam}>
-                Request to Join
-            </Button>
+            <div className='flex w-full sm:w-auto items-center gap-2'>
+              {isOwner ? (
+                  <>
+                    <Button size="lg" variant="outline" className="w-full sm:w-auto" onClick={handleShareProject}>
+                        <Share2 className="mr-2 h-4 w-4" />
+                        Share
+                    </Button>
+                    <Button size="lg" className="w-full sm:w-auto" disabled>
+                        Manage Project
+                    </Button>
+                  </>
+              ) : (
+                <Button size="lg" className="w-full sm:w-auto shrink-0" onClick={handleJoinTeam}>
+                    Request to Join
+                </Button>
+              )}
+            </div>
         </div>
       
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-muted-foreground">
