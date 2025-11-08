@@ -28,10 +28,14 @@ import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { StudentProfile } from '@/lib/types';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 const profileSchema = z.object({
   skills: z.string().min(1, 'Please add at least one skill.'),
   interests: z.string().min(1, 'Please add at least one interest.'),
+  github: z.string().url().optional().or(z.literal('')),
+  linkedin: z.string().url().optional().or(z.literal('')),
 });
 
 interface EditProfileDialogProps {
@@ -49,8 +53,10 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      skills: userProfile.skills.join(', '),
-      interests: userProfile.interests.join(', '),
+      skills: userProfile?.skills?.join(', ') || '',
+      interests: userProfile?.interests?.join(', ') || '',
+      github: userProfile?.socialLinks?.github || '',
+      linkedin: userProfile?.socialLinks?.linkedin || '',
     },
   });
 
@@ -59,9 +65,11 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
       form.reset({
         skills: userProfile.skills?.join(', ') || '',
         interests: userProfile.interests?.join(', ') || '',
+        github: userProfile.socialLinks?.github || '',
+        linkedin: userProfile.socialLinks?.linkedin || '',
       });
     }
-  }, [userProfile, form]);
+  }, [userProfile, form, isOpen]);
 
   const onSubmit = async (values: z.infer<typeof profileSchema>) => {
     if (!firestore || !user) {
@@ -74,11 +82,25 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
     }
 
     setIsSubmitting(true);
+    const updatedData = {
+      skills: values.skills.split(',').map(s => s.trim()).filter(Boolean),
+      interests: values.interests.split(',').map(i => i.trim()).filter(Boolean),
+      socialLinks: {
+        github: values.github || '',
+        linkedin: values.linkedin || '',
+      }
+    };
+
     try {
       const userRef = doc(firestore, 'users', user.uid);
-      await updateDoc(userRef, {
-        skills: values.skills.split(',').map(s => s.trim()),
-        interests: values.interests.split(',').map(i => i.trim()),
+      await updateDoc(userRef, updatedData).catch(async (serverError) => {
+         const permissionError = new FirestorePermissionError({
+          path: userRef.path,
+          operation: 'update',
+          requestResourceData: updatedData,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        throw serverError;
       });
 
       toast({
@@ -87,12 +109,14 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
       });
       onOpenChange(false);
     } catch (error) {
-      console.error('Error updating profile:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh!',
-        description: 'There was a problem updating your profile.',
-      });
+      if (!(error instanceof FirestorePermissionError)) {
+          console.error('Error updating profile:', error);
+          toast({
+            variant: 'destructive',
+            title: 'Uh oh!',
+            description: 'There was a problem updating your profile.',
+          });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -100,11 +124,11 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Edit Your Profile</DialogTitle>
           <DialogDescription>
-            Update your skills and interests to find better matches.
+            Update your skills, interests and social links to find better matches.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -133,6 +157,32 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
                     <Input placeholder="AI, Music, Gaming" {...field} />
                   </FormControl>
                    <FormDescription>Comma-separated list of your interests.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="github"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>GitHub URL</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://github.com/username" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="linkedin"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>LinkedIn URL</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://linkedin.com/in/username" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

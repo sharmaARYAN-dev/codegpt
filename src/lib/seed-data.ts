@@ -11,6 +11,10 @@ export const seedUsers: Omit<StudentProfile, 'id'>[] = [
       { label: 'Top Contributor', color: 'text-yellow-400' },
       { label: 'Rising Star', color: 'text-green-400' },
     ],
+    socialLinks: {
+      github: 'https://github.com/alexj',
+      linkedin: 'https://linkedin.com/in/alexj'
+    }
   },
   {
     displayName: 'Brenda Smith',
@@ -19,6 +23,9 @@ export const seedUsers: Omit<StudentProfile, 'id'>[] = [
     skills: ['UI/UX Design', 'Figma', 'Webflow', 'HTML/CSS'],
     interests: ['Sustainable Design', 'Mobile Interfaces', 'Art History'],
     reputation: [{ label: 'Community Helper', color: 'text-blue-400' }],
+    socialLinks: {
+      github: 'https://github.com/brendas'
+    }
   },
   {
     displayName: 'Charles Lee',
@@ -30,6 +37,10 @@ export const seedUsers: Omit<StudentProfile, 'id'>[] = [
         { label: 'Code Guardian', color: 'text-purple-400' },
         { label: 'Bug Squasher', color: 'text-red-400' }
     ],
+    socialLinks: {
+      github: 'https://github.com/charlesl',
+      linkedin: 'https://linkedin.com/in/charlesl'
+    }
   },
    {
     displayName: 'Diana Garcia',
@@ -38,10 +49,13 @@ export const seedUsers: Omit<StudentProfile, 'id'>[] = [
     skills: ['Project Management', 'Agile', 'Scrum', 'Jira'],
     interests: ['Startup Ecosystems', 'EdTech', 'Product Strategy'],
     reputation: [],
+    socialLinks: {
+      linkedin: 'https://linkedin.com/in/dianag'
+    }
   },
 ];
 
-export const seedProjects: Omit<Project, 'id' | 'ownerId'>[] = [
+export const seedProjects: Omit<Project, 'id' | 'ownerId' | 'createdAt'>[] = [
   {
     name: 'AI-Powered Personal Tutor',
     description:
@@ -55,7 +69,7 @@ export const seedProjects: Omit<Project, 'id' | 'ownerId'>[] = [
   {
     name: 'Campus Sustainability Dashboard',
     description:
-      'A data visualization project that tracks and displays the university\'s energy consumption, waste management, and carbon footprint in real-time.',
+      "A data visualization project that tracks and displays the university's energy consumption, waste management, and carbon footprint in real-time.",
     memberIds: [],
     tags: ['Data Viz', 'React', 'Firebase', 'Sustainability'],
     rating: 4,
@@ -111,7 +125,7 @@ export const seedForumPosts: Omit<ForumPost, 'id' | 'authorId' | 'createdAt'>[] 
   {
     title: 'What are the best resources for learning advanced React hooks?',
     content:
-      'I\'ve got the basics of useState and useEffect down, but I want to dive deeper into hooks like useMemo, useCallback, and useReducer. Any recommendations for tutorials, articles, or courses that you found helpful?',
+      "I've got the basics of useState and useEffect down, but I want to dive deeper into hooks like useMemo, useCallback, and useReducer. Any recommendations for tutorials, articles, or courses that you found helpful?",
     community: 'WebDev',
     upvotes: 15,
     comments: 4,
@@ -119,7 +133,7 @@ export const seedForumPosts: Omit<ForumPost, 'id' | 'authorId' | 'createdAt'>[] 
   {
     title: 'Brainstorming session: Ideas for a "tech for good" project?',
     content:
-      'I\'m looking to start a new project that has a positive social impact. Thinking about areas like education, healthcare, or environmental sustainability. Anyone have interesting ideas or want to collaborate?',
+      "I'm looking to start a new project that has a positive social impact. Thinking about areas like education, healthcare, or environmental sustainability. Anyone have interesting ideas or want to collaborate?",
     community: 'Startups',
     upvotes: 28,
     comments: 12,
@@ -127,7 +141,7 @@ export const seedForumPosts: Omit<ForumPost, 'id' | 'authorId' | 'createdAt'>[] 
     {
     title: 'Is anyone else experimenting with the new Gemini 2.5 Flash model?',
     content:
-      'The new Gemini model seems incredibly fast and powerful for its size. I\'m thinking of using it for a real-time chatbot application. Has anyone else started building with it? Would love to share findings and challenges.',
+      "The new Gemini model seems incredibly fast and powerful for its size. I'm thinking of using it for a real-time chatbot application. Has anyone else started building with it? Would love to share findings and challenges.",
     community: 'AI/ML',
     upvotes: 42,
     comments: 7,

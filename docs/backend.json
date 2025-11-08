@@ -20,6 +20,14 @@
                     "color": {"type": "string"}
                 }
             }
+        },
+        "socialLinks": {
+          "type": "object",
+          "description": "Links to the user's social media profiles.",
+          "properties": {
+            "github": { "type": "string", "format": "uri" },
+            "linkedin": { "type": "string", "format": "uri" }
+          }
         }
       },
       "required": ["id", "displayName", "email"]
@@ -37,9 +45,10 @@
         "tags": { "type": "array", "items": { "type": "string" } },
         "rating": { "type": "number" },
         "forks": { "type": "number" },
-        "comments": { "type": "number" }
+        "comments": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["name", "description", "ownerId"]
+      "required": ["name", "description", "ownerId", "createdAt"]
     },
     "Event": {
       "title": "Event",

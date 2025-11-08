@@ -10,18 +10,98 @@ import { Button } from '@/components/ui/button';
 import { Plus, Users, GitFork, Search } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { allProjects, users } from '@/lib/mock-data';
 import { useState } from 'react';
 import { CreateProjectDialog } from '@/components/create-project-dialog';
 import { Input } from '@/components/ui/input';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import type { Project, StudentProfile } from '@/lib/types';
+import { collection, query, orderBy } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
+
+function ProjectsSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Card key={i} className="flex h-full flex-col">
+          <CardHeader>
+            <div className='flex items-center gap-4'>
+              <Skeleton className='size-12 rounded-full' />
+              <div className='space-y-2'>
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="flex-grow space-y-4">
+            <div className='space-y-2'>
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+            </div>
+            <div className='space-y-3'>
+              <Skeleton className="h-3 w-1/4" />
+              <div className="flex flex-wrap items-center gap-2 text-sm">
+                <Skeleton className="h-6 w-16 rounded-full" />
+                <Skeleton className="h-6 w-20 rounded-full" />
+              </div>
+            </div>
+          </CardContent>
+          <div className="flex items-center justify-between p-6 pt-2">
+            <div className='flex items-center gap-4'>
+              <Skeleton className="h-5 w-10" />
+              <Skeleton className="h-5 w-10" />
+            </div>
+            <Skeleton className="h-9 w-20 rounded-md" />
+          </div>
+        </Card>
+      ))}
+      <Card
+        className="flex min-h-[350px] flex-col items-center justify-center border-2 border-dashed bg-card/50">
+          <Skeleton className="size-20 rounded-full mb-4" />
+          <Skeleton className="h-6 w-40 mb-2" />
+          <Skeleton className="h-4 w-32" />
+      </Card>
+    </div>
+  )
+}
 
 export default function ProjectsPage() {
   const [isCreateProjectOpen, setCreateProjectOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeFilter, setActiveFilter] = useState('All');
+  const firestore = useFirestore();
 
-  const renderProjectGrid = (projectList: typeof allProjects) => (
+  const projectsQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'projects'), orderBy('createdAt', 'desc')) : null, [firestore]);
+  const { data: allProjects, loading: loadingProjects } = useCollection<Project>(projectsQuery);
+
+  const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
+  const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery);
+
+  const filters = ['All', 'Web Dev', 'AI/ML', 'Mobile', 'Game Dev'];
+  
+  const filteredProjects = useMemoFirebase(() => {
+    if (!allProjects) return [];
+    
+    let projects = allProjects;
+
+    if (activeFilter !== 'All') {
+      projects = projects.filter(p => p.tags.some(tag => tag.toLowerCase().includes(activeFilter.toLowerCase())));
+    }
+    
+    if (searchTerm) {
+      projects = projects.filter(p => 
+        p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        p.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+    
+    return projects;
+  }, [allProjects, searchTerm, activeFilter]);
+
+  const renderProjectGrid = (projectList: Project[]) => (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
       {projectList.map((project) => {
-        const owner = users.find(u => u.id === project.ownerId);
+        const owner = users?.find(u => u.id === project.ownerId);
         const memberCount = (project.memberIds?.length || 0) + 1;
 
         return (
@@ -88,20 +168,16 @@ export default function ProjectsPage() {
           </div>
           <div className="relative w-full max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search projects..." className="pl-10" />
+            <Input placeholder="Search projects..." className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button>All</Button>
-          <Button variant="outline">Web Dev</Button>
-          <Button variant="outline">AI/ML</Button>
-          <Button variant="outline">Mobile</Button>
-          <Button variant="outline">Game Dev</Button>
-          <div className="flex-1"></div>
-          <Button variant="ghost">Sort By: Newest</Button>
+          {filters.map(filter => (
+            <Button key={filter} variant={activeFilter === filter ? 'default' : 'outline'} onClick={() => setActiveFilter(filter)}>{filter}</Button>
+          ))}
         </div>
 
-        {renderProjectGrid(allProjects)}
+        {loadingProjects || loadingUsers ? <ProjectsSkeleton /> : renderProjectGrid(filteredProjects || [])}
       </div>
     </>
   );

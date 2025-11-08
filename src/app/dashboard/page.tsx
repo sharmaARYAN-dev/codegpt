@@ -11,25 +11,71 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Star } from 'lucide-react';
-import { useUser } from '@/firebase';
-import { feedProjects, recommendedEvents, suggestedTeammates as allTeammates, users } from '@/lib/mock-data';
-import { useMemo } from 'react';
+import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
+import { collection, query, limit, orderBy } from 'firebase/firestore';
+import type { Project, Event, StudentProfile } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
+
+function DashboardSkeleton() {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+      <div className="lg:col-span-2 space-y-6">
+        <Skeleton className="h-9 w-1/2" />
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex gap-4">
+              <Skeleton className="size-12 rounded-full" />
+              <div className="flex-1 space-y-3">
+                <Skeleton className="h-5 w-1/4" />
+                <Skeleton className="h-4 w-1/3" />
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-4 w-full" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      <div className="space-y-6">
+        <Card><CardHeader><Skeleton className="h-6 w-3/4" /></CardHeader><CardContent className="space-y-3"><Skeleton className="h-20 w-full" /><Skeleton className="h-20 w-full" /></CardContent></Card>
+        <Card><CardHeader><Skeleton className="h-6 w-3/4" /></CardHeader><CardContent className="space-y-4"><Skeleton className="h-12 w-full" /><Skeleton className="h-12 w-full" /></CardContent></Card>
+      </div>
+    </div>
+  )
+}
 
 export default function DashboardPage() {
   const { user } = useUser();
+  const firestore = useFirestore();
 
-  const suggestedTeammates = useMemo(() => {
-    if (!user) return [];
-    return allTeammates.filter(u => u.id !== user.uid).slice(0, 3);
-  }, [user]);
+  const projectsQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'projects'), orderBy('createdAt', 'desc'), limit(3)) : null, [firestore]);
+  const { data: feedProjects, loading: loadingProjects } = useCollection<Project>(projectsQuery);
   
+  const eventsQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'events'), limit(2)) : null, [firestore]);
+  const { data: recommendedEvents, loading: loadingEvents } = useCollection<Event>(eventsQuery);
+
+  const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
+  const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery);
+
+  const suggestedTeammates = useMemoFirebase(() => {
+    if (!user || !users) return [];
+    return users.filter(u => u.id !== user.uid).slice(0, 3);
+  }, [user, users]);
+
+  const getProjectOwner = (ownerId: string) => users?.find(u => u.id === ownerId);
+  
+  const isLoading = loadingProjects || loadingEvents || loadingUsers;
+
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div className='lg:col-span-2 space-y-6'>
             <h1 className="font-headline text-3xl font-bold tracking-tight">Hey {user?.displayName?.split(' ')[0]}, here&apos;s what&apos;s happening</h1>
             <div className='space-y-6'>
-            {feedProjects.map((project) => {
-              const owner = users.find(u => u.id === project.ownerId);
+            {feedProjects?.map((project) => {
+              const owner = getProjectOwner(project.ownerId);
 
               return (
                 <Card key={project.id} className="transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/10">
@@ -88,7 +134,7 @@ export default function DashboardPage() {
                     <CardTitle className="font-headline text-lg">Recommended Events</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                     {recommendedEvents.map(event => (
+                     {recommendedEvents?.map(event => (
                         <div key={event.id} className="p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
                             <p className="font-semibold">{event.title}</p>
                             <p className="text-sm text-muted-foreground">{new Date(event.date).toLocaleDateString()}, {event.location}</p>
@@ -104,7 +150,7 @@ export default function DashboardPage() {
                     <CardTitle className="font-headline text-lg">Suggested Teammates</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                     {suggestedTeammates.map((student) => {
+                     {suggestedTeammates?.map((student) => {
                         return (
                             <div key={student.id} className="flex items-center gap-4">
                             <Avatar>

@@ -56,7 +56,7 @@ export default function SeedPage() {
         const projectRef = doc(projectsCollection);
         // Assign a random user as the owner
         const ownerId = userRefs[index % userRefs.length].id;
-        batch.set(projectRef, { ...project, id: projectRef.id, ownerId });
+        batch.set(projectRef, { ...project, id: projectRef.id, ownerId, createdAt: Timestamp.now() });
       });
 
       // --- Seed Events ---
@@ -78,7 +78,7 @@ export default function SeedPage() {
           ...post,
           id: postRef.id,
           authorId,
-          createdAt: Timestamp.now(),
+          createdAt: Timestamp.fromMillis(Date.now() - (index * 24 * 60 * 60 * 1000)),
         });
       });
 

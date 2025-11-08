@@ -11,6 +11,10 @@ export type StudentProfile = {
     label: string;
     color: string;
   }[];
+  socialLinks?: {
+    github?: string;
+    linkedin?: string;
+  };
 };
 
 export type Project = {
@@ -23,6 +27,7 @@ export type Project = {
   rating: number;
   forks: number;
   comments: number;
+  createdAt: any; // Can be Timestamp
 };
 
 export type Event = {
@@ -45,5 +50,5 @@ export type ForumPost = {
   community: string;
   upvotes: number;
   comments: number;
-  createdAt: string; // ISO 8601 format
+  createdAt: any; // Can be Timestamp
 };

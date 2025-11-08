@@ -18,10 +18,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Award, ShieldCheck, Star, Trophy } from 'lucide-react';
-import { useUser } from '@/firebase';
-import { users } from '@/lib/mock-data';
-import { useMemo } from 'react';
+import { Search, Award, ShieldCheck, Star, Trophy, Loader2 } from 'lucide-react';
+import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
+import { collection } from 'firebase/firestore';
+import type { StudentProfile } from '@/lib/types';
+import { useMemo, useState } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const reputationIcons = {
   'Top Contributor': Award,
@@ -32,15 +34,72 @@ const reputationIcons = {
   'Community Helper': Star
 }
 
+function TeammatesSkeleton() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <Card key={i} className="flex flex-col text-center">
+          <CardHeader className="items-center pt-8">
+            <Skeleton className="h-28 w-28 rounded-full" />
+            <Skeleton className="h-6 w-3/5 mt-4" />
+            <Skeleton className="h-4 w-4/5 mt-1" />
+          </CardHeader>
+          <CardContent className="flex-grow space-y-4">
+            <div>
+              <Skeleton className="h-4 w-1/4 mx-auto mb-2" />
+              <div className="flex flex-wrap justify-center gap-1.5 mt-2">
+                <Skeleton className="h-5 w-16 rounded-full" />
+                <Skeleton className="h-5 w-20 rounded-full" />
+              </div>
+            </div>
+            <div>
+              <Skeleton className="h-4 w-1/4 mx-auto mb-2" />
+              <div className="flex flex-wrap justify-center gap-1.5 mt-2">
+                <Skeleton className="h-5 w-12 rounded-full" />
+                <Skeleton className="h-5 w-16 rounded-full" />
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className='p-4'>
+            <Skeleton className="h-10 w-full" />
+          </CardFooter>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
 export default function TeammatesPage() {
   const { user } = useUser();
+  const firestore = useFirestore();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedInterest, setSelectedInterest] = useState('all');
+
+  const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
+  const { data: users, loading } = useCollection<StudentProfile>(usersQuery);
   
   const teammates = useMemo(() => {
-    if (!user) return users;
-    return users.filter(u => u.id !== user.uid);
-  }, [user]);
+    if (!users) return [];
+    let filteredUsers = user ? users.filter(u => u.id !== user.uid) : users;
+
+    if (selectedInterest !== 'all') {
+      filteredUsers = filteredUsers.filter(u => u.interests.includes(selectedInterest));
+    }
+
+    if (searchTerm) {
+      filteredUsers = filteredUsers.filter(u => 
+        u.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        u.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+    
+    return filteredUsers;
+  }, [user, users, searchTerm, selectedInterest]);
   
-  const interests = useMemo(() => [...new Set(users.flatMap((s) => s.interests))], []);
+  const interests = useMemo(() => {
+    if (!users) return [];
+    return ['all', ...Array.from(new Set(users.flatMap((s) => s.interests)))];
+  }, [users]);
 
   return (
     <div className="space-y-8">
@@ -54,16 +113,16 @@ export default function TeammatesPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative md:col-span-2">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search by name or skill..." className="pl-10" />
+              <Input placeholder="Search by name or skill..." className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
-            <Select>
+            <Select value={selectedInterest} onValueChange={setSelectedInterest}>
               <SelectTrigger>
                 <SelectValue placeholder="Filter by interest" />
               </SelectTrigger>
               <SelectContent>
                 {interests.map((interest) => (
-                  <SelectItem key={interest} value={interest}>
-                    {interest}
+                  <SelectItem key={interest} value={interest} className="capitalize">
+                    {interest === 'all' ? 'All Interests' : interest}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -72,60 +131,62 @@ export default function TeammatesPage() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {teammates.map((student) => {
-          return (
-            <Card key={student.id} className="flex flex-col text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-primary/20 hover:shadow-lg hover:border-primary/30">
-              <CardHeader className="items-center pt-8">
-                <Avatar className="h-28 w-28 border-4 border-muted">
-                  <AvatarImage src={student.photoURL} alt={student.displayName} data-ai-hint="person portrait" />
-                  <AvatarFallback className='text-3xl'>{student.displayName.substring(0, 2)}</AvatarFallback>
-                </Avatar>
-                <CardTitle className="mt-4 font-headline text-xl">{student.displayName}</CardTitle>
-                {student.reputation?.length > 0 && (
-                   <div className="flex justify-center gap-2 mt-1">
-                        {student.reputation.map((rep) => {
-                            const Icon = reputationIcons[rep.label as keyof typeof reputationIcons] || Star;
-                            return (
-                            <div key={rep.label} className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Icon className={`h-3 w-3 ${rep.color}`} />
-                                {rep.label}
-                            </div>
-                        )})}
-                    </div>
-                )}
-              </CardHeader>
-              <CardContent className="flex-grow">
-                <div className="space-y-4">
-                    <div>
-                        <h4 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Skills</h4>
-                        <div className="flex flex-wrap justify-center gap-1.5 mt-2">
-                            {student.skills.map((skill) => (
-                            <Badge key={skill} variant="secondary">
-                                {skill}
-                            </Badge>
-                            ))}
-                        </div>
-                    </div>
-                     <div>
-                        <h4 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Interests</h4>
-                        <div className="flex flex-wrap justify-center gap-1.5 mt-2">
-                            {student.interests.map((interest) => (
-                            <Badge key={interest} variant="outline">
-                                {interest}
-                            </Badge>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-              </CardContent>
-              <CardFooter className='p-4'>
-                <Button className="w-full">Connect</Button>
-              </CardFooter>
-            </Card>
-          );
-        })}
-      </div>
+      {loading ? <TeammatesSkeleton /> :
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {teammates.map((student) => {
+            return (
+              <Card key={student.id} className="flex flex-col text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-primary/20 hover:shadow-lg hover:border-primary/30">
+                <CardHeader className="items-center pt-8">
+                  <Avatar className="h-28 w-28 border-4 border-muted">
+                    <AvatarImage src={student.photoURL} alt={student.displayName} data-ai-hint="person portrait" />
+                    <AvatarFallback className='text-3xl'>{student.displayName.substring(0, 2)}</AvatarFallback>
+                  </Avatar>
+                  <CardTitle className="mt-4 font-headline text-xl">{student.displayName}</CardTitle>
+                  {student.reputation?.length > 0 && (
+                     <div className="flex justify-center gap-2 mt-1">
+                          {student.reputation.map((rep) => {
+                              const Icon = reputationIcons[rep.label as keyof typeof reputationIcons] || Star;
+                              return (
+                              <div key={rep.label} className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <Icon className={`h-3 w-3 ${rep.color}`} />
+                                  {rep.label}
+                              </div>
+                          )})}
+                      </div>
+                  )}
+                </CardHeader>
+                <CardContent className="flex-grow">
+                  <div className="space-y-4">
+                      <div>
+                          <h4 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Skills</h4>
+                          <div className="flex flex-wrap justify-center gap-1.5 mt-2">
+                              {student.skills.map((skill) => (
+                              <Badge key={skill} variant="secondary">
+                                  {skill}
+                              </Badge>
+                              ))}
+                          </div>
+                      </div>
+                       <div>
+                          <h4 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Interests</h4>
+                          <div className="flex flex-wrap justify-center gap-1.5 mt-2">
+                              {student.interests.map((interest) => (
+                              <Badge key={interest} variant="outline">
+                                  {interest}
+                              </Badge>
+                              ))}
+                          </div>
+                      </div>
+                  </div>
+                </CardContent>
+                <CardFooter className='p-4'>
+                  <Button className="w-full">Connect</Button>
+                </CardFooter>
+              </Card>
+            );
+          })}
+        </div>
+      }
     </div>
   );
 }
