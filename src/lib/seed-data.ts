@@ -13,7 +13,8 @@ export const seedUsers: Omit<StudentProfile, 'id'>[] = [
     ],
     socialLinks: {
       github: 'https://github.com/alexj',
-      linkedin: 'https://linkedin.com/in/alexj'
+      linkedin: 'https://linkedin.com/in/alexj',
+      instagram: 'https://instagram.com/alexj.codes',
     }
   },
   {
@@ -24,7 +25,9 @@ export const seedUsers: Omit<StudentProfile, 'id'>[] = [
     interests: ['Sustainable Design', 'Mobile Interfaces', 'Art History'],
     reputation: [{ label: 'Community Helper', color: 'text-blue-400' }],
     socialLinks: {
-      github: 'https://github.com/brendas'
+      github: 'https://github.com/brendas',
+      linkedin: 'https://linkedin.com/in/brendas',
+      whatsapp: '15551234567',
     }
   },
   {
@@ -39,7 +42,8 @@ export const seedUsers: Omit<StudentProfile, 'id'>[] = [
     ],
     socialLinks: {
       github: 'https://github.com/charlesl',
-      linkedin: 'https://linkedin.com/in/charlesl'
+      linkedin: 'https://linkedin.com/in/charlesl',
+      reddit: 'https://reddit.com/user/charlesdev'
     }
   },
    {

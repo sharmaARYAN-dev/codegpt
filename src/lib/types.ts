@@ -14,6 +14,9 @@ export type StudentProfile = {
   socialLinks?: {
     github?: string;
     linkedin?: string;
+    whatsapp?: string;
+    instagram?: string;
+    reddit?: string;
   };
 };
 

@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Award, ShieldCheck, Star, Trophy, Loader2, Github, Linkedin } from 'lucide-react';
+import { Search, Award, ShieldCheck, Star, Trophy, Loader2, Github, Linkedin, Instagram } from 'lucide-react';
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import type { StudentProfile } from '@/lib/types';
@@ -26,6 +26,7 @@ import { useMemo, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
+import { RedditIcon, WhatsAppIcon } from '@/components/icons';
 
 const reputationIcons = {
   'Top Contributor': Award,
@@ -100,7 +101,8 @@ export default function TeammatesPage() {
   
   const interests = useMemo(() => {
     if (!users) return [];
-    return ['all', ...Array.from(new Set(users.flatMap((s) => s.interests)))];
+    const allInterests = users.flatMap((s) => s.interests || []);
+    return ['all', ...Array.from(new Set(allInterests))];
   }, [users]);
 
   return (
@@ -136,7 +138,7 @@ export default function TeammatesPage() {
       {loading ? <TeammatesSkeleton /> :
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {teammates.map((student) => {
-            const hasSocials = student.socialLinks?.github || student.socialLinks?.linkedin;
+            const hasSocials = student.socialLinks && Object.values(student.socialLinks).some(link => link);
             return (
               <Card key={student.id} className="flex flex-col text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-primary/20 hover:shadow-lg hover:border-primary/30">
                 <CardHeader className="items-center pt-8">
@@ -189,7 +191,7 @@ export default function TeammatesPage() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-56">
                       {student.socialLinks?.github && (
-                        <Link href={student.socialLinks.github} target="_blank">
+                        <Link href={student.socialLinks.github} target="_blank" rel="noopener noreferrer">
                           <DropdownMenuItem>
                             <Github className="mr-2 h-4 w-4" />
                             <span>View GitHub</span>
@@ -197,10 +199,34 @@ export default function TeammatesPage() {
                         </Link>
                       )}
                       {student.socialLinks?.linkedin && (
-                         <Link href={student.socialLinks.linkedin} target="_blank">
+                         <Link href={student.socialLinks.linkedin} target="_blank" rel="noopener noreferrer">
                           <DropdownMenuItem>
                             <Linkedin className="mr-2 h-4 w-4" />
                             <span>View LinkedIn</span>
+                          </DropdownMenuItem>
+                        </Link>
+                      )}
+                       {student.socialLinks?.instagram && (
+                         <Link href={student.socialLinks.instagram} target="_blank" rel="noopener noreferrer">
+                          <DropdownMenuItem>
+                            <Instagram className="mr-2 h-4 w-4" />
+                            <span>View Instagram</span>
+                          </DropdownMenuItem>
+                        </Link>
+                      )}
+                       {student.socialLinks?.reddit && (
+                         <Link href={student.socialLinks.reddit} target="_blank" rel="noopener noreferrer">
+                          <DropdownMenuItem>
+                            <RedditIcon className="mr-2 h-4 w-4" />
+                            <span>View Reddit</span>
+                          </DropdownMenuItem>
+                        </Link>
+                      )}
+                       {student.socialLinks?.whatsapp && (
+                         <Link href={`https://wa.me/${student.socialLinks.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer">
+                          <DropdownMenuItem>
+                            <WhatsAppIcon className="mr-2 h-4 w-4" />
+                            <span>Chat on WhatsApp</span>
                           </DropdownMenuItem>
                         </Link>
                       )}

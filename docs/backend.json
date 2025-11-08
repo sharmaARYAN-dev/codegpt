@@ -26,7 +26,10 @@
           "description": "Links to the user's social media profiles.",
           "properties": {
             "github": { "type": "string", "format": "uri" },
-            "linkedin": { "type": "string", "format": "uri" }
+            "linkedin": { "type": "string", "format": "uri" },
+            "whatsapp": { "type": "string", "format": "uri" },
+            "instagram": { "type": "string", "format": "uri" },
+            "reddit": { "type": "string", "format": "uri" }
           }
         }
       },

@@ -34,8 +34,11 @@ import { FirestorePermissionError } from '@/firebase/errors';
 const profileSchema = z.object({
   skills: z.string().min(1, 'Please add at least one skill.'),
   interests: z.string().min(1, 'Please add at least one interest.'),
-  github: z.string().url().optional().or(z.literal('')),
-  linkedin: z.string().url().optional().or(z.literal('')),
+  github: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
+  linkedin: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
+  whatsapp: z.string().optional().or(z.literal('')),
+  instagram: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
+  reddit: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
 });
 
 interface EditProfileDialogProps {
@@ -57,6 +60,9 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
       interests: userProfile?.interests?.join(', ') || '',
       github: userProfile?.socialLinks?.github || '',
       linkedin: userProfile?.socialLinks?.linkedin || '',
+      whatsapp: userProfile?.socialLinks?.whatsapp || '',
+      instagram: userProfile?.socialLinks?.instagram || '',
+      reddit: userProfile?.socialLinks?.reddit || '',
     },
   });
 
@@ -67,6 +73,9 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
         interests: userProfile.interests?.join(', ') || '',
         github: userProfile.socialLinks?.github || '',
         linkedin: userProfile.socialLinks?.linkedin || '',
+        whatsapp: userProfile.socialLinks?.whatsapp || '',
+        instagram: userProfile.socialLinks?.instagram || '',
+        reddit: userProfile.socialLinks?.reddit || '',
       });
     }
   }, [userProfile, form, isOpen]);
@@ -88,6 +97,9 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
       socialLinks: {
         github: values.github || '',
         linkedin: values.linkedin || '',
+        whatsapp: values.whatsapp || '',
+        instagram: values.instagram || '',
+        reddit: values.reddit || '',
       }
     };
 
@@ -132,7 +144,7 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-h-[70vh] overflow-y-auto pr-4">
             <FormField
               control={form.control}
               name="skills"
@@ -187,7 +199,47 @@ export function EditProfileDialog({ isOpen, onOpenChange, userProfile }: EditPro
                 </FormItem>
               )}
             />
-            <DialogFooter>
+            <FormField
+              control={form.control}
+              name="instagram"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Instagram URL</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://instagram.com/username" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="reddit"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Reddit URL</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://reddit.com/user/username" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="whatsapp"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>WhatsApp Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="+1234567890" {...field} />
+                  </FormControl>
+                   <FormDescription>Include your country code.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter className="pt-4 sticky bottom-0 bg-background">
                <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

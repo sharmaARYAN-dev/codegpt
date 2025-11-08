@@ -5,13 +5,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Award, ShieldCheck, Star, Github, Linkedin, Loader2, FileCode2 } from 'lucide-react';
+import { Award, ShieldCheck, Star, Github, Linkedin, Loader2, FileCode2, Instagram } from 'lucide-react';
 import type { StudentProfile, Project } from '@/lib/types';
 import { useMemo, useState } from 'react';
 import { EditProfileDialog } from '@/components/edit-profile-dialog';
 import { collection, doc, query, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
+import { RedditIcon, WhatsAppIcon } from '@/components/icons';
 
 const reputationIcons = {
   'Top Contributor': Award,
@@ -106,6 +107,21 @@ export default function ProfilePage() {
                     {userProfile.socialLinks?.linkedin && (
                         <Button variant="ghost" size="icon" asChild>
                             <a href={userProfile.socialLinks.linkedin} target="_blank" rel="noopener noreferrer"><Linkedin className="h-5 w-5 text-muted-foreground" /></a>
+                        </Button>
+                    )}
+                    {userProfile.socialLinks?.instagram && (
+                        <Button variant="ghost" size="icon" asChild>
+                            <a href={userProfile.socialLinks.instagram} target="_blank" rel="noopener noreferrer"><Instagram className="h-5 w-5 text-muted-foreground" /></a>
+                        </Button>
+                    )}
+                    {userProfile.socialLinks?.reddit && (
+                        <Button variant="ghost" size="icon" asChild>
+                            <a href={userProfile.socialLinks.reddit} target="_blank" rel="noopener noreferrer"><RedditIcon className="h-5 w-5 text-muted-foreground" /></a>
+                        </Button>
+                    )}
+                    {userProfile.socialLinks?.whatsapp && (
+                        <Button variant="ghost" size="icon" asChild>
+                            <a href={`https://wa.me/${userProfile.socialLinks.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer"><WhatsAppIcon className="h-5 w-5 text-muted-foreground" /></a>
                         </Button>
                     )}
                 </div>
