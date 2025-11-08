@@ -10,11 +10,13 @@ import { useMemo, useState } from 'react';
 import { CreatePostDialog } from '@/components/create-post-dialog';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import type { ForumPost, Project, StudentProfile } from '@/lib/types';
-import { collection, query, orderBy, doc, updateDoc, increment, limit, where } from 'firebase/firestore';
+import { collection, query, orderBy, doc, updateDoc, arrayUnion, limit, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { db } from '@/lib/firebase';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
 
 function CommunitiesSkeleton() {
   return (
@@ -50,6 +52,7 @@ function CommunitiesSkeleton() {
 }
 
 export default function CommunitiesPage() {
+  const { user } = useAuth();
   const [isCreatePostOpen, setCreatePostOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState('All');
 
@@ -72,13 +75,16 @@ export default function CommunitiesPage() {
   const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery);
 
   const handleUpvote = (postId: string) => {
-    if (!db) return;
+    if (!db || !user) {
+        toast.error('You must be logged in to upvote.');
+        return;
+    }
     const postRef = doc(db, 'forumPosts', postId);
-    updateDoc(postRef, { upvotes: increment(1) }).catch(async (serverError) => {
+    updateDoc(postRef, { upvotes: arrayUnion(user.id) }).catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
             path: postRef.path,
             operation: 'update',
-            requestResourceData: { upvotes: 'increment' },
+            requestResourceData: { upvotes: `arrayUnion(${user.id})` },
         });
         errorEmitter.emit('permission-error', permissionError);
     });
@@ -111,6 +117,7 @@ export default function CommunitiesPage() {
             <div className="lg:col-span-2 space-y-6">
               {forumPosts?.map((post) => {
                 const author = users?.find(u => u.id === post.authorId);
+                const upvoteCount = post.upvotes?.length || 0;
                 return (
                   <Card key={post.id} className="p-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20">
                     <CardContent className="p-6">
@@ -131,7 +138,7 @@ export default function CommunitiesPage() {
                     <div className="px-6 pb-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                       <Button variant='outline' size='sm' className='text-primary border-primary/50 hover:bg-primary/10 hover:text-primary' onClick={() => handleUpvote(post.id)}>
                         <ArrowBigUp className="mr-2 h-4 w-4" />
-                        Upvote ({post.upvotes.length})
+                        Upvote ({upvoteCount})
                       </Button>
                       <div className='flex items-center gap-1.5'>
                         <MessageSquare className="h-4 w-4" />

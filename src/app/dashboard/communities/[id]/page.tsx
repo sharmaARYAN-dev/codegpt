@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowBigUp, MessageSquare, Loader2 } from 'lucide-react';
 import { useDoc } from '@/firebase/firestore/use-doc';
 import { db } from '@/lib/firebase';
-import { doc, collection, addDoc, serverTimestamp, updateDoc, increment, query, orderBy } from 'firebase/firestore';
+import { doc, collection, addDoc, serverTimestamp, updateDoc, increment, query, orderBy, arrayUnion } from 'firebase/firestore';
 import type { Comment, ForumPost, StudentProfile } from '@/lib/types';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -112,13 +112,16 @@ export default function PostPage({ params }: { params: { id: string } }) {
   }
   
   const handleUpvote = (postId: string) => {
-    if (!db) return;
+    if (!db || !user) {
+        toast.error('You must be logged in to upvote.');
+        return;
+    }
     const postDocRef = doc(db, 'forumPosts', postId);
-    updateDoc(postDocRef, { upvotes: increment(1) }).catch(async (serverError) => {
+    updateDoc(postDocRef, { upvotes: arrayUnion(user.id) }).catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
             path: postDocRef.path,
             operation: 'update',
-            requestResourceData: { upvotes: 'increment' },
+            requestResourceData: { upvotes: `arrayUnion(${user.id})` },
         });
         errorEmitter.emit('permission-error', permissionError);
     });
@@ -133,6 +136,8 @@ export default function PostPage({ params }: { params: { id: string } }) {
   if (!post) {
     return <div className="text-center">Post not found.</div>
   }
+
+  const upvoteCount = post.upvotes?.length || 0;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -158,7 +163,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
             <div className="px-6 pb-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                 <Button variant='outline' size='sm' className='text-primary border-primary/50 hover:bg-primary/10 hover:text-primary' onClick={() => handleUpvote(post.id)}>
                     <ArrowBigUp className="mr-2 h-4 w-4" />
-                    Upvote ({post.upvotes})
+                    Upvote ({upvoteCount})
                 </Button>
                 <div className='flex items-center gap-1.5'>
                     <MessageSquare className="h-4 w-4" />
