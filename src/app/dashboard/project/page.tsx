@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Card,
   CardContent,
@@ -9,130 +11,243 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { projects, students } from '@/lib/data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { FileText, Send } from 'lucide-react';
+import { Dot, Send, Star, X } from 'lucide-react';
+import Link from 'next/link';
+import Image from 'next/image';
 
 export default function ProjectWorkspacePage() {
   const project = projects[0];
-  
+  const teamMembers = project.team;
+
+  const openRoles = [
+    {
+      title: 'UI/UX Designer',
+      description: 'Euhccland',
+      collegeYear: 'College 1st Year',
+      avatar: 'avatar-3',
+    },
+    {
+      title: 'ML Engineer',
+      description: 'Cohesipt ters',
+      collegeYear: 'College 1st Year',
+      avatar: 'avatar-5',
+    },
+  ];
+
   return (
     <div className="space-y-6">
-       <div>
-        <h1 className="font-headline text-3xl font-bold tracking-tight">{project.name}</h1>
-        <p className="text-muted-foreground mt-1">{project.description}</p>
+      <div>
+        <h1 className="font-headline text-3xl font-bold tracking-tight">
+          {project.name}
+        </h1>
+        <div className="flex flex-wrap gap-2 mt-2">
+          {project.tags?.map((tag) => (
+            <Badge
+              key={tag}
+              variant={
+                tag === 'AI/ML' || tag === 'Python' ? 'default' : 'secondary'
+              }
+            >
+              {tag}
+            </Badge>
+          ))}
+          <Badge variant="secondary">Education</Badge>
+        </div>
       </div>
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="code">Code Editor</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-          <TabsTrigger value="chat">Chat</TabsTrigger>
-        </TabsList>
-        <TabsContent value="overview" className="mt-6">
+      <div className="mt-4 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Avatar>
+            <AvatarImage
+              src={
+                PlaceHolderImages.find((p) => p.id === project.team[0].avatar)
+                  ?.imageUrl
+              }
+            />
+            <AvatarFallback>
+              {project.team[0].name.substring(0, 2)}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="font-semibold">{project.team[0].name}</p>
+            <p className="text-sm text-muted-foreground">
+              College 1st Year <span className="mx-1">&middot;</span> 1.2K
+            </p>
+          </div>
+        </div>
+        <Button className="bg-gradient-to-r from-accent to-primary text-primary-foreground">
+          Join Team
+        </Button>
+      </div>
+
+      <div className="text-sm text-muted-foreground flex items-center gap-1">
+        <Link href="#" className="hover:text-primary">
+          Dott.ict
+        </Link>
+        <Dot />
+        <Link href="#" className="hover:text-primary">
+          Newest
+        </Link>
+        <span>/</span>
+        <Link href="#" className="hover:text-primary">
+          Trending
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Project Overview</CardTitle>
+              <CardTitle className="font-headline text-xl">
+                Description
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-                <div>
-                    <h3 className="font-semibold">Team Members</h3>
-                    <div className="flex flex-wrap gap-4 mt-2">
-                        {project.team.map(member => {
-                            const avatar = PlaceHolderImages.find(p => p.id === member.avatar);
-                            return (
-                                <div key={member.id} className="flex items-center gap-2">
-                                    <Avatar className='size-8'>
-                                        {avatar && <AvatarImage src={avatar.imageUrl} alt={member.name} />}
-                                        <AvatarFallback>{member.name.substring(0,2)}</AvatarFallback>
-                                    </Avatar>
-                                    <span className="font-medium">{member.name}</span>
-                                </div>
-                            )
-                        })}
-                    </div>
-                </div>
-                <div>
-                    <h3 className="font-semibold">Project Progress</h3>
-                    <div className="w-full bg-muted rounded-full h-2.5 mt-2">
-                        <div className="bg-primary h-2.5 rounded-full" style={{width: `${project.progress}%`}}></div>
-                    </div>
-                    <p className='text-sm text-muted-foreground mt-1'>{project.progress}% complete</p>
-                </div>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Your foosire tliyefwlay illicert besteas off the sot clreed a
+                fovite kitaitit to tro, Widhy yoe agae-and lotjeet. Uwine de
+                metare witit wt the youll. habs to pest and oratresoacts. Alli
+                ht thet, fhitn Wienen avrit legrit ho mend emd o proftroria ads
+                renn; aue future.
+              </p>
             </CardContent>
           </Card>
-        </TabsContent>
-        <TabsContent value="code" className="mt-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Real-Time Code Editor</CardTitle>
-                    <CardDescription>Collaborate on code with your teammates instantly. This is a placeholder for a real code editor.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Textarea 
-                        className="min-h-[500px] font-code bg-muted/50 text-base"
-                        defaultValue={`function HelloWorld() {\n  console.log("Welcome to the ${project.name} project!");\n}`}
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-headline text-xl">
+                Team Members
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {teamMembers.map((member) => {
+                const avatar = PlaceHolderImages.find(
+                  (p) => p.id === member.avatar
+                );
+                return (
+                  <div key={member.id} className="flex items-center gap-3">
+                    <Avatar className="size-10">
+                      {avatar && <AvatarImage src={avatar.imageUrl} />}
+                      <AvatarFallback>
+                        {member.name.substring(0, 2)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold">{member.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        The the bed it: be hihesk the toroid ertrit the tose yot
+                        sahep buiid
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-headline text-xl">
+                Comments
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-start gap-3">
+                <Avatar className="size-10">
+                  <AvatarImage
+                    src={
+                      PlaceHolderImages.find((p) => p.id === 'avatar-4')
+                        ?.imageUrl
+                    }
+                  />
+                  <AvatarFallback>GA</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-semibold">Giiaa Aetcleme</p>
+                  <p className="text-sm text-muted-foreground">
+                    Aliegine 1st Year
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Avatar className="size-10">
+                  <AvatarImage
+                    src={
+                      PlaceHolderImages.find((p) => p.id === 'avatar-6')
+                        ?.imageUrl
+                    }
+                  />
+                  <AvatarFallback>SE</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-semibold">Sted Ernactde</p>
+                  <p className="text-sm text-muted-foreground">
+                    Oatlage. Tet Virar
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="space-y-6 lg:sticky top-20">
+          <Card className="bg-card/50 backdrop-blur-sm border-border/20">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="font-headline text-xl">
+                Team Chat
+              </CardTitle>
+              <Button variant="ghost" size="icon" className="h-6 w-6">
+                <X className="h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-sm">
+                <span className="font-semibold">Priye:</span> Welcome!
+                <br />
+                <span className="font-semibold">Alax:</span> Just pushed the ode
+                code.
+              </div>
+              <Button className="w-full">Join Team</Button>
+            </CardContent>
+          </Card>
+
+          {openRoles.map((role) => (
+            <Card key={role.title}>
+              <CardContent className="p-4">
+                <div className="flex items-start gap-4">
+                  <Avatar>
+                    <AvatarImage
+                      src={
+                        PlaceHolderImages.find((p) => p.id === role.avatar)
+                          ?.imageUrl
+                      }
                     />
-                </CardContent>
-            </Card>
-        </TabsContent>
-        <TabsContent value="documents" className="mt-6">
-             <Card>
-                <CardHeader>
-                    <CardTitle>Shared Documents</CardTitle>
-                    <CardDescription>All your project-related documents in one place.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-2">
-                        {['Project_Proposal.pdf', 'API_Documentation.md', 'User_Flow_Diagram.fig'].map(doc => (
-                            <div key={doc} className="flex items-center p-2 rounded-md border hover:bg-muted/50">
-                                <FileText className="h-5 w-5 mr-3 text-muted-foreground" />
-                                <span className='font-medium'>{doc}</span>
-                                <Button variant="ghost" size="sm" className="ml-auto">Download</Button>
-                            </div>
-                        ))}
+                    <AvatarFallback>
+                      {role.title.substring(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <p className="font-semibold">{role.title}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {role.collegeYear}
+                    </p>
+                    <p className="text-sm mt-1">{role.description}</p>
+                    <div className="flex items-center gap-1 text-muted-foreground mt-2">
+                      <Star className="size-4" />
+                      <Star className="size-4" />
+                      <Star className="size-4" />
+                      <Star className="size-4" />
+                      <Star className="size-4" />
                     </div>
-                </CardContent>
+                  </div>
+                  <Button size="sm">Join</Button>
+                </div>
+              </CardContent>
             </Card>
-        </TabsContent>
-        <TabsContent value="chat" className="mt-6">
-            <Card className='flex flex-col h-[600px]'>
-                <CardHeader>
-                    <CardTitle>Team Chat</CardTitle>
-                </CardHeader>
-                <CardContent className='flex-1 flex flex-col'>
-                    <div className="flex-grow space-y-4 overflow-y-auto p-4 bg-muted/30 rounded-md">
-                        <div className="flex items-end gap-2">
-                             <Avatar className='size-8'>
-                                <AvatarImage src={PlaceHolderImages.find(p => p.id === 'avatar-2')?.imageUrl} />
-                                <AvatarFallback>SL</AvatarFallback>
-                            </Avatar>
-                            <div className="p-3 rounded-lg bg-muted max-w-xs">
-                                <p className="text-sm">Hey, I just pushed the initial setup for the auth flow. Can you take a look?</p>
-                            </div>
-                        </div>
-                         <div className="flex items-end gap-2 justify-end">
-                            <div className="p-3 rounded-lg bg-primary text-primary-foreground max-w-xs">
-                                <p className="text-sm">Awesome, on it now!</p>
-                            </div>
-                            <Avatar className='size-8'>
-                                <AvatarImage src={PlaceHolderImages.find(p => p.id === 'avatar-1')?.imageUrl} />
-                                <AvatarFallback>AJ</AvatarFallback>
-                            </Avatar>
-                        </div>
-                    </div>
-                    <div className="mt-4 flex items-center gap-2">
-                        <Input placeholder="Type a message..." />
-                        <Button>
-                            <Send className="h-4 w-4" />
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
-        </TabsContent>
-      </Tabs>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

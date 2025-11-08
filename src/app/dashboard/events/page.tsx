@@ -15,6 +15,7 @@ import { Plus, Star, MessageSquare, Dot } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import Link from 'next/link';
 
 export default function ProjectsPage() {
   const allProjects = projects;
@@ -26,41 +27,43 @@ export default function ProjectsPage() {
         const ownerAvatar = PlaceHolderImages.find((p) => p.id === owner.avatar);
 
         return (
-          <Card key={project.id} className="flex flex-col overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:shadow-primary/20 hover:shadow-lg">
-            <CardHeader>
-                <div className='flex items-center gap-3'>
-                    <Avatar>
-                        {ownerAvatar && <AvatarImage src={ownerAvatar.imageUrl} alt={owner.name} />}
-                        <AvatarFallback>{owner.name.substring(0, 2)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                        <p className="font-semibold">{owner.name}</p>
-                        <p className="text-sm text-muted-foreground">College 1st Year</p>
-                    </div>
+          <Link href="/dashboard/project" key={project.id}>
+            <Card  className="flex flex-col overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:shadow-primary/20 hover:shadow-lg h-full">
+              <CardHeader>
+                  <div className='flex items-center gap-3'>
+                      <Avatar>
+                          {ownerAvatar && <AvatarImage src={ownerAvatar.imageUrl} alt={owner.name} />}
+                          <AvatarFallback>{owner.name.substring(0, 2)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                          <p className="font-semibold">{owner.name}</p>
+                          <p className="text-sm text-muted-foreground">College 1st Year</p>
+                      </div>
+                  </div>
+              </CardHeader>
+              <CardContent className="flex-grow space-y-3">
+                <CardTitle className="font-headline text-xl">{project.name}</CardTitle>
+                  <div className='text-sm text-muted-foreground'>
+                    <p>{project.description}</p>
+                  </div>
+                <div className="flex flex-wrap gap-2">
+                  {project.tags?.map((tag) => (
+                      <Badge key={tag} variant={tag === 'AI/ML' ? 'default' : 'secondary'}>{tag}</Badge>
+                  ))}
                 </div>
-            </CardHeader>
-            <CardContent className="flex-grow space-y-3">
-              <CardTitle className="font-headline text-xl">{project.name}</CardTitle>
-                <div className='text-sm text-muted-foreground'>
-                  <p>{project.description}</p>
+                <div className='flex items-center gap-2 text-muted-foreground'>
+                    <Star className='size-4'/>
+                    <Star className='size-4'/>
+                    <Star className='size-4'/>
+                    <Star className='size-4'/>
+                    <Star className='size-4'/>
                 </div>
-              <div className="flex flex-wrap gap-2">
-                {project.tags?.map((tag) => (
-                    <Badge key={tag} variant={tag === 'AI/ML' ? 'default' : 'secondary'}>{tag}</Badge>
-                ))}
-              </div>
-              <div className='flex items-center gap-2 text-muted-foreground'>
-                  <Star className='size-4'/>
-                  <Star className='size-4'/>
-                  <Star className='size-4'/>
-                  <Star className='size-4'/>
-                  <Star className='size.4'/>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button className="w-full bg-gradient-to-r from-accent to-primary text-primary-foreground">Join</Button>
-            </CardFooter>
-          </Card>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full bg-gradient-to-r from-accent to-primary text-primary-foreground">Join</Button>
+              </CardFooter>
+            </Card>
+          </Link>
         );
       })}
         <Card className="flex flex-col items-center justify-center border-dashed border-2 hover:border-primary hover:text-primary transition-colors duration-300 cursor-pointer min-h-[250px] hover:shadow-lg">
