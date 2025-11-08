@@ -17,7 +17,7 @@ const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Home' },
   { href: '/dashboard/projects', icon: FolderKanban, label: 'Projects' },
   { href: '/dashboard/communities', icon: MessageSquare, label: 'Communities' },
-  { href: '/dashboard/events', icon: Swords, label: 'Events' },
+  { href: '/dashboard/hackathons', icon: Swords, label: 'Events' },
   { href: '/dashboard/teammates', icon: Users, label: 'Teammates' },
   { href: '/dashboard/ideas', icon: Lightbulb, label: 'Ideas' },
   { href: '/dashboard/profile', icon: User, label: 'Profile' },
@@ -34,7 +34,7 @@ export function AppNav() {
         <SidebarMenu>
             {navItems.map((item) => (
             <SidebarMenuItem key={item.href}>
-                <Link href={item.href} legacyBehavior passHref>
+                <Link href={item.href}>
                 <SidebarMenuButton
                     isActive={pathname.startsWith(item.href) && (item.href === '/dashboard' ? pathname === item.href : true)}
                     tooltip={item.label}
