@@ -57,6 +57,56 @@ export const seedUsers: Omit<StudentProfile, 'id'>[] = [
       linkedin: 'https://linkedin.com/in/dianag'
     }
   },
+  {
+    displayName: 'Ethan Wong',
+    email: 'ethan.w@university.edu',
+    photoURL: 'https://picsum.photos/seed/105/200/200',
+    skills: ['Java', 'Spring Boot', 'Kafka', 'Microservices'],
+    interests: ['Distributed Systems', 'Cloud Computing', 'Chess'],
+    reputation: [
+      { label: 'Hackathon Winner', color: 'text-blue-500' }
+    ],
+    socialLinks: {
+      github: 'https://github.com/ethanw',
+      linkedin: 'https://linkedin.com/in/ethanw'
+    }
+  },
+  {
+    displayName: 'Fiona Chen',
+    email: 'fiona.c@university.edu',
+    photoURL: 'https://picsum.photos/seed/106/200/200',
+    skills: ['Data Science', 'Pandas', 'Scikit-learn', 'TensorFlow'],
+    interests: ['Natural Language Processing', 'Bioinformatics', 'Photography'],
+    reputation: [],
+    socialLinks: {
+      linkedin: 'https://linkedin.com/in/fionac'
+    }
+  },
+  {
+    displayName: 'George Kim',
+    email: 'george.k@university.edu',
+    photoURL: 'https://picsum.photos/seed/107/200/200',
+    skills: ['C++', 'Unreal Engine', 'Blender', 'Game Design'],
+    interests: ['Game Development', 'Virtual Reality', '3D Modeling'],
+    reputation: [
+      { label: 'Community Helper', color: 'text-blue-400' }
+    ],
+    socialLinks: {
+      github: 'https://github.com/georgek',
+      instagram: 'https://instagram.com/george.creates'
+    }
+  },
+  {
+    displayName: 'Hannah Davis',
+    email: 'hannah.d@university.edu',
+    photoURL: 'https://picsum.photos/seed/108/200/200',
+    skills: ['Swift', 'iOS Development', 'CoreML', 'ARKit'],
+    interests: ['Mobile Apps', 'Augmented Reality', 'Creative Coding'],
+    reputation: [],
+    socialLinks: {
+      linkedin: 'https://linkedin.com/in/hannahd'
+    }
+  }
 ];
 
 export const seedProjects: Omit<Project, 'id' | 'ownerId' | 'createdAt'>[] = [
@@ -90,6 +140,24 @@ export const seedProjects: Omit<Project, 'id' | 'ownerId' | 'createdAt'>[] = [
     forks: 9,
     comments: 6,
   },
+  {
+    name: 'Project Nebula: VR Game',
+    description: 'An immersive VR exploration game set in a procedurally generated galaxy. Built with Unreal Engine and focused on player-driven narrative.',
+    memberIds: [],
+    tags: ['Game Dev', 'Unreal Engine', 'VR', 'C++'],
+    rating: 5,
+    forks: 25,
+    comments: 15,
+  },
+  {
+    name: 'FinTech Stock Analyzer',
+    description: 'A web app that uses machine learning to analyze market trends and provide stock recommendations. Includes a paper trading feature.',
+    memberIds: [],
+    tags: ['FinTech', 'Python', 'Flask', 'AI/ML'],
+    rating: 4,
+    forks: 18,
+    comments: 9,
+  }
 ];
 
 export const seedEvents: Omit<Event, 'id' | 'organizerId'>[] = [
@@ -120,9 +188,27 @@ export const seedEvents: Omit<Event, 'id' | 'organizerId'>[] = [
     location: 'Main Auditorium',
     description:
       'A full-day conference featuring talks from industry experts on the latest trends in web development, including serverless, WebAssembly, and next-gen frameworks.',
-    tags: ['WebDev', 'Conference', 'Networking'],
+    tags: ['Web Dev', 'Conference', 'Networking'],
     rating: 5,
   },
+  {
+    title: 'Game Jam: 72-Hour Challenge',
+    type: 'Hackathon',
+    date: new Date(new Date().setDate(new Date().getDate() + 45)).toISOString(),
+    location: 'Campus Green',
+    description: 'Join teams to create a video game from scratch in just 72 hours. Theme will be announced at the start of the event. All platforms welcome.',
+    tags: ['Game Dev', 'Competition', 'In-Person'],
+    rating: 5,
+  },
+  {
+    title: 'Building Your First Mobile App',
+    type: 'Workshop',
+    date: new Date(new Date().setDate(new Date().getDate() + 21)).toISOString(),
+    location: 'Online',
+    description: 'A beginner-friendly workshop on building a simple mobile app for iOS and Android using React Native. No prior experience required.',
+    tags: ['Mobile', 'React Native', 'Workshop'],
+    rating: 4,
+  }
 ];
 
 export const seedForumPosts: Omit<ForumPost, 'id' | 'authorId' | 'createdAt'>[] = [
@@ -150,4 +236,18 @@ export const seedForumPosts: Omit<ForumPost, 'id' | 'authorId' | 'createdAt'>[] 
     upvotes: 42,
     comments: 7,
   },
+  {
+    title: 'Looking for a 3D artist for a VR game project',
+    content: 'We have the core mechanics of our VR game built in Unreal Engine, but we desperately need a talented 3D artist to bring our world to life. Anyone with Blender/Maya experience interested in joining?',
+    community: 'Gaming',
+    upvotes: 18,
+    comments: 5,
+  },
+  {
+    title: 'Showcase: My new portfolio website built with Next.js and Framer Motion',
+    content: 'Just deployed my new personal portfolio! Would love to get some feedback from the design and web dev communities on the UI/UX and animations. Link in the comments.',
+    community: 'Design',
+    upvotes: 33,
+    comments: 9,
+  }
 ];
