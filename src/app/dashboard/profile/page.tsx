@@ -1,26 +1,38 @@
 'use client';
 
-import { useUser } from '@/firebase';
+import { useUser, useDoc, useFirestore } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Award, ShieldCheck, Star } from 'lucide-react';
+import type { StudentProfile } from '@/lib/types';
+import { useMemo } from 'react';
+import { doc } from 'firebase/firestore';
+
+const reputationIcons = {
+    'Top Contributor': Award,
+    'Bug Squasher': ShieldCheck,
+    'Rising Star': Star,
+    'Hackathon Winner': Award,
+    'Code Guardian': ShieldCheck,
+    'Community Helper': Star
+  } as const;
 
 export default function ProfilePage() {
   const { user } = useUser();
+  const firestore = useFirestore();
 
-  if (!user) {
+  const userProfileRef = useMemo(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+
+  const { data: userProfile } = useDoc<StudentProfile>(userProfileRef);
+
+  if (!user || !userProfile) {
     return null;
   }
-
-  const skills = ['React', 'Node.js', 'TypeScript', 'Figma', 'Firebase'];
-  const interests = ['AI/ML', 'Web Dev', 'Mobile Apps', 'Design Systems'];
-  const reputation = [
-    { icon: Award, label: 'Top Contributor', color: 'text-yellow-400' },
-    { icon: ShieldCheck, label: 'Bug Squasher', color: 'text-green-400' },
-    { icon: Star, label: 'Rising Star', color: 'text-purple-400' },
-  ];
 
   return (
     <div className="container mx-auto max-w-4xl py-2">
@@ -29,11 +41,11 @@ export default function ProfilePage() {
         <CardContent className="p-6">
           <div className="flex items-end -mt-16">
             <Avatar className="h-28 w-28 border-4 border-background">
-              {user.photoURL && (
-                <AvatarImage src={user.photoURL} alt={user.displayName || 'User'} />
+              {userProfile.photoURL && (
+                <AvatarImage src={userProfile.photoURL} alt={userProfile.displayName || 'User'} />
               )}
               <AvatarFallback className="text-4xl">
-                {user.displayName
+                {userProfile.displayName
                   ?.split(' ')
                   .map((n) => n[0])
                   .join('')}
@@ -41,9 +53,9 @@ export default function ProfilePage() {
             </Avatar>
             <div className="ml-4">
               <h1 className="text-2xl font-bold font-headline">
-                {user.displayName}
+                {userProfile.displayName}
               </h1>
-              <p className="text-muted-foreground">{user.email}</p>
+              <p className="text-muted-foreground">{userProfile.email}</p>
             </div>
             <Button variant="outline" className="ml-auto">
               Edit Profile
@@ -79,7 +91,7 @@ export default function ProfilePage() {
                   <CardTitle>Skills</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
-                  {skills.map((skill) => (
+                  {userProfile.skills?.map((skill) => (
                     <Badge key={skill} variant="secondary">
                       {skill}
                     </Badge>
@@ -91,7 +103,7 @@ export default function ProfilePage() {
                   <CardTitle>Interests</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
-                  {interests.map((interest) => (
+                  {userProfile.interests?.map((interest) => (
                     <Badge key={interest} variant="outline">
                       {interest}
                     </Badge>
@@ -103,12 +115,14 @@ export default function ProfilePage() {
                   <CardTitle>Reputation</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {reputation.map((rep) => (
+                  {userProfile.reputation?.map((rep) => {
+                     const Icon = reputationIcons[rep.label as keyof typeof reputationIcons] || Star;
+                     return (
                      <div key={rep.label} className="flex items-center gap-2 text-sm">
-                        <rep.icon className={`h-5 w-5 ${rep.color}`} />
+                        <Icon className={`h-5 w-5 ${rep.color}`} />
                         <span>{rep.label}</span>
                     </div>
-                  ))}
+                  )})}
                 </CardContent>
               </Card>
             </div>

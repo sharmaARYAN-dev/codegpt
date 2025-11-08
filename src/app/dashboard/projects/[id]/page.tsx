@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, Users, GitFork, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
-import { useDoc, useCollection, useFirestore } from '@/firebase';
+import { useDoc, useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import type { Project, StudentProfile } from '@/lib/types';
 import { useMemo } from 'react';
 import { doc, collection } from 'firebase/firestore';
@@ -19,13 +19,13 @@ import { doc, collection } from 'firebase/firestore';
 export default function ProjectWorkspacePage({ params }: { params: { id: string } }) {
   const firestore = useFirestore();
 
-  const projectRef = useMemo(() => {
+  const projectRef = useMemoFirebase(() => {
     if (!firestore || !params.id) return null;
     return doc(firestore, 'projects', params.id);
   }, [firestore, params.id]);
   const { data: project } = useDoc<Project>(projectRef);
   
-  const usersQuery = useMemo(() => {
+  const usersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return collection(firestore, 'users');
   }, [firestore]);
@@ -33,7 +33,9 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
 
   const teamMembers = useMemo(() => {
     if (!project || !users) return [];
-    return users.filter(u => project.memberIds?.includes(u.id));
+    // Ensure owner is always part of the team members list
+    const memberIds = [...(project.memberIds || []), project.ownerId];
+    return users.filter(u => memberIds.includes(u.id));
   }, [project, users]);
 
   const openRoles = [
