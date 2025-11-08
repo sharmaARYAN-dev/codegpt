@@ -84,7 +84,11 @@ export default function ProjectsPage() {
     let projects = allProjects;
 
     if (activeFilter !== 'All') {
-      projects = projects.filter(p => p.tags.some(tag => tag.toLowerCase().includes(activeFilter.toLowerCase())));
+        const filterTerms = activeFilter.toLowerCase().split(' ');
+        projects = projects.filter(p => {
+            const projectTags = p.tags.map(tag => tag.toLowerCase());
+            return filterTerms.every(term => projectTags.some(tag => tag.includes(term)));
+        });
     }
     
     if (searchTerm) {
