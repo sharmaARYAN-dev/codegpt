@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Settings, LogOut, Bell, Search, Orbit, Menu } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Input } from './ui/input';
 import { useAuth, useUser } from '@/firebase';
@@ -30,28 +30,29 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-card px-4 md:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-card/50 px-4 backdrop-blur-sm md:px-6">
       <div className="flex items-center gap-2">
          <Link href="/dashboard" className="flex items-center gap-2 md:hidden">
             <Orbit className="h-7 w-7 text-primary" />
         </Link>
-        <SidebarTrigger>
+        <SidebarTrigger className="hidden md:flex">
+            <Menu className="h-5 w-5" />
+        </SidebarTrigger>
+        <SidebarTrigger className="flex md:hidden">
             <Menu className="h-5 w-5" />
         </SidebarTrigger>
       </div>
 
-       <div className="hidden md:flex items-center gap-2">
-            <Orbit className="w-7 h-7 text-primary" />
+       <div className="hidden items-center gap-2 md:ml-4">
             <h1 className="font-headline text-xl font-semibold tracking-tight">Universe</h1>
         </div>
 
         <div className='flex-1 flex justify-center px-4 lg:px-16'>
              <div className="relative w-full max-w-lg">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search..." className="pl-10 bg-muted border-0" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Search anything..." className="pl-10 bg-background/50 border-0 focus-visible:ring-primary/50 focus-visible:bg-background" />
             </div>
         </div>
-
 
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" className="rounded-full">
@@ -60,16 +61,16 @@ export function Header() {
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-              <Avatar className="h-9 w-9">
+            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+              <Avatar className="h-10 w-10">
                 {user?.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || "User"} />}
-                <AvatarFallback>{user?.displayName?.split(" ").map(n => n[0]).join("") ?? 'U'}</AvatarFallback>
+                <AvatarFallback className='text-base'>{user?.displayName?.split(" ").map(n => n[0]).join("") ?? 'U'}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end">
             <DropdownMenuLabel>
-                <p>{user?.displayName}</p>
+                <p className='font-medium'>{user?.displayName}</p>
                 <p className="text-xs text-muted-foreground font-normal">{user?.email}</p>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />

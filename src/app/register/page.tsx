@@ -52,16 +52,13 @@ export default function RegisterPage() {
 
     setIsSubmitting(true);
     try {
-      // 1. Create user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const authUser = userCredential.user;
 
-      // 2. Update Firebase Auth profile
       await updateProfile(authUser, {
         displayName: data.displayName,
       });
       
-      // 3. Create user profile in Firestore
       const userRef = doc(firestore, 'users', authUser.uid);
       const newUserProfile: StudentProfile = {
         id: authUser.uid,
@@ -80,7 +77,6 @@ export default function RegisterPage() {
         description: "Welcome! We're redirecting you to your dashboard.",
       });
 
-      // Redirect to dashboard after a short delay
       setTimeout(() => router.push('/dashboard'), 1000);
 
     } catch (error: any) {
@@ -108,16 +104,17 @@ export default function RegisterPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <div
-        className="absolute inset-0 z-0 opacity-20"
+        className="absolute inset-0 -z-10 opacity-20"
         style={{
           backgroundImage:
             'radial-gradient(circle at 25% 25%, hsl(var(--primary) / 0.3), rgba(255, 255, 255, 0) 35%), radial-gradient(circle at 75% 75%, hsl(var(--accent) / 0.3), rgba(255, 255, 255, 0) 35%)',
         }}
       />
-      <div className="absolute inset-0 z-0 h-full w-full bg-[url('https://res.cloudinary.com/dfhpkqrjw/image/upload/v1717438453/grid_y4h5x6.svg')] [background-position:calc(50%_+_1px)_calc(50%_+_1px)]" />
+      <div className="absolute inset-0 -z-20 h-full w-full bg-background bg-[url('https://res.cloudinary.com/dfhpkqrjw/image/upload/v1717438453/grid_y4h5x6.svg')] bg-repeat [background-position:calc(50%_+_1px)_calc(50%_+_1px)]" />
+
 
       <main className="flex-1 relative z-10 flex items-center justify-center p-4">
-        <Card className="w-full max-w-sm bg-card/50 backdrop-blur-sm border-border/20">
+        <Card className="w-full max-w-md bg-card/60 backdrop-blur-lg border-border/30">
           <CardHeader className="text-center">
             <CardTitle className="font-headline text-3xl font-bold">Create an Account</CardTitle>
             <CardDescription>Join Universe and start your journey.</CardDescription>
@@ -131,7 +128,7 @@ export default function RegisterPage() {
                   type="text"
                   placeholder="Your Name"
                   {...register('displayName')}
-                  className="bg-input/50"
+                  className="bg-background"
                   aria-invalid={errors.displayName ? 'true' : 'false'}
                 />
                 {errors.displayName && <p className="text-sm text-destructive">{errors.displayName.message}</p>}
@@ -143,7 +140,7 @@ export default function RegisterPage() {
                   type="email"
                   placeholder="you@example.com"
                   {...register('email')}
-                  className="bg-input/50"
+                  className="bg-background"
                   aria-invalid={errors.email ? 'true' : 'false'}
                 />
                 {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
@@ -155,18 +152,18 @@ export default function RegisterPage() {
                   type="password"
                   placeholder="••••••••"
                   {...register('password')}
-                  className="bg-input/50"
+                  className="bg-background"
                   aria-invalid={errors.password ? 'true' : 'false'}
                 />
                 {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
               </div>
-              <Button type="submit" className="w-full h-12 text-base font-bold" disabled={isSubmitting}>
+              <Button type="submit" className="w-full h-11 text-base font-bold" disabled={isSubmitting}>
                 {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Create Account'}
               </Button>
             </form>
-            <div className="mt-4 text-center text-sm text-muted-foreground">
+            <div className="mt-6 text-center text-sm text-muted-foreground">
               Already have an account?{' '}
-              <Link href="/login" className="underline hover:text-primary">
+              <Link href="/login" className="underline hover:text-primary font-medium">
                 Log in
               </Link>
             </div>

@@ -38,7 +38,6 @@ export default function LoginPage() {
       const userRef = doc(firestore, 'users', user.uid);
       const userDoc = await getDoc(userRef);
 
-      // Create profile only if it doesn't exist
       if (!userDoc.exists()) {
           const userData = {
             id: user.uid,
@@ -95,31 +94,31 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
        <div
-        className="absolute inset-0 z-0 opacity-20"
+        className="absolute inset-0 -z-10 opacity-20"
         style={{
           backgroundImage:
             'radial-gradient(circle at 25% 25%, hsl(var(--primary) / 0.3), rgba(255, 255, 255, 0) 35%), radial-gradient(circle at 75% 75%, hsl(var(--accent) / 0.3), rgba(255, 255, 255, 0) 35%)',
         }}
       />
-      <div className="absolute inset-0 z-0 h-full w-full bg-[url('https://res.cloudinary.com/dfhpkqrjw/image/upload/v1717438453/grid_y4h5x6.svg')] [background-position:calc(50%_+_1px)_calc(50%_+_1px)]" />
+      <div className="absolute inset-0 -z-20 h-full w-full bg-background bg-[url('https://res.cloudinary.com/dfhpkqrjw/image/upload/v1717438453/grid_y4h5x6.svg')] bg-repeat [background-position:calc(50%_+_1px)_calc(50%_+_1px)]" />
 
       <main className="flex-1 relative z-10 flex items-center justify-center p-4">
-        <Card className="w-full max-w-sm bg-card/50 backdrop-blur-sm border-border/20">
+        <Card className="w-full max-w-md bg-card/60 backdrop-blur-lg border-border/30">
           <CardHeader className="text-center">
-            <CardTitle className="font-headline text-3xl font-bold">Welcome back to Universe.</CardTitle>
-            <CardDescription>Step into your Universe.</CardDescription>
+            <CardTitle className="font-headline text-3xl font-bold">Welcome Back</CardTitle>
+            <CardDescription>Log in to step into your Universe.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleEmailLogin} className="space-y-4">
                <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="Email" required className="bg-input/50" />
+                <Input id="email" type="email" placeholder="you@example.com" required className="bg-background" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" placeholder="Password" required className="bg-input/50" />
+                <Input id="password" type="password" placeholder="••••••••" required className="bg-background" />
               </div>
-              <Button type="submit" className="w-full h-12 text-base font-bold bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+              <Button type="submit" className="w-full h-11 text-base font-bold">
                 Login
               </Button>
             </form>
@@ -128,13 +127,13 @@ export default function LoginPage() {
                 <span className="mx-4 text-xs uppercase text-muted-foreground">OR</span>
                 <div className="flex-grow border-t border-muted-foreground/20"></div>
             </div>
-            <Button variant="outline" className="w-full h-12 text-base" onClick={handleGoogleLogin}>
+            <Button variant="outline" className="w-full h-11 text-base" onClick={handleGoogleLogin}>
               <Chrome className="mr-2 h-5 w-5" />
               Continue with Google
             </Button>
-            <div className="mt-4 text-center text-sm text-muted-foreground">
+            <div className="mt-6 text-center text-sm text-muted-foreground">
               Don&apos;t have an account?{' '}
-              <Link href="/register" className="underline hover:text-primary">
+              <Link href="/register" className="underline hover:text-primary font-medium">
                 Create Account
               </Link>
             </div>

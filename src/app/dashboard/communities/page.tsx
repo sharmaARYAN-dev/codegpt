@@ -17,7 +17,7 @@ export default function CommunitiesPage() {
   return (
     <>
       <CreatePostDialog open={isCreatePostOpen} onOpenChange={setCreatePostOpen} />
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-headline text-3xl font-bold tracking-tight">Communities</h1>
@@ -35,30 +35,32 @@ export default function CommunitiesPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-2 space-y-6">
             {forumPosts.map((post) => {
               const author = users.find(u => u.id === post.authorId);
               return (
-                <Card key={post.id} className="p-4 transition-shadow duration-300 hover:border-primary/50 hover:shadow-lg">
-                  <div className='mb-3 flex items-center gap-3'>
-                    <Avatar className='size-8'>
-                      {author?.photoURL && <AvatarImage src={author.photoURL} alt={author.displayName} />}
-                      <AvatarFallback>{author?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-sm font-semibold">{author?.displayName}</p>
-                      <p className="text-xs text-muted-foreground">{new Date(post.createdAt).toLocaleDateString()}</p>
+                <Card key={post.id} className="p-0 transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/10">
+                  <CardContent className="p-6">
+                    <div className='mb-4 flex items-center gap-3'>
+                      <Avatar className='size-9'>
+                        {author?.photoURL && <AvatarImage src={author.photoURL} alt={author.displayName} />}
+                        <AvatarFallback>{author?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-semibold">{author?.displayName}</p>
+                        <p className="text-xs text-muted-foreground">{new Date(post.createdAt).toLocaleDateString()}</p>
+                      </div>
+                      <Badge variant="secondary" className='ml-auto'>{post.community}</Badge>
                     </div>
-                    <Badge variant="secondary" className='ml-auto'>{post.community}</Badge>
-                  </div>
-                  <h2 className="font-headline mt-1 text-xl font-semibold">{post.title}</h2>
-                  <p className='text-muted-foreground mt-2 line-clamp-2 text-sm'>{post.content}</p>
-                  <div className="mt-4 flex items-center gap-4 text-sm text-muted-foreground">
-                    <Button variant='outline' size='sm' className='text-primary hover:bg-primary/10 hover:text-primary'>
+                    <h2 className="font-headline text-xl font-semibold">{post.title}</h2>
+                    <p className='text-muted-foreground mt-2 line-clamp-2 text-sm leading-relaxed'>{post.content}</p>
+                  </CardContent>
+                  <div className="px-6 pb-4 flex items-center gap-4 text-sm text-muted-foreground">
+                    <Button variant='outline' size='sm' className='text-primary border-primary/50 hover:bg-primary/10 hover:text-primary'>
                       <ArrowBigUp className="mr-2 h-4 w-4" />
                       Upvote ({post.upvotes})
                     </Button>
-                    <div className='flex items-center gap-1'>
+                    <div className='flex items-center gap-1.5'>
                       <MessageSquare className="h-4 w-4" />
                       <span>{post.comments} Comments</span>
                     </div>
@@ -72,7 +74,7 @@ export default function CommunitiesPage() {
             })}
           </div>
 
-          <div className="space-y-6 lg:sticky top-20">
+          <div className="space-y-6 lg:sticky top-24">
             <Card>
               <CardHeader>
                 <CardTitle className="font-headline text-lg">Hot Projects</CardTitle>
@@ -81,7 +83,7 @@ export default function CommunitiesPage() {
                 {suggestedProjects.map((project) => {
                   const owner = users.find(u => u.id === project.ownerId);
                   return (
-                    <div key={project.id}>
+                    <div key={project.id} className="p-3 border rounded-md bg-card hover:bg-muted/50 transition-colors">
                       <div className='flex items-center gap-3'>
                         <Avatar className='size-8'>
                           {owner?.photoURL && <AvatarImage src={owner.photoURL} alt={owner.displayName} />}

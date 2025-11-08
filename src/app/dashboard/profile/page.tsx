@@ -25,9 +25,6 @@ export default function ProfilePage() {
   const [isEditProfileOpen, setEditProfileOpen] = useState(false);
   
   const userProfile = useMemo(() => {
-    // In a real app, you'd fetch this from your backend based on the user's ID
-    // For now, we'll find the user in our mock data.
-    // Fallback to a default profile if user not in mock data.
     return mockUsers.find(p => p.email.split('.')[0] === user?.email?.split('@')[0].split('.')[0]) || {
         id: user?.uid || 'new-user',
         displayName: user?.displayName || "New User",
@@ -54,24 +51,24 @@ export default function ProfilePage() {
         onOpenChange={setEditProfileOpen} 
         userProfile={userProfile} 
     />
-    <div className="container mx-auto max-w-4xl py-2">
+    <div className="container mx-auto max-w-5xl py-2">
       <Card className="overflow-hidden">
-        <div className="h-32 bg-gradient-to-r from-primary to-accent" />
+        <div className="h-36 bg-gradient-to-r from-primary/70 to-accent/70" />
         <CardContent className="p-6">
-          <div className="flex items-end -mt-16">
-            <Avatar className="h-28 w-28 border-4 border-background">
+          <div className="flex items-end -mt-20">
+            <Avatar className="h-32 w-32 border-4 border-background">
               {userProfile.photoURL && (
                 <AvatarImage src={userProfile.photoURL} alt={userProfile.displayName || 'User'} />
               )}
-              <AvatarFallback className="text-4xl">
+              <AvatarFallback className="text-5xl">
                 {userProfile.displayName
                   ?.split(' ')
                   .map((n) => n[0])
                   .join('')}
               </AvatarFallback>
             </Avatar>
-            <div className="ml-4">
-              <h1 className="text-2xl font-bold font-headline">
+            <div className="ml-6">
+              <h1 className="text-3xl font-bold font-headline">
                 {userProfile.displayName}
               </h1>
               <p className="text-muted-foreground">{userProfile.email}</p>
@@ -81,11 +78,11 @@ export default function ProfilePage() {
             </Button>
           </div>
 
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2 space-y-6">
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="md:col-span-2 space-y-8">
               <Card>
                 <CardHeader>
-                  <CardTitle>About Me</CardTitle>
+                  <CardTitle className="font-headline text-xl">About Me</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
@@ -97,21 +94,21 @@ export default function ProfilePage() {
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle>My Projects</CardTitle>
+                  <CardTitle className="font-headline text-xl">My Projects</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">No projects yet. Start creating!</p>
                 </CardContent>
               </Card>
             </div>
-            <div className="space-y-6">
+            <div className="space-y-8">
               <Card>
                 <CardHeader>
-                  <CardTitle>Skills</CardTitle>
+                  <CardTitle className="font-headline text-xl">Skills</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
                   {userProfile.skills?.map((skill) => (
-                    <Badge key={skill} variant="secondary">
+                    <Badge key={skill} variant="secondary" className='text-sm'>
                       {skill}
                     </Badge>
                   ))}
@@ -119,11 +116,11 @@ export default function ProfilePage() {
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle>Interests</CardTitle>
+                  <CardTitle className="font-headline text-xl">Interests</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
                   {userProfile.interests?.map((interest) => (
-                    <Badge key={interest} variant="outline">
+                    <Badge key={interest} variant="outline" className='text-sm'>
                       {interest}
                     </Badge>
                   ))}
@@ -131,15 +128,15 @@ export default function ProfilePage() {
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle>Reputation</CardTitle>
+                  <CardTitle className="font-headline text-xl">Reputation</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-4">
                   {userProfile.reputation?.map((rep) => {
                     const Icon = reputationIcons[rep.label as keyof typeof reputationIcons] || Star;
                     return (
-                      <div key={rep.label} className="flex items-center gap-2 text-sm">
+                      <div key={rep.label} className="flex items-center gap-3 text-sm">
                         <Icon className={`h-5 w-5 ${rep.color}`} />
-                        <span>{rep.label}</span>
+                        <span className='font-medium'>{rep.label}</span>
                       </div>
                     )
                   })}

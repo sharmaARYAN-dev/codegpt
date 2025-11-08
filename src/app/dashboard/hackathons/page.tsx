@@ -19,51 +19,42 @@ export default function HackathonsPage() {
   const heroImage = PlaceHolderImages.find(img => img.id === 'event-conference');
 
   return (
-    <div className="space-y-6">
-      <div className="relative flex min-h-[250px] items-end overflow-hidden rounded-lg bg-gradient-to-t from-black/80 via-black/0 p-8">
+    <div className="space-y-8">
+      <div className="relative flex min-h-[300px] items-end overflow-hidden rounded-lg bg-gradient-to-t from-black/80 via-transparent p-8">
         {heroImage && <Image src={heroImage.imageUrl} alt={heroImage.description} fill className="-z-10 object-cover" data-ai-hint={heroImage.imageHint} />}
         <div className="text-white">
-          <h1 className="font-headline text-4xl font-bold tracking-tight">Explore Events</h1>
-          <p className="mt-1 text-white/80">Find your next opportunity to innovate and create.</p>
+          <h1 className="font-headline text-5xl font-bold tracking-tight">Explore Events</h1>
+          <p className="mt-2 text-lg text-white/80 max-w-lg">Find your next opportunity to innovate, learn, and connect with the brightest minds.</p>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <Button>Tags</Button>
-        <Button variant="outline">Domain</Button>
-        <Button variant="outline">Sort By</Button>
-        <div className="flex-1"></div>
-        <p className="text-sm text-muted-foreground">Newest / Trending</p>
-      </div>
-
       <div className='grid grid-cols-1 gap-8 md:grid-cols-4 items-start'>
-        <aside className='space-y-6 md:col-span-1 md:sticky top-20'>
+        <aside className='space-y-6 md:col-span-1 md:sticky top-24'>
           <Card>
             <CardHeader>
-              <CardTitle className='font-headline text-lg'>Domain</CardTitle>
+              <CardTitle className='font-headline text-lg'>Filters</CardTitle>
             </CardHeader>
-            <CardContent className='space-y-3'>
-              <div className='flex flex-wrap gap-2'>
-                <Badge variant='secondary' className='cursor-pointer hover:bg-primary/20'>AI/ML</Badge>
-                <Badge variant='secondary' className='cursor-pointer hover:bg-primary/20'>WebDev</Badge>
-                <Badge variant='secondary' className='cursor-pointer hover:bg-primary/20'>Design</Badge>
+            <CardContent className='space-y-4'>
+              <div>
+                <h3 className="text-sm font-semibold mb-2 text-muted-foreground">Location</h3>
+                <ToggleGroup type="single" defaultValue="online" className="grid w-full grid-cols-2 gap-2">
+                  <ToggleGroupItem value="online" aria-label="Toggle online" className='gap-2'>
+                    <Home className='size-4' /> Online
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="campus-based" aria-label="Toggle campus-based" className='gap-2'>
+                    <Building className='size-4' /> Campus
+                  </ToggleGroupItem>
+                </ToggleGroup>
               </div>
-              <ToggleGroup type="single" defaultValue="online" className="grid w-full grid-cols-2 gap-2">
-                <ToggleGroupItem value="online" aria-label="Toggle online" className='gap-2'>
-                  <Home className='size-4' /> Online
-                </ToggleGroupItem>
-                <ToggleGroupItem value="campus-based" aria-label="Toggle campus-based" className='gap-2'>
-                  <Building className='size-4' /> Campus
-                </ToggleGroupItem>
-              </ToggleGroup>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className='font-headline text-lg'>Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className='text-sm text-muted-foreground'>Filter by status</p>
+               <div>
+                <h3 className="text-sm font-semibold mb-2 text-muted-foreground">Event Type</h3>
+                <div className='flex flex-col gap-2'>
+                    <Button variant="outline" className='justify-start'>All Types</Button>
+                    <Button variant="ghost" className='justify-start'>Hackathons</Button>
+                    <Button variant="ghost" className='justify-start'>Workshops</Button>
+                    <Button variant="ghost" className='justify-start'>Conferences</Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </aside>
@@ -72,26 +63,26 @@ export default function HackathonsPage() {
           {allEvents.map((event) => {
             const organizer = users.find(u => u.id === event.organizerId);
             return (
-              <Card key={event.id} className="flex flex-col overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20">
+              <Card key={event.id} className="flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20 hover:border-primary/30">
                 <CardHeader>
                   <div className='flex items-start justify-between'>
-                    <div className='flex items-center gap-3'>
-                      <Avatar className='size-10'>
+                    <div className='flex items-center gap-4'>
+                      <Avatar className='size-12'>
                         {organizer?.photoURL && <AvatarImage src={organizer.photoURL} alt={organizer.displayName} />}
                         <AvatarFallback>{organizer?.displayName?.substring(0, 2) ?? 'EV'}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-semibold text-sm">{organizer?.displayName}</p>
-                        <p className="text-xs text-muted-foreground">Organizer</p>
+                        <p className="font-semibold text-base">{organizer?.displayName}</p>
+                        <p className="text-sm text-muted-foreground">Organizer</p>
                       </div>
                     </div>
                     <Button variant='ghost' size='icon'>
                       <Bookmark className='size-5' />
                     </Button>
                   </div>
-                  <CardTitle className="font-headline pt-2 text-lg">{event.title}</CardTitle>
+                  <CardTitle className="font-headline pt-4 text-xl">{event.title}</CardTitle>
                 </CardHeader>
-                <CardContent className="flex-grow space-y-3">
+                <CardContent className="flex-grow space-y-4">
                   <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
                     <div className='flex items-center gap-2'>
                       <Calendar className='size-4' />
@@ -109,11 +100,11 @@ export default function HackathonsPage() {
                   </div>
 
                   <div className="flex items-center gap-2 text-sm">
-                    {event.tags.map(tag => <Badge key={tag}>{tag}</Badge>)}
+                    {event.tags.map(tag => <Badge key={tag} variant='secondary'>{tag}</Badge>)}
                   </div>
-                  <p className="text-muted-foreground pt-2 line-clamp-2 text-sm">{event.description}</p>
+                  <p className="text-muted-foreground pt-2 line-clamp-2 text-sm leading-relaxed">{event.description}</p>
                 </CardContent>
-                <div className='p-6 pt-0'>
+                <div className='p-6 pt-2'>
                   <Button className="w-full">Join Event</Button>
                 </div>
               </Card>

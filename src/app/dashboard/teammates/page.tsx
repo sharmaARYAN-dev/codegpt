@@ -43,7 +43,7 @@ export default function TeammatesPage() {
   const interests = useMemo(() => [...new Set(users.flatMap((s) => s.interests))], []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
         <h1 className="font-headline text-3xl font-bold tracking-tight">Find Your Next Teammate</h1>
         <p className="text-muted-foreground mt-1">Browse and connect with talented students across the university.</p>
@@ -75,43 +75,43 @@ export default function TeammatesPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {teammates.map((student) => {
           return (
-            <Card key={student.id} className="flex flex-col text-center transition-transform duration-300 hover:-translate-y-1 hover:shadow-primary/20 hover:shadow-lg">
-              <CardHeader className="items-center">
-                <Avatar className="h-24 w-24 border-4 border-muted">
+            <Card key={student.id} className="flex flex-col text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-primary/20 hover:shadow-lg hover:border-primary/30">
+              <CardHeader className="items-center pt-8">
+                <Avatar className="h-28 w-28 border-4 border-muted">
                   <AvatarImage src={student.photoURL} alt={student.displayName} data-ai-hint="person portrait" />
-                  <AvatarFallback>{student.displayName.substring(0, 2)}</AvatarFallback>
+                  <AvatarFallback className='text-3xl'>{student.displayName.substring(0, 2)}</AvatarFallback>
                 </Avatar>
-                <CardTitle className="mt-4 font-headline">{student.displayName}</CardTitle>
+                <CardTitle className="mt-4 font-headline text-xl">{student.displayName}</CardTitle>
                 {student.reputation?.length > 0 && (
                    <div className="flex justify-center gap-2 mt-1">
                         {student.reputation.map((rep) => {
                             const Icon = reputationIcons[rep.label as keyof typeof reputationIcons] || Star;
                             return (
-                            <Badge variant="secondary" key={rep.label} className="text-xs">
-                                <Icon className={`mr-1 h-3 w-3 ${rep.color}`} />
+                            <div key={rep.label} className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Icon className={`h-3 w-3 ${rep.color}`} />
                                 {rep.label}
-                            </Badge>
+                            </div>
                         )})}
                     </div>
                 )}
               </CardHeader>
               <CardContent className="flex-grow">
-                <div className="space-y-2">
+                <div className="space-y-4">
                     <div>
-                        <h4 className="text-sm font-semibold text-muted-foreground">Skills</h4>
-                        <div className="flex flex-wrap justify-center gap-1 mt-1">
+                        <h4 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Skills</h4>
+                        <div className="flex flex-wrap justify-center gap-1.5 mt-2">
                             {student.skills.map((skill) => (
-                            <Badge key={skill} variant="outline">
+                            <Badge key={skill} variant="secondary">
                                 {skill}
                             </Badge>
                             ))}
                         </div>
                     </div>
                      <div>
-                        <h4 className="text-sm font-semibold text-muted-foreground">Interests</h4>
-                        <div className="flex flex-wrap justify-center gap-1 mt-1">
+                        <h4 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Interests</h4>
+                        <div className="flex flex-wrap justify-center gap-1.5 mt-2">
                             {student.interests.map((interest) => (
-                            <Badge key={interest} variant="secondary">
+                            <Badge key={interest} variant="outline">
                                 {interest}
                             </Badge>
                             ))}
@@ -119,7 +119,7 @@ export default function TeammatesPage() {
                     </div>
                 </div>
               </CardContent>
-              <CardFooter>
+              <CardFooter className='p-4'>
                 <Button className="w-full">Connect</Button>
               </CardFooter>
             </Card>

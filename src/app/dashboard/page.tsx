@@ -13,7 +13,6 @@ import Link from 'next/link';
 import { Star } from 'lucide-react';
 import { useUser } from '@/firebase';
 import { feedProjects, recommendedEvents, suggestedTeammates as allTeammates, users } from '@/lib/mock-data';
-import type { Project, StudentProfile, Event } from '@/lib/types';
 import { useMemo } from 'react';
 
 export default function DashboardPage() {
@@ -21,44 +20,47 @@ export default function DashboardPage() {
 
   const suggestedTeammates = useMemo(() => {
     if (!user) return [];
-    return allTeammates.filter(u => u.id !== user.uid).slice(0, 2);
+    return allTeammates.filter(u => u.id !== user.uid).slice(0, 3);
   }, [user]);
   
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div className='lg:col-span-2 space-y-6'>
-            <h1 className="font-headline text-2xl font-bold tracking-tight">Hey {user?.displayName?.split(' ')[0]}, here&apos;s what&apos;s happening</h1>
-            <div className='space-y-4'>
+            <h1 className="font-headline text-3xl font-bold tracking-tight">Hey {user?.displayName?.split(' ')[0]}, here&apos;s what&apos;s happening</h1>
+            <div className='space-y-6'>
             {feedProjects.map((project) => {
               const owner = users.find(u => u.id === project.ownerId);
 
               return (
-                <Card key={project.id} className="transition-shadow duration-300 hover:shadow-lg">
+                <Card key={project.id} className="transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/10">
                   <CardContent className="p-6">
                     <div className='flex items-start gap-4'>
-                        <Avatar>
+                        <Avatar className='mt-1'>
                             {owner?.photoURL && <AvatarImage src={owner.photoURL} alt={owner.displayName} />}
                             <AvatarFallback>{owner?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
                         </Avatar>
                         <div className='flex-1'>
-                            <p className="font-semibold">{owner?.displayName}</p>
-                            <p className="text-sm text-muted-foreground">Project Owner</p>
-                            <h2 className="font-headline text-lg font-semibold mt-2">{project.name}</h2>
-                            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{project.description}</p>
-                            <div className="flex flex-wrap gap-2 mt-3">
+                            <div className='flex items-center justify-between'>
+                                <div>
+                                    <p className="font-semibold">{owner?.displayName}</p>
+                                    <p className="text-sm text-muted-foreground">Project Owner</p>
+                                </div>
+                                <Button asChild size="sm" variant="secondary">
+                                    <Link href={`/dashboard/projects/${project.id}`}>View Project</Link>
+                                </Button>
+                            </div>
+                            <h2 className="font-headline text-xl font-semibold mt-4">{project.name}</h2>
+                            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{project.description}</p>
+                            <div className="flex flex-wrap gap-2 mt-4">
                                 {project.tags?.map((tag) => (
                                     <Badge key={tag} variant={tag === 'AI/ML' ? 'default' : 'secondary'}>{tag}</Badge>
                                 ))}
                             </div>
-                            <div className='flex items-center justify-between mt-4'>
-                                <div className='flex items-center gap-1 text-yellow-400'>
-                                    {[...Array(5)].map((_, i) => (
-                                      <Star key={i} className={`size-4 ${i < project.rating ? 'fill-current' : ''}`} />
-                                    ))}
-                                </div>
-                                <Button asChild size="sm">
-                                    <Link href={`/dashboard/projects/${project.id}`}>View Project</Link>
-                                </Button>
+                            <div className='flex items-center gap-1 text-yellow-400 mt-4'>
+                                {[...Array(5)].map((_, i) => (
+                                  <Star key={i} className={`size-4 ${i < project.rating ? 'fill-current' : ''}`} />
+                                ))}
+                                <span className='text-xs text-muted-foreground ml-1'>({project.rating.toFixed(1)})</span>
                             </div>
                         </div>
                     </div>
@@ -68,17 +70,17 @@ export default function DashboardPage() {
             })}
             </div>
         </div>
-        <div className="space-y-6 lg:sticky top-20">
+        <div className="space-y-6 lg:sticky top-24">
             <Card>
                 <CardHeader>
                     <CardTitle className="font-headline text-lg">Recommended Events</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3">
                      {recommendedEvents.map(event => (
-                        <div key={event.id} className="p-3 rounded-lg border bg-card hover:bg-muted/50">
+                        <div key={event.id} className="p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
                             <p className="font-semibold">{event.title}</p>
                             <p className="text-sm text-muted-foreground">{new Date(event.date).toLocaleDateString()}, {event.location}</p>
-                            <Button variant="outline" size="sm" className="mt-2 w-full" asChild>
+                            <Button variant="outline" size="sm" className="mt-3 w-full" asChild>
                                 <Link href="/dashboard/hackathons">Learn More</Link>
                             </Button>
                         </div>

@@ -35,13 +35,13 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
         <div className='flex justify-between items-start'>
             <div>
-                <h1 className="font-headline text-3xl font-bold tracking-tight">
+                <h1 className="font-headline text-4xl font-bold tracking-tight">
                 {project.name}
                 </h1>
-                <div className="flex flex-wrap gap-2 mt-2">
+                <div className="flex flex-wrap gap-2 mt-3">
                 {project.tags.map((tag) => (
                     <Badge
                     key={tag}
@@ -54,12 +54,12 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
                 ))}
                 </div>
             </div>
-             <Button>
+             <Button size="lg">
                 Join Team
             </Button>
         </div>
       
-      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+      <div className="flex items-center gap-6 text-sm text-muted-foreground">
         <div className='flex items-center gap-2'>
             <Users className='size-4' />
             <span>{teamMembers.length} Members</span>
@@ -75,7 +75,7 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-8">
           <Card>
             <CardHeader>
               <CardTitle className="font-headline text-xl">
@@ -83,7 +83,7 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground leading-relaxed">
                 {project.description}
               </p>
             </CardContent>
@@ -98,15 +98,15 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
             <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {teamMembers.map((member) => {
                 return (
-                  <div key={member.id} className="flex items-center gap-3 p-3 rounded-md border bg-card hover:bg-muted/50">
-                    <Avatar className="size-10">
+                  <div key={member.id} className="flex items-center gap-4 p-3 rounded-md border bg-card hover:bg-muted/50 transition-colors">
+                    <Avatar className="size-12">
                       <AvatarImage src={member.photoURL} alt={member.displayName} />
                       <AvatarFallback>
                         {member.displayName.substring(0, 2)}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-semibold">{member.displayName}</p>
+                      <p className="font-semibold text-base">{member.displayName}</p>
                       <p className="text-sm text-muted-foreground">
                         {project.ownerId === member.id ? 'Project Owner' : 'Member'}
                       </p>
@@ -124,14 +124,13 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Comment section can be built out here */}
               <p className='text-sm text-muted-foreground'>No comments yet. Be the first to share your thoughts!</p>
                <Button variant="outline">Add Comment</Button>
             </CardContent>
           </Card>
         </div>
 
-        <div className="space-y-6 lg:sticky top-20">
+        <div className="space-y-8 lg:sticky top-24">
           <Card>
             <CardHeader>
               <CardTitle className="font-headline text-xl">
@@ -140,8 +139,8 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
             </CardHeader>
             <CardContent className="space-y-4">
                 {openRoles.map((role) => (
-                    <div key={role.title} className="flex items-center gap-3 p-3 rounded-md border bg-card hover:bg-muted/50">
-                       <Avatar>
+                    <div key={role.title} className="flex items-start gap-4 p-3 rounded-md border bg-card hover:bg-muted/50 transition-colors">
+                       <Avatar className='mt-1'>
                             <AvatarImage src={role.avatar} />
                             <AvatarFallback>
                             {role.title.substring(0, 2)}
@@ -149,9 +148,9 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
                         </Avatar>
                         <div className="flex-1">
                             <p className="font-semibold">{role.title}</p>
-                            <p className="text-sm text-muted-foreground line-clamp-1">{role.description}</p>
+                            <p className="text-sm text-muted-foreground line-clamp-2">{role.description}</p>
+                            <Button size="sm" variant="secondary" className='mt-2'>Apply</Button>
                         </div>
-                         <Button size="sm" variant="secondary">Apply</Button>
                     </div>
                 ))}
             </CardContent>
@@ -162,12 +161,12 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
                     Project Links
                 </CardTitle>
             </CardHeader>
-            <CardContent className='space-y-3'>
-                <Link href="#" className='flex items-center gap-2 text-sm text-muted-foreground hover:text-primary'>
+            <CardContent className='space-y-4'>
+                <Link href="#" className='flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors'>
                     <ExternalLink className='size-4' />
                     <span>View Live Demo</span>
                 </Link>
-                 <Link href="#" className='flex items-center gap-2 text-sm text-muted-foreground hover:text-primary'>
+                 <Link href="#" className='flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors'>
                     <GitFork className='size-4' />
                     <span>GitHub Repository</span>
                 </Link>
