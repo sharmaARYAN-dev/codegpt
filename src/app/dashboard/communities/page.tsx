@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowBigUp, MessageSquare } from 'lucide-react';
+import { ArrowBigUp, MessageSquare, Bot } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
@@ -120,7 +120,11 @@ export default function CommunitiesPage() {
                 const upvoteCount = post.upvotes?.length || 0;
                 return (
                   <Card key={post.id} className="p-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20">
-                    <Link href={`/dashboard/communities/${post.id}`} className="block p-6">
+                    <Link href={`/dashboard/communities/${post.id}`} className="block p-6" onClick={(e) => {
+                       if ((e.target as HTMLElement).closest('button')) {
+                          e.preventDefault();
+                       }
+                    }}>
                       <div className='mb-4 flex items-start sm:items-center gap-3 flex-wrap'>
                         <Avatar className='size-9'>
                           {author?.photoURL && <AvatarImage src={author.photoURL} alt={author.displayName} />}
@@ -130,7 +134,15 @@ export default function CommunitiesPage() {
                           <p className="text-sm font-semibold truncate">{author?.displayName}</p>
                           <p className="text-xs text-muted-foreground">{post.createdAt?.toDate()?.toLocaleDateString()}</p>
                         </div>
-                        <Badge variant="secondary" className='ml-0 sm:ml-auto shrink-0'>{post.community}</Badge>
+                        <div className='ml-auto flex items-center gap-2'>
+                          {post.isAiGenerated && (
+                              <Badge variant="outline" className='border-primary/50 text-primary'>
+                                  <Bot className="mr-1.5 h-3 w-3" />
+                                  AI Generated
+                              </Badge>
+                          )}
+                          <Badge variant="secondary" className='shrink-0'>{post.community}</Badge>
+                        </div>
                       </div>
                       <h2 className="font-headline text-xl font-semibold">{post.title}</h2>
                       <p className='text-muted-foreground mt-2 line-clamp-2 text-sm leading-relaxed'>{post.content}</p>

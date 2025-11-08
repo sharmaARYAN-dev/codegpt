@@ -47,6 +47,7 @@ export interface Project {
   createdAt: Timestamp;
   updatedAt: Timestamp;
   commentCount?: number;
+  upvotes?: string[];
 };
 
 export interface ChatMessage {
@@ -82,6 +83,7 @@ export interface ForumPost {
   comments: number; // Changed from bookmarkCount
   createdAt: Timestamp;
   updatedAt: Timestamp;
+  isAiGenerated?: boolean;
 };
 
 export interface Comment {

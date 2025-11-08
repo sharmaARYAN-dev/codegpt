@@ -9,7 +9,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowBigUp, MessageSquare, Loader2 } from 'lucide-react';
+import { ArrowBigUp, MessageSquare, Loader2, Bot } from 'lucide-react';
 import { useDoc } from '@/firebase/firestore/use-doc';
 import { db } from '@/lib/firebase';
 import { doc, collection, addDoc, serverTimestamp, updateDoc, increment, query, orderBy, arrayUnion, deleteDoc, writeBatch } from 'firebase/firestore';
@@ -328,7 +328,15 @@ export default function PostPage({ params }: { params: { id: string } }) {
             <div>
                 <div className="flex justify-between items-start">
                     <div>
-                        <Badge variant="secondary">{post.community}</Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary">{post.community}</Badge>
+                          {post.isAiGenerated && (
+                              <Badge variant="outline" className='border-primary/50 text-primary'>
+                                  <Bot className="mr-1.5 h-3 w-3" />
+                                  AI Generated
+                              </Badge>
+                          )}
+                        </div>
                         <h1 className="font-headline text-3xl md:text-4xl font-bold tracking-tight mt-2">{post.title}</h1>
                     </div>
                     {isOwner && <ItemOptionsMenu onEdit={() => setIsEditing(true)} onDelete={() => setIsDeleting(true)} />}
