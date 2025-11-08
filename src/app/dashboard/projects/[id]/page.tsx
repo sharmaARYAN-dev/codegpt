@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { MessageSquare, Users, GitFork, ExternalLink, Loader2, Share2, Send } from 'lucide-react';
 import Link from 'next/link';
 import { useDoc } from '@/firebase/firestore/use-doc';
-import { collection, doc, query, orderBy, addDoc, serverTimestamp, updateDoc, increment } from 'firebase/firestore';
+import { collection, doc, query, orderBy, addDoc, serverTimestamp, updateDoc, increment, arrayUnion } from 'firebase/firestore';
 import type { Project, StudentProfile, ChatMessage } from '@/lib/types';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -94,8 +94,26 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
   ];
 
   const handleJoinTeam = () => {
-    toast.info("Request Sent!", {
-      description: `Your request to join ${project?.name} has been sent to the project owner.`,
+    if (!db || !user || !project) {
+        toast.error("You must be logged in to join a team.");
+        return;
+    }
+    
+    const projectDocRef = doc(db, 'projects', project.id);
+    const requestData = {
+        uid: user.id,
+        message: `User ${user.displayName} wants to join the project.`,
+        createdAt: serverTimestamp(),
+    };
+
+    const promise = updateDoc(projectDocRef, {
+        joinRequests: arrayUnion(requestData)
+    });
+
+    toast.promise(promise, {
+        loading: "Sending your request...",
+        success: `Your request to join ${project.name} has been sent to the project owner.`,
+        error: "Failed to send join request."
     });
   }
   

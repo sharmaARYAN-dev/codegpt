@@ -25,8 +25,8 @@ service cloud.firestore {
     match /projects/{projectId} {
       allow read: if isSignedIn();
       allow create: if isSignedIn();
-      // Only owner can update project details like commentCount
-      allow update: if isOwner(resource.data.ownerId);
+      // Only owner can update project details like commentCount, anyone can send a join request
+      allow update: if isOwner(resource.data.ownerId) || request.resource.data.keys().hasOnly(['joinRequests']);
       allow delete: if isOwner(resource.data.ownerId);
       match /chat/{msgId} {
         allow read: if isSignedIn();
