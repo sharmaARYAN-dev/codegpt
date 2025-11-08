@@ -5,6 +5,20 @@ import { Toaster } from '@/components/ui/sonner';
 import { FirebaseClientProvider } from '@/firebase';
 import { ThemeProvider } from '@/components/theme-provider';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
+
+const fontHeadline = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-headline',
+});
+
+const fontBody = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-body',
+});
+
 
 export const metadata: Metadata = {
   title: 'Universe',
@@ -19,12 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-      </head>
-      <body className={cn("font-body antialiased")}>
+      <body className={cn("font-body antialiased", fontHeadline.variable, fontBody.variable)}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

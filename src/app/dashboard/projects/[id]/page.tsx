@@ -145,7 +145,7 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
         <div className="lg:col-span-2 space-y-8">
           <Card>
             <CardHeader>
-              <CardTitle className="font-headline text-xl">
+              <CardTitle>
                 Project Description
               </CardTitle>
             </CardHeader>
@@ -158,7 +158,7 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
 
           <Card>
             <CardHeader>
-              <CardTitle className="font-headline text-xl">
+              <CardTitle>
                 Team Members
               </CardTitle>
             </CardHeader>
@@ -186,7 +186,7 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
 
           <Card>
             <CardHeader>
-              <CardTitle className="font-headline text-xl">
+              <CardTitle>
                 Comments
               </CardTitle>
             </CardHeader>
@@ -200,7 +200,7 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
         <div className="space-y-8 lg:sticky top-24">
           <Card>
             <CardHeader>
-              <CardTitle className="font-headline text-xl">
+              <CardTitle>
                 Open Roles
               </CardTitle>
             </CardHeader>
@@ -224,7 +224,7 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
           </Card>
           <Card>
             <CardHeader>
-                <CardTitle className="font-headline text-xl">
+                <CardTitle>
                     Project Links
                 </CardTitle>
             </CardHeader>
