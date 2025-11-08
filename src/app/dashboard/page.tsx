@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Star } from 'lucide-react';
-import { collection, query, limit, orderBy } from 'firebase/firestore';
+import { collection, query, limit, orderBy, where, Timestamp } from 'firebase/firestore';
 import type { Project, Event, StudentProfile } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMemo } from 'react';
@@ -52,7 +52,11 @@ export default function DashboardPage() {
   const projectsQuery = useMemo(() => db ? query(collection(db, 'projects'), orderBy('createdAt', 'desc'), limit(3)) : null, [db]);
   const { data: feedProjects, loading: loadingProjects } = useCollection<Project>(projectsQuery, 'projects');
   
-  const eventsQuery = useMemo(() => db ? query(collection(db, 'events'), limit(2)) : null, [db]);
+  const eventsQuery = useMemo(() => {
+    if (!db) return null;
+    const today = Timestamp.now();
+    return query(collection(db, 'events'), where('date', '>=', today), orderBy('date', 'asc'), limit(2));
+  }, [db]);
   const { data: recommendedEvents, loading: loadingEvents } = useCollection<Event>(eventsQuery, 'events');
 
   const usersQuery = useMemo(() => db ? collection(db, 'users') : null, [db]);
@@ -60,7 +64,25 @@ export default function DashboardPage() {
 
   const suggestedTeammates = useMemo(() => {
     if (!user || !users) return [];
-    return users.filter(u => u.id !== user.id).slice(0, 3);
+    
+    const currentUserSkills = new Set(user.skills || []);
+    const currentUserInterests = new Set(user.interests || []);
+
+    const scoredUsers = users
+      .filter(u => u.id !== user.id)
+      .map(u => {
+        let score = 0;
+        const sharedSkills = u.skills?.filter(skill => currentUserSkills.has(skill)) || [];
+        const sharedInterests = u.interests?.filter(interest => currentUserInterests.has(interest)) || [];
+        
+        score += sharedSkills.length * 2;
+        score += sharedInterests.length;
+
+        return { ...u, score };
+      })
+      .filter(u => u.score > 0);
+
+    return scoredUsers.sort((a, b) => b.score - a.score).slice(0, 3);
   }, [user, users]);
 
   const getProjectOwner = (ownerId: string) => users?.find(u => u.id === ownerId);
