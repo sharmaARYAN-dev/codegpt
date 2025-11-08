@@ -26,6 +26,9 @@ export interface StudentProfile {
     teamwork: number;
     productivity: number;
   };
+  connections?: string[];
+  incomingRequests?: string[];
+  sentRequests?: string[];
 };
 
 export interface Project {
@@ -61,7 +64,7 @@ export interface ChatMessage {
 }
 
 export interface Event {
-  id: string;
+  id:string;
   title: string;
   organizerId: string; // Changed from organizerUid
   date: Timestamp;

@@ -3,6 +3,7 @@
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -18,58 +19,155 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Award, ShieldCheck, Star, Trophy, Loader2, Github, Linkedin, Instagram } from 'lucide-react';
+import { Search, Github, Linkedin, Check, X, UserPlus, Clock } from 'lucide-react';
 import { useCollection } from '@/firebase/firestore/use-collection';
-import { collection } from 'firebase/firestore';
+import { collection, doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import type { StudentProfile } from '@/lib/types';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
-import { RedditIcon, WhatsAppIcon } from '@/components/icons';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
-
+import { toast } from 'sonner';
 
 function TeammatesSkeleton() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {Array.from({ length: 8 }).map((_, i) => (
-        <Card key={i} className="flex flex-col text-center">
-          <CardHeader className="items-center pt-8">
-            <Skeleton className="h-28 w-28 rounded-full" />
-            <Skeleton className="h-6 w-3/5 mt-4" />
-            <Skeleton className="h-4 w-4/5 mt-1" />
-          </CardHeader>
-          <CardContent className="flex-grow space-y-4">
-            <div>
-              <Skeleton className="h-4 w-1/4 mx-auto mb-2" />
-              <div className="flex flex-wrap justify-center gap-1.5 mt-2">
-                <Skeleton className="h-5 w-16 rounded-full" />
-                <Skeleton className="h-5 w-20 rounded-full" />
+    <div className="space-y-8">
+      <Card>
+        <CardHeader>
+           <Skeleton className="h-6 w-40" />
+           <Skeleton className="h-4 w-64 mt-1" />
+        </CardHeader>
+        <CardContent>
+           <Skeleton className="h-24 w-full" />
+        </CardContent>
+      </Card>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <Card key={i} className="flex flex-col text-center">
+            <CardHeader className="items-center pt-8">
+              <Skeleton className="h-28 w-28 rounded-full" />
+              <Skeleton className="h-6 w-3/5 mt-4" />
+              <Skeleton className="h-4 w-4/5 mt-1" />
+            </CardHeader>
+            <CardContent className="flex-grow space-y-4">
+              <div>
+                <Skeleton className="h-4 w-1/4 mx-auto mb-2" />
+                <div className="flex flex-wrap justify-center gap-1.5 mt-2">
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                  <Skeleton className="h-5 w-20 rounded-full" />
+                </div>
               </div>
-            </div>
-            <div>
-              <Skeleton className="h-4 w-1/4 mx-auto mb-2" />
-              <div className="flex flex-wrap justify-center gap-1.5 mt-2">
-                <Skeleton className="h-5 w-12 rounded-full" />
-                <Skeleton className="h-5 w-16 rounded-full" />
+              <div>
+                <Skeleton className="h-4 w-1/4 mx-auto mb-2" />
+                <div className="flex flex-wrap justify-center gap-1.5 mt-2">
+                  <Skeleton className="h-5 w-12 rounded-full" />
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </div>
               </div>
-            </div>
-          </CardContent>
-          <CardFooter className='p-4'>
-            <Skeleton className="h-10 w-full" />
-          </CardFooter>
-        </Card>
-      ))}
+            </CardContent>
+            <CardFooter className='p-4'>
+              <Skeleton className="h-10 w-full" />
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
     </div>
   );
+}
+
+function useConnection(currentUser: StudentProfile | null) {
+    const sendRequest = useCallback(async (targetUserId: string) => {
+        if (!currentUser || !db) return;
+        
+        const currentUserRef = doc(db, "users", currentUser.id);
+        const targetUserRef = doc(db, "users", targetUserId);
+
+        const promise = Promise.all([
+             updateDoc(currentUserRef, { sentRequests: arrayUnion(targetUserId) }),
+             updateDoc(targetUserRef, { incomingRequests: arrayUnion(currentUser.id) })
+        ]);
+        
+        toast.promise(promise, {
+            loading: 'Sending request...',
+            success: 'Connection request sent!',
+            error: 'Failed to send request.',
+        });
+
+    }, [currentUser]);
+
+    const acceptRequest = useCallback(async (requesterId: string) => {
+        if (!currentUser || !db) return;
+
+        const currentUserRef = doc(db, "users", currentUser.id);
+        const requesterRef = doc(db, "users", requesterId);
+
+        const promise = Promise.all([
+            updateDoc(currentUserRef, {
+                incomingRequests: arrayRemove(requesterId),
+                connections: arrayUnion(requesterId)
+            }),
+            updateDoc(requesterRef, {
+                sentRequests: arrayRemove(currentUser.id),
+                connections: arrayUnion(currentUser.id)
+            })
+        ]);
+        
+         toast.promise(promise, {
+            loading: 'Accepting request...',
+            success: 'Connection accepted!',
+            error: 'Failed to accept request.',
+        });
+    }, [currentUser]);
+
+    const declineRequest = useCallback(async (requesterId: string) => {
+        if (!currentUser || !db) return;
+        const currentUserRef = doc(db, "users", currentUser.id);
+        const requesterRef = doc(db, "users", requesterId);
+
+        const promise = Promise.all([
+            updateDoc(currentUserRef, { incomingRequests: arrayRemove(requesterId) }),
+            updateDoc(requesterRef, { sentRequests: arrayRemove(currentUser.id) })
+        ]);
+
+        toast.promise(promise, {
+            loading: 'Declining request...',
+            success: 'Request declined.',
+            error: 'Failed to decline request.',
+        });
+    }, [currentUser]);
+
+    return { sendRequest, acceptRequest, declineRequest };
+}
+
+
+function ConnectionRequestCard({ request, onAccept, onDecline }: { request: StudentProfile, onAccept: () => void, onDecline: () => void }) {
+    return (
+        <div className="flex items-center justify-between p-3 rounded-md border bg-card hover:bg-muted/50">
+            <div className="flex items-center gap-3">
+                 <Avatar className="h-11 w-11">
+                    <AvatarImage src={request.photoURL} alt={request.displayName} />
+                    <AvatarFallback className='text-sm'>{request.displayName.substring(0, 2)}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                    <p className="font-semibold truncate">{request.displayName}</p>
+                    <p className="text-xs text-muted-foreground truncate">{request.skills.slice(0, 3).join(', ')}</p>
+                </div>
+            </div>
+            <div className="flex items-center gap-2">
+                <Button size="icon" variant="outline" className="h-8 w-8 bg-green-500/10 text-green-600 border-green-500/30 hover:bg-green-500/20 hover:text-green-700" onClick={onAccept}><Check className="h-4 w-4" /></Button>
+                <Button size="icon" variant="outline" className="h-8 w-8 bg-red-500/10 text-red-600 border-red-500/30 hover:bg-red-500/20 hover:text-red-700" onClick={onDecline}><X className="h-4 w-4" /></Button>
+            </div>
+        </div>
+    )
 }
 
 export default function TeammatesPage() {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedInterest, setSelectedInterest] = useState('all');
+  const { sendRequest, acceptRequest, declineRequest } = useConnection(user);
 
   const usersQuery = useMemo(() => db ? collection(db, 'users') : null, [db]);
   const { data: users, loading } = useCollection<StudentProfile>(usersQuery, 'users');
@@ -97,6 +195,18 @@ export default function TeammatesPage() {
     const allInterests = users.flatMap((s) => s.interests || []);
     return ['all', ...Array.from(new Set(allInterests))];
   }, [users]);
+  
+  const connectionRequests = useMemo(() => {
+    if (!user || !users) return [];
+    return users.filter(u => user.incomingRequests?.includes(u.id));
+  }, [user, users]);
+
+  const getButtonState = (studentId: string) => {
+    if (!user) return 'CONNECT';
+    if (user.connections?.includes(studentId)) return 'CONNECTED';
+    if (user.sentRequests?.includes(studentId)) return 'PENDING';
+    return 'CONNECT';
+  }
 
   return (
     <div className="space-y-8">
@@ -129,9 +239,32 @@ export default function TeammatesPage() {
       </Card>
 
       {loading ? <TeammatesSkeleton /> :
+      <>
+        {connectionRequests.length > 0 && (
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline text-xl">Connection Requests</CardTitle>
+                    <CardDescription>You have {connectionRequests.length} pending connection request{connectionRequests.length > 1 && 's'}.</CardDescription>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {connectionRequests.map(req => (
+                        <ConnectionRequestCard 
+                            key={req.id} 
+                            request={req}
+                            onAccept={() => acceptRequest(req.id)}
+                            onDecline={() => declineRequest(req.id)}
+                        />
+                    ))}
+                </CardContent>
+            </Card>
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {teammates.map((student) => {
+            if (user?.incomingRequests?.includes(student.id)) return null;
+
             const hasSocials = student.links && Object.values(student.links).some(link => !!link);
+            const buttonState = getButtonState(student.id);
+
             return (
               <Card key={student.id} className="flex flex-col text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-primary/20 hover:shadow-lg hover:border-primary/30 group">
                 <CardHeader className="flex-1 flex flex-col items-center pt-8">
@@ -165,35 +298,45 @@ export default function TeammatesPage() {
                       </div>
                   </div>
                 </CardContent>
-                <CardFooter className='p-4'>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button className="w-full" disabled={!hasSocials}>Connect</Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56">
-                      {student.links?.github && (
-                        <Link href={student.links.github} target="_blank" rel="noopener noreferrer">
-                          <DropdownMenuItem>
-                            <Github className="mr-2 h-4 w-4" />
-                            <span>View GitHub</span>
-                          </DropdownMenuItem>
-                        </Link>
-                      )}
-                      {student.links?.linkedin && (
-                         <Link href={student.links.linkedin} target="_blank" rel="noopener noreferrer">
-                          <DropdownMenuItem>
-                            <Linkedin className="mr-2 h-4 w-4" />
-                            <span>View LinkedIn</span>
-                          </DropdownMenuItem>
-                        </Link>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                <CardFooter className='p-4 flex-col gap-2'>
+                    <Button 
+                        className="w-full" 
+                        disabled={buttonState !== 'CONNECT'}
+                        onClick={() => sendRequest(student.id)}
+                    >
+                       {buttonState === 'CONNECT' && <><UserPlus className="mr-2 h-4 w-4" /> Connect</>}
+                       {buttonState === 'PENDING' && <><Clock className="mr-2 h-4 w-4" /> Pending</>}
+                       {buttonState === 'CONNECTED' && <><Check className="mr-2 h-4 w-4" /> Connected</>}
+                    </Button>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                        <Button className="w-full" variant="secondary" disabled={!hasSocials}>View Socials</Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56">
+                        {student.links?.github && (
+                            <Link href={student.links.github} target="_blank" rel="noopener noreferrer">
+                            <DropdownMenuItem>
+                                <Github className="mr-2 h-4 w-4" />
+                                <span>View GitHub</span>
+                            </DropdownMenuItem>
+                            </Link>
+                        )}
+                        {student.links?.linkedin && (
+                            <Link href={student.links.linkedin} target="_blank" rel="noopener noreferrer">
+                            <DropdownMenuItem>
+                                <Linkedin className="mr-2 h-4 w-4" />
+                                <span>View LinkedIn</span>
+                            </DropdownMenuItem>
+                            </Link>
+                        )}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </CardFooter>
               </Card>
             );
           })}
         </div>
+      </>
       }
     </div>
   );

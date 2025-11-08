@@ -13,7 +13,12 @@ service cloud.firestore {
     match /users/{uid} {
       allow read: if isSignedIn();
       allow create: if isOwner(uid);
-      allow update: if isOwner(uid);
+      // Allow user to update their own profile, but not critical fields
+      allow update: if isOwner(uid) && !(request.resource.data.keys().hasAll(['connections', 'incomingRequests', 'sentRequests']));
+      
+      // Allow user to manage their own connection lists
+      allow update: if isOwner(uid) && request.resource.data.keys().hasOnly(['connections', 'incomingRequests', 'sentRequests', 'displayName', 'email', 'photoURL', 'skills', 'interests', 'bio', 'links', 'reputation', 'updatedAt', 'college', 'branch', 'year', 'xp', 'level', 'softSkills']);
+
       allow delete: if false;
     }
 
