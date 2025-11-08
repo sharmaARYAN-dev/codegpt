@@ -29,13 +29,12 @@ export function useCollection<T>(query: Query<DocumentData> | null) {
       },
       (err) => {
         const permissionError = new FirestorePermissionError({
-          path: query.path,
+          path: (query as any)._query.path.canonical,
           operation: 'list',
         });
         errorEmitter.emit('permission-error', permissionError);
         setError(permissionError);
         setLoading(false);
-        console.error("Error fetching collection:", err);
       }
     );
 
