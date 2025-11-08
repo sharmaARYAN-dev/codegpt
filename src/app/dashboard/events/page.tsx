@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import type { Event, StudentProfile } from '@/lib/types';
-import { collection, query, where, orderBy, type QueryConstraint, doc, deleteDoc } from 'firebase/firestore';
+import { collection, query, where, orderBy, type QueryConstraint, doc, deleteDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { useMemo, useState } from 'react';
@@ -50,7 +50,7 @@ function EventsSkeleton() {
 
 type EventType = 'All' | 'Hackathon' | 'Workshop' | 'Conference';
 
-function EventCard({ event, users, onJoin, onEdit, onDelete }: { event: Event, users: StudentProfile[] | null, onJoin: (eventName: string) => void, onEdit: (event: Event) => void, onDelete: (eventId: string, eventName: string) => void }) {
+function EventCard({ event, users, onJoin, onEdit, onDelete, onBookmark, isBookmarked }: { event: Event, users: StudentProfile[] | null, onJoin: (eventName: string) => void, onEdit: (event: Event) => void, onDelete: (eventId: string, eventName: string) => void, onBookmark: () => void, isBookmarked: boolean }) {
     const { user } = useAuth();
     const organizer = users?.find(u => u.id === event.organizerId);
     const isOwner = user && user.id === event.organizerId;
@@ -73,8 +73,8 @@ function EventCard({ event, users, onJoin, onEdit, onDelete }: { event: Event, u
                         {isOwner ? (
                              <ItemOptionsMenu onEdit={() => onEdit(event)} onDelete={() => onDelete(event.id, event.title)} />
                         ) : (
-                            <Button variant='ghost' size='icon'>
-                                <Bookmark className='size-5' />
+                            <Button variant='ghost' size='icon' onClick={onBookmark}>
+                                <Bookmark className={cn('size-5', isBookmarked && 'fill-primary text-primary')} />
                             </Button>
                         )}
                     </div>
@@ -106,6 +106,7 @@ function EventCard({ event, users, onJoin, onEdit, onDelete }: { event: Event, u
 }
 
 export default function EventsPage() {
+  const { user } = useAuth();
   const [activeType, setActiveType] = useState<EventType>('All');
   const [locationType, setLocationType] = useState('all');
   const [isCreateEventOpen, setCreateEventOpen] = useState(false);
@@ -165,6 +166,33 @@ export default function EventsPage() {
   const handleJoinEvent = (eventName: string) => {
     toast.success('Successfully Registered!', {
       description: `You have joined the event: ${eventName}.`,
+    });
+  }
+
+  const handleBookmark = (event: Event) => {
+    if (!db || !user) {
+        toast.error("You must be logged in to bookmark an event.");
+        return;
+    }
+    const userDocRef = doc(db, 'users', user.id);
+    const isBookmarked = user.bookmarkedEvents?.includes(event.id);
+
+    const promise = updateDoc(userDocRef, {
+        bookmarkedEvents: isBookmarked ? arrayRemove(event.id) : arrayUnion(event.id)
+    }).catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+            path: userDocRef.path,
+            operation: 'update',
+            requestResourceData: { bookmarkedEvents: `array${isBookmarked ? 'Remove' : 'Union'}(${event.id})` },
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        throw serverError;
+    });
+
+    toast.promise(promise, {
+        loading: isBookmarked ? "Removing bookmark..." : "Adding bookmark...",
+        success: isBookmarked ? "Event removed from your bookmarks." : "Event bookmarked successfully!",
+        error: "Failed to update bookmarks."
     });
   }
   
@@ -232,7 +260,16 @@ export default function EventsPage() {
         {isLoading ? <EventsSkeleton /> : (
             <main className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
                 {sortedEvents?.map((event) => (
-                  <EventCard key={event.id} event={event} users={users} onJoin={handleJoinEvent} onEdit={handleCreateOrEdit} onDelete={handleDelete} />
+                  <EventCard 
+                    key={event.id} 
+                    event={event} 
+                    users={users} 
+                    onJoin={handleJoinEvent} 
+                    onEdit={handleCreateOrEdit} 
+                    onDelete={handleDelete}
+                    onBookmark={() => handleBookmark(event)}
+                    isBookmarked={user?.bookmarkedEvents?.includes(event.id) ?? false}
+                  />
                 ))}
             </main>
         )}

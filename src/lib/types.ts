@@ -31,6 +31,7 @@ export interface StudentProfile {
   incomingRequests?: string[];
   sentRequests?: string[];
   bookmarks?: string[];
+  bookmarkedEvents?: string[];
 };
 
 export interface Project {
