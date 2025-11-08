@@ -24,6 +24,7 @@ import { ItemOptionsMenu } from '@/components/item-options-menu';
 import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import { cn } from '@/lib/utils';
 
 function EventsSkeleton() {
   return (
