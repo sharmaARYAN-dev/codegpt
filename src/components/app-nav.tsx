@@ -8,7 +8,7 @@ import {
   SidebarFooter,
   SidebarContent,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Users, FolderKanban, MessageSquare, LogOut, Swords, Lightbulb, User as UserIcon } from 'lucide-react';
+import { LayoutDashboard, Users, FolderKanban, MessageSquare, LogOut, Swords, Lightbulb, User as UserIcon, Orbit } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/firebase';
@@ -44,7 +44,12 @@ export function AppNav() {
 
   return (
     <>
-      <SidebarHeader className="hidden border-b border-sidebar-border md:flex" />
+      <SidebarHeader className="hidden items-center justify-center border-b border-sidebar-border md:flex">
+        <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
+          <Orbit className="h-6 w-6 text-primary" />
+          <span className="text-lg">Universe</span>
+        </Link>
+      </SidebarHeader>
       <SidebarContent className="p-2">
         <SidebarMenu>
           {navItems.map((item) => (

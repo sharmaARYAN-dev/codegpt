@@ -48,7 +48,7 @@ export function Header() {
         </SidebarTrigger>
       </div>
 
-       <div className="hidden items-center gap-2 md:ml-4">
+       <div className="hidden items-center gap-2 md:ml-4 md:hidden">
             <h1 className="font-headline text-xl font-semibold tracking-tight">Universe</h1>
         </div>
 
