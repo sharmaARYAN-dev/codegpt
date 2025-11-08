@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowBigUp, MessageSquare, Loader2 } from 'lucide-react';
+import { ArrowBigUp, MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
@@ -65,13 +65,13 @@ export default function CommunitiesPage() {
       return query(coll, where('community', '==', activeFilter), orderBy('createdAt', 'desc'));
     }
     return query(coll, orderBy('createdAt', 'desc'));
-  }, [activeFilter, db]);
+  }, [activeFilter]);
   const { data: forumPosts, loading: loadingPosts } = useCollection<ForumPost>(postsQuery, 'forumPosts');
 
-  const projectsQuery = useMemo(() => db ? query(collection(db, 'projects'), orderBy('createdAt', 'desc'), limit(2)) : null, [db]);
+  const projectsQuery = useMemo(() => db ? query(collection(db, 'projects'), orderBy('createdAt', 'desc'), limit(2)) : null, []);
   const { data: suggestedProjects, loading: loadingProjects } = useCollection<Project>(projectsQuery, 'projects');
 
-  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, [db]);
+  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, []);
   const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery, 'users');
 
   const handleUpvote = (postId: string) => {
@@ -120,7 +120,7 @@ export default function CommunitiesPage() {
                 const upvoteCount = post.upvotes?.length || 0;
                 return (
                   <Card key={post.id} className="p-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20">
-                    <CardContent className="p-6">
+                    <Link href={`/dashboard/communities/${post.id}`} className="block p-6">
                       <div className='mb-4 flex items-start sm:items-center gap-3 flex-wrap'>
                         <Avatar className='size-9'>
                           {author?.photoURL && <AvatarImage src={author.photoURL} alt={author.displayName} />}
@@ -134,9 +134,9 @@ export default function CommunitiesPage() {
                       </div>
                       <h2 className="font-headline text-xl font-semibold">{post.title}</h2>
                       <p className='text-muted-foreground mt-2 line-clamp-2 text-sm leading-relaxed'>{post.content}</p>
-                    </CardContent>
+                    </Link>
                     <div className="px-6 pb-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                      <Button variant='outline' size='sm' className='text-primary border-primary/50 hover:bg-primary/10 hover:text-primary' onClick={() => handleUpvote(post.id)}>
+                      <Button variant='outline' size='sm' className='text-primary border-primary/50 hover:bg-primary/10 hover:text-primary' onClick={(e) => {e.stopPropagation(); handleUpvote(post.id)}}>
                         <ArrowBigUp className="mr-2 h-4 w-4" />
                         Upvote ({upvoteCount})
                       </Button>
@@ -146,7 +146,7 @@ export default function CommunitiesPage() {
                       </div>
                       <div className="flex-1 min-w-[10px]"></div>
                       <Button size='sm' asChild>
-                        <Link href={`/dashboard/communities/${post.id}`}>Join Discussion</Link>
+                        <Link href={`/dashboard/communities/${post.id}`} onClick={(e) => e.stopPropagation()}>Join Discussion</Link>
                       </Button>
                     </div>
                   </Card>

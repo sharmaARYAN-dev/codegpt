@@ -218,10 +218,10 @@ export default function PostPage({ params }: { params: { id: string } }) {
   const { data: author, loading: loadingAuthor } = useDoc<StudentProfile>(authorRef);
 
   const commentsPath = useMemo(() => `forumPosts/${id}/comments`, [id]);
-  const commentsQuery = useMemo(() => db ? query(collection(db, commentsPath), orderBy('createdAt', 'asc')) : null, [db, commentsPath]);
-  const { data: comments, loading: loadingComments } = useCollection<Comment>(commentsQuery, `forumPosts/${id}/comments`);
+  const commentsQuery = useMemo(() => db ? query(collection(db, commentsPath), orderBy('createdAt', 'asc')) : null, [commentsPath]);
+  const { data: comments, loading: loadingComments } = useCollection<Comment>(commentsQuery, commentsPath);
 
-  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, [db]);
+  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, []);
   const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery, 'users');
 
   const handleDeletePost = async () => {

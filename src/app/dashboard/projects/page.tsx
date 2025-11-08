@@ -70,10 +70,10 @@ export default function ProjectsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
 
-  const projectsQuery = useMemo(() => db ? query(collection(db, 'projects'), orderBy('createdAt', 'desc')) : null, [db]);
+  const projectsQuery = useMemo(() => db ? query(collection(db, 'projects'), orderBy('createdAt', 'desc')) : null, []);
   const { data: allProjects, loading: loadingProjects } = useCollection<Project>(projectsQuery, 'projects');
 
-  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, [db]);
+  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, []);
   const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery, 'users');
 
   const filters = ['All', 'Web Dev', 'AI/ML', 'Mobile', 'Game Dev'];
@@ -145,7 +145,9 @@ export default function ProjectsPage() {
                     <span>{project.repo ? 1 : 0}</span>
                   </div>
                 </div>
-                <Button variant="secondary">View</Button>
+                <Button variant="secondary" asChild>
+                  <Link href={`/dashboard/projects/${project.id}`}>View</Link>
+                </Button>
               </div>
             </Card>
           </Link>
