@@ -103,7 +103,7 @@ export function Header() {
                     </div>
                     <div className="flex-1">
                        <p className={`text-sm ${!notif.isRead && 'font-semibold'}`}>{notif.message}</p>
-                       <p className="text-xs text-muted-foreground">{formatDistanceToNow(notif.createdAt.toDate(), { addSuffix: true })}</p>
+                       {notif.createdAt && <p className="text-xs text-muted-foreground">{formatDistanceToNow(notif.createdAt.toDate(), { addSuffix: true })}</p>}
                     </div>
                     {!notif.isRead && <div className="size-2 rounded-full bg-primary mt-2"></div>}
                   </DropdownMenuItem>
