@@ -16,7 +16,7 @@ import { useAuth } from '@/firebase';
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Home' },
   { href: '/dashboard/projects', icon: FolderKanban, label: 'Projects' },
-  { href: '/dashboard/community', icon: MessageSquare, label: 'Community' },
+  { href: '/dashboard/communities', icon: MessageSquare, label: 'Community' },
   { href: '/dashboard/events', icon: Calendar, label: 'Events' },
   { href: '/dashboard/teammates', icon: Users, label: 'Teammates' },
   { href: '/dashboard/ideas', icon: Lightbulb, label: 'Ideas' },
