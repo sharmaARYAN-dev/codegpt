@@ -168,13 +168,15 @@ export default function ProgressPage() {
         <Card>
           <CardHeader>
             <CardTitle className="font-headline text-xl">Badges Earned</CardTitle>
-            <CardDescription>Achievements unlocked on your journey.</CardDescription>
+            <CardDescription>Showcase your achievements and stand out.</CardDescription>
           </CardHeader>
           <CardContent>
               <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg">
                   <Trophy className="mx-auto h-12 w-12" />
-                  <p className="mt-4 font-semibold">No badges yet.</p>
-                  <p className="mt-1 text-sm">Complete projects and participate in events to start earning them!</p>
+                  <p className="mt-4 font-semibold">Your Badge Collection is Empty</p>
+                  <p className="mt-2 text-sm max-w-sm mx-auto">
+                    Badges are awarded for significant milestones, like completing 10 projects, making 50 connections, or mastering a new skill. Keep engaging to start your collection!
+                  </p>
               </div>
           </CardContent>
         </Card>
