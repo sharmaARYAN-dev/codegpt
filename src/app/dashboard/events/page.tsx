@@ -126,7 +126,7 @@ export default function EventsPage() {
       queries.push(where('isOnline', '==', isOnline));
     }
 
-    return query(baseColl, ...queries, orderBy('date'));
+    return query(baseColl, ...queries);
   }, [activeType, locationType]);
 
   const { data: allEvents, loading: loadingEvents } = useCollection<Event>(eventsQuery, 'events');
@@ -170,6 +170,11 @@ export default function EventsPage() {
   
   const eventTypes: EventType[] = ['All', 'Hackathon', 'Workshop', 'Conference'];
   const isLoading = loadingEvents || loadingUsers;
+
+  const sortedEvents = useMemo(() => {
+    if (!allEvents) return [];
+    return [...allEvents].sort((a, b) => a.date.toMillis() - b.date.toMillis());
+  }, [allEvents]);
 
   return (
     <>
@@ -226,7 +231,7 @@ export default function EventsPage() {
 
         {isLoading ? <EventsSkeleton /> : (
             <main className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
-                {allEvents?.map((event) => (
+                {sortedEvents?.map((event) => (
                   <EventCard key={event.id} event={event} users={users} onJoin={handleJoinEvent} onEdit={handleCreateOrEdit} onDelete={handleDelete} />
                 ))}
             </main>
