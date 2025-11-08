@@ -1,7 +1,7 @@
 'use server';
 
 /**
- * @fileOverview Generates personalized project ideas for students.
+ * Generates personalized project ideas for students using AI.
  */
 
 import {ai} from '@/ai/genkit';
@@ -10,11 +10,11 @@ import {z} from 'genkit';
 const GeneratePersonalizedProjectIdeasInputSchema = z.object({
   skills: z
     .array(z.string())
-    .describe('List of the student\u2019s technical skills.'),
+    .describe('List of the student’s technical skills.'),
   interests:
-    z.array(z.string()).describe('List of the student\u2019s interests.'),
+    z.array(z.string()).describe('List of the student’s interests.'),
   projectPreferences:
-    z.string().describe('Student\u2019s preferences for project type.'),
+    z.string().describe('Student’s preferences for project type.'),
 });
 export type GeneratePersonalizedProjectIdeasInput =
   z.infer<typeof GeneratePersonalizedProjectIdeasInputSchema>;

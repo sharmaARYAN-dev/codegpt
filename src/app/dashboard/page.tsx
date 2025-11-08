@@ -139,7 +139,7 @@ export default function DashboardPage() {
                         return (
                             <div key={student.id} className="flex items-center gap-4">
                             <Avatar>
-                                {student.photoURL && <AvatarImage src={student.photoURL} alt={student.displayName} data-ai-hint="person portrait" />}
+                                {student.photoURL && <AvatarImage src={student.photoURL} alt={student.displayName} />}
                                 <AvatarFallback>{student.displayName.substring(0, 2)}</AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">

@@ -1,6 +1,6 @@
-# UniVerse - Next.js Starter
+# UniVerse - Next.js Student Collaboration Platform
 
-This is a starter project for a Next.js application, built with React, TypeScript, Tailwind CSS, and ShadCN UI components.
+This is a Next.js application for **UniVerse**, a platform designed for college innovators. It's built with React, TypeScript, Tailwind CSS, and ShadCN UI components for the frontend, with Firebase for the backend and Genkit for AI features.
 
 ## Getting Started
 
