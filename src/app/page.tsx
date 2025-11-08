@@ -44,7 +44,7 @@ export default function LandingPage() {
                 <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
                     <Link href="#features" className="text-foreground/70 transition-colors hover:text-foreground">Features</Link>
                     <Link href="/dashboard/projects" className="text-foreground/70 transition-colors hover:text-foreground">Projects</Link>
-                    <Link href="/dashboard/events" className="text-foreground/70 transition-colors hover:text-foreground">Events</Link>
+                    <Link href="/dashboard/hackathons" className="text-foreground/70 transition-colors hover:text-foreground">Events</Link>
                 </nav>
                 <div className="hidden items-center gap-4 md:flex">
                     <Button variant="ghost" asChild>
@@ -85,7 +85,7 @@ export default function LandingPage() {
                 </div>
 
                  <div className="hidden md:flex items-center justify-center">
-                     <Image src="https://www.genkit.dev/images/gemini-orbit.svg" alt="Orbit graphic" width={400} height={400} className="opacity-70" />
+                     <Image src="https://www.genkit.dev/images/gemini-orbit.svg" alt="Orbit graphic" width={500} height={500} className="opacity-70" />
                 </div>
 
             </div>
