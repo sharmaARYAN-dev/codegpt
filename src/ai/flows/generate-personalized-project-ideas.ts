@@ -1,11 +1,7 @@
 'use server';
 
 /**
- * @fileOverview Generates personalized project ideas based on student skills, interests, and preferences.
- *
- * - generatePersonalizedProjectIdeas - A function that generates project ideas.
- * - GeneratePersonalizedProjectIdeasInput - The input type for the generatePersonalizedProjectIdeas function.
- * - GeneratePersonalizedProjectIdeasOutput - The return type for the generatePersonalizedProjectIdeas function.
+ * @fileOverview Generates personalized project ideas for students.
  */
 
 import {ai} from '@/ai/genkit';

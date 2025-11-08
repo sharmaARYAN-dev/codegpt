@@ -3,80 +3,67 @@
     {
       "id": "landing-hero",
       "description": "Abstract cosmic background",
-      "imageUrl": "https://images.unsplash.com/photo-1614540648095-3b1a0bf29570?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxhYnN0cmFjdCUyMHNwYWNlfGVufDB8fHx8MTc2MjU3Mjc5Nnww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "abstract space"
+      "imageUrl": "https://images.unsplash.com/photo-1614540648095-3b1a0bf29570?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxhYnN0cmFjdCUyMHNwYWNlfGVufDB8fHx8MTc2MjU3Mjc5Nnww&ixlib=rb-4.1.0&q=80&w=1080"
     },
     {
       "id": "avatar-1",
       "description": "Student avatar 1",
-      "imageUrl": "https://images.unsplash.com/photo-1643932919088-53349a7c3385?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwb3J0cmFpdCUyMHBlcnNvbnxlbnwwfHx8fDE3NjI1NTAyNzZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "portrait person"
+      "imageUrl": "https://images.unsplash.com/photo-1643932919088-53349a7c3385?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwb3J0cmFpdCUyMHBlcnNvbnxlbnwwfHx8fDE3NjI1NTAyNzZ8MA&ixlib=rb-4.1.0&q=80&w=1080"
     },
     {
       "id": "avatar-2",
       "description": "Student avatar 2",
-      "imageUrl": "https://images.unsplash.com/photo-1561740303-a0fd9fabc646?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxwb3J0cmFpdCUyMHBlcnNvbnxlbnwwfHx8fDE3NjI1NTAyNzZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "portrait person"
+      "imageUrl": "https://images.unsplash.com/photo-1561740303-a0fd9fabc646?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxwb3J0cmFpdCUyMHBlcnNvbnxlbnwwfHx8fDE3NjI1NTAyNzZ8MA&ixlib=rb-4.1.0&q=80&w=1080"
     },
     {
       "id": "avatar-3",
       "description": "Student avatar 3",
-      "imageUrl": "https://images.unsplash.com/photo-1643932919088-53349a7c3385?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwb3J0cmFpdCUyMHBlcnNvbnxlbnwwfHx8fDE3NjI1NTAyNzZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "portrait person"
+      "imageUrl": "https://images.unsplash.com/photo-1643932919088-53349a7c3385?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwb3J0cmFpdCUyMHBlcnNvbnxlbnwwfHx8fDE3NjI1NTAyNzZ8MA&ixlib=rb-4.1.0&q=80&w=1080"
     },
     {
       "id": "avatar-4",
       "description": "Student avatar 4",
-      "imageUrl": "https://images.unsplash.com/photo-1559695034-cd3396fcf29b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cG9ydHJhaXQlMjBwZXJzb258ZW58MHx8fHwxNzYyNTUwMjc2fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "portrait person"
+      "imageUrl": "https://images.unsplash.com/photo-1559695034-cd3396fcf29b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cG9ydHJhaXQlMjBwZXJzb258ZW58MHx8fHwxNzYyNTUwMjc2fDA&ixlib=rb-4.1.0&q=80&w=1080"
     },
     {
       "id": "avatar-5",
       "description": "Student avatar 5",
-      "imageUrl": "https://images.unsplash.com/photo-1561740303-a0fd9fabc646?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxwb3J0cmFpdCUyMHBlcnNvbnxlbnwwfHx8fDE3NjI1NTAyNzZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "portrait person"
+      "imageUrl": "https://images.unsplash.com/photo-1561740303-a0fd9fabc646?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxwb3J0cmFpdCUyMHBlcnNvbnxlbnwwfHx8fDE3NjI1NTAyNzZ8MA&ixlib=rb-4.1.0&q=80&w=1080"
     },
     {
       "id": "avatar-6",
       "description": "Student avatar 6",
-      "imageUrl": "https://images.unsplash.com/photo-1651342997325-a5326de3da6d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwb3J0cmFpdCUyMHBlcnNvbnxlbnwwfHx8fDE3NjI1NTAyNzZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "portrait person"
+      "imageUrl": "https://images.unsplash.com/photo-1651342997325-a5326de3da6d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwb3J0cmFpdCUyMHBlcnNvbnxlbnwwfHx8fDE3NjI1NTAyNzZ8MA&ixlib=rb-4.1.0&q=80&w=1080"
     },
     {
       "id": "event-hackathon",
       "description": "Image for a hackathon event",
-      "imageUrl": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxjb21wdXRlciUyMGNvZGV8ZW58MHx8fHwxNzYyNTQ1ODA3fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "computer code"
+      "imageUrl": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxjb21wdXRlciUyMGNvZGV8ZW58MHx8fHwxNzYyNTQ1ODA3fDA&ixlib=rb-4.1.0&q=80&w=1080"
     },
     {
       "id": "event-workshop",
       "description": "Image for a workshop event",
-      "imageUrl": "https://images.unsplash.com/photo-1519863922220-757a70e563e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cGVvcGxlJTIwbGVhcm5pbmd8ZW58MHx8fHwxNzYyNTgxMTgzfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "people learning"
+      "imageUrl": "https://images.unsplash.com/photo-1519863922220-757a70e563e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cGVvcGxlJTIwbGVhcm5pbmd8ZW58MHx8fHwxNzYyNTgxMTgzfDA&ixlib=rb-4.1.0&q=80&w=1080"
     },
     {
       "id": "event-conference",
       "description": "Image for a conference event",
-      "imageUrl": "https://images.unsplash.com/photo-1664262283644-bfbc54a88c90?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwcmVzZW50YXRpb24lMjBzdGFnZXxlbnwwfHx8fDE3NjI1MTM1MDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "presentation stage"
+      "imageUrl": "https://images.unsplash.com/photo-1664262283644-bfbc54a88c90?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwcmVzZW50YXRpb24lMjBzdGFnZXxlbnwwfHx8fDE3NjI1MTM1MDB8MA&ixlib=rb-4.1.0&q=80&w=1080"
     },
     {
       "id": "project-icon-1",
       "description": "Project icon 1",
-      "imageUrl": "https://images.unsplash.com/photo-1557264337-e8a93017fe92?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxhYnN0cmFjdCUyMHRlY2h8ZW58MHx8fHwxNzYyNTc1NTUxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "abstract tech"
+      "imageUrl": "https://images.unsplash.com/photo-1557264337-e8a93017fe92?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxhYnN0cmFjdCUyMHRlY2h8ZW58MHx8fHwxNzYyNTc1NTUxfDA&ixlib=rb-4.1.0&q=80&w=1080"
     },
     {
       "id": "project-icon-2",
       "description": "Project icon 2",
-      "imageUrl": "https://images.unsplash.com/photo-1486551937199-baf066858de7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxhYnN0cmFjdCUyMGRhdGF8ZW58MHx8fHwxNzYyNDY2NzIzfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "abstract data"
+      "imageUrl": "https://images.unsplash.com/photo-1486551937199-baf066858de7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxhYnN0cmFjdCUyMGRhdGF8ZW58MHx8fHwxNzYyNDY2NzIzfDA&ixlib=rb-4.1.0&q=80&w=1080"
     },
     {
       "id": "project-icon-3",
       "description": "Project icon 3",
-      "imageUrl": "https://images.unsplash.com/photo-1550438496-8c6e269e7886?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxhYnN0cmFjdCUyMGNvZGV8ZW58MHx8fHwxNzYyNTA2NjcxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "abstract code"
+      "imageUrl": "https://images.unsplash.com/photo-1550438496-8c6e269e7886?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxhYnN0cmFjdCUyMGNvZGV8ZW58MHx8fHwxNzYyNTA2NjcxfDA&ixlib=rb-4.1.0&q=80&w=1080"
     }
   ]
 }

@@ -87,7 +87,7 @@ export default function EventsPage() {
       <CreateEventDialog open={isCreateEventOpen} onOpenChange={setCreateEventOpen} />
       <div className="space-y-8">
         <div className="relative flex flex-col justify-end min-h-[240px] md:min-h-[300px] overflow-hidden rounded-lg bg-gradient-to-t from-black/80 via-transparent to-black/20 p-4 sm:p-8">
-          {heroImage && <Image src={heroImage.imageUrl} alt={heroImage.description} fill className="-z-10 object-cover" data-ai-hint={heroImage.imageHint} />}
+          {heroImage && <Image src={heroImage.imageUrl} alt={heroImage.description} fill className="-z-10 object-cover" />}
           <div className="text-white relative">
             <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">Explore Events</h1>
             <p className="mt-2 text-base md:text-lg text-white/80 max-w-lg">Find your next opportunity to innovate, learn, and connect with the brightest minds.</p>
