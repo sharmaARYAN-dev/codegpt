@@ -122,10 +122,10 @@ export default function ProgressPage() {
         </div>
 
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-center">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="font-headline text-lg flex items-center justify-center gap-2">
+            <CardTitle className="font-headline text-lg flex items-center gap-2 text-muted-foreground font-medium">
                 <GitPullRequest className="size-5 text-primary"/> Projects Completed
             </CardTitle>
           </CardHeader>
@@ -135,7 +135,7 @@ export default function ProgressPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="font-headline text-lg flex items-center justify-center gap-2">
+            <CardTitle className="font-headline text-lg flex items-center gap-2 text-muted-foreground font-medium">
                 <Users className="size-5 text-primary"/> Total Connections
             </CardTitle>
           </CardHeader>
@@ -171,11 +171,11 @@ export default function ProgressPage() {
             <CardDescription>Showcase your achievements and stand out.</CardDescription>
           </CardHeader>
           <CardContent>
-              <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg">
-                  <Trophy className="mx-auto h-12 w-12" />
+              <div className="text-center py-10 text-muted-foreground rounded-lg bg-muted/50">
+                  <Trophy className="mx-auto h-12 w-12 text-primary/50" />
                   <p className="mt-4 font-semibold">Your Badge Collection is Empty</p>
                   <p className="mt-2 text-sm max-w-sm mx-auto">
-                    Badges are awarded for significant milestones, like completing 10 projects, making 50 connections, or mastering a new skill. Keep engaging to start your collection!
+                    Badges are awarded for significant milestones, like completing projects, making connections, or mastering a new skill. Keep engaging to start your collection!
                   </p>
               </div>
           </CardContent>
