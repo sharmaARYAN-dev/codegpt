@@ -36,7 +36,7 @@ export default function LoginPage() {
       const userDoc = await getDoc(userRef);
 
       if (!userDoc.exists()) {
-          const newUserProfile: Omit<StudentProfile, 'id' | 'createdAt' | 'updatedAt' | 'level' | 'xp'> = {
+          const newUserProfile: Omit<StudentProfile, 'id' | 'createdAt' | 'updatedAt' | 'level' | 'xp' | 'connections' | 'incomingRequests' | 'sentRequests' | 'bookmarks' | 'bookmarkedEvents' | 'registeredEvents' > = {
             displayName: firebaseUser.displayName || 'New User',
             email: firebaseUser.email!,
             photoURL: firebaseUser.photoURL || '',
@@ -53,6 +53,12 @@ export default function LoginPage() {
             xp: 0,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
+            connections: [],
+            incomingRequests: [],
+            sentRequests: [],
+            bookmarks: [],
+            bookmarkedEvents: [],
+            registeredEvents: [],
           });
       }
 
@@ -136,7 +142,7 @@ export default function LoginPage() {
             </Button>
             <div className="mt-6 text-center text-sm text-muted-foreground">
               Don't have an account?{' '}
-              <Link href="/register" className="underline hover:text-primary font-medium">
+              <Link href="/register" className="font-medium text-primary underline-offset-4 hover:underline">
                 Create Account
               </Link>
             </div>

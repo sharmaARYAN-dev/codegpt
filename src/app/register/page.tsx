@@ -78,6 +78,12 @@ export default function RegisterPage() {
         reputation: 0,
         xp: 0,
         level: 1,
+        connections: [],
+        incomingRequests: [],
+        sentRequests: [],
+        bookmarks: [],
+        bookmarkedEvents: [],
+        registeredEvents: [],
       };
       
       await setDoc(userRef, {
@@ -242,7 +248,7 @@ export default function RegisterPage() {
             </form>
             <div className="mt-6 text-center text-sm text-muted-foreground">
               Already have an account?{' '}
-              <Link href="/login" className="underline hover:text-primary font-medium">
+              <Link href="/login" className="font-medium text-primary underline-offset-4 hover:underline">
                 Log in
               </Link>
             </div>

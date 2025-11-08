@@ -14,14 +14,14 @@ import { usePathname, useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 
 const navItems = [
-  { href: '/dashboard', icon: LayoutDashboard, label: 'Home' },
-  { href: '/dashboard/projects', icon: FolderKanban, label: 'Projects' },
-  { href: '/dashboard/communities', icon: MessageSquare, label: 'Community' },
-  { href: '/dashboard/events', icon: Calendar, label: 'Events' },
-  { href: '/dashboard/teammates', icon: Users, label: 'Connections' },
-  { href: '/dashboard/ideas', icon: Lightbulb, label: 'Ideas' },
-  { href: '/dashboard/progress', icon: TrendingUp, label: 'Progress'},
-  { href: '/dashboard/profile', icon: UserIcon, label: 'Profile' },
+  { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
+  { href: '/dashboard/projects', label: 'Projects', icon: FolderKanban },
+  { href: '/dashboard/communities', label: 'Community', icon: MessageSquare },
+  { href: '/dashboard/events', label: 'Events', icon: Calendar },
+  { href: '/dashboard/teammates', label: 'Connections', icon: Users },
+  { href: '/dashboard/ideas', label: 'Ideas', icon: Lightbulb },
+  { href: '/dashboard/progress', label: 'Progress', icon: TrendingUp },
+  { href: '/dashboard/profile', label: 'Profile', icon: UserIcon },
 ];
 
 export function AppNav() {

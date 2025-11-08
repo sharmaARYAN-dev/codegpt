@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setUser({ id: snap.id, ...snap.data() } as StudentProfile);
           } else {
             // Create new user profile if it doesn't exist
-            const newUserProfile: Omit<StudentProfile, 'id' | 'createdAt' | 'updatedAt' | 'level' | 'xp'> = {
+            const newUserProfile: Omit<StudentProfile, 'id' | 'createdAt' | 'updatedAt' > = {
               displayName: firebaseUser.displayName || 'New User',
               email: firebaseUser.email!,
               photoURL: firebaseUser.photoURL || '',
@@ -41,12 +41,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               bio: '',
               links: { github: '', linkedin: '', portfolio: ''},
               reputation: 0,
+              xp: 0,
+              level: 1,
+              connections: [],
+              incomingRequests: [],
+              sentRequests: [],
+              bookmarks: [],
+              bookmarkedEvents: [],
+              registeredEvents: [],
             };
             
             await setDoc(userRef, {
               ...newUserProfile,
-              level: 1,
-              xp: 0,
               createdAt: serverTimestamp(),
               updatedAt: serverTimestamp(),
             });
