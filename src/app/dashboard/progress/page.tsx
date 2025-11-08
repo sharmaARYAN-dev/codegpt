@@ -8,11 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import {
-  Award,
-  ShieldCheck,
-  Star,
   Trophy,
   BarChart,
   GitPullRequest,
@@ -27,14 +23,6 @@ import { Progress } from '@/components/ui/progress';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from 'recharts';
 import { db } from '@/lib/firebase';
-
-const badgeIcons = {
-  'Rookie Collaborator': Trophy,
-  'Reliable Partner': ShieldCheck,
-  'Expert Contributor': Award,
-  'Project Leader': Star,
-  'Top Rated': Award,
-} as const;
 
 function ProgressSkeleton() {
   return (
@@ -75,7 +63,11 @@ export default function ProgressPage() {
 
   const userProfile = user;
 
-  const userProjectsQuery = useMemo(() => (db && user) ? query(collection(db, 'projects'), where('members', 'array-contains', user.id)) : null, [user, db]);
+  const userProjectsQuery = useMemo(() => {
+    if (!db || !user) return null;
+    return query(collection(db, 'projects'), where('members', 'array-contains', { uid: user.id, role: 'member', joinedAt: user.createdAt?.toDate() }));
+  }, [user, db]);
+  
   const { data: userProjects, loading: loadingProjects } = useCollection<Project>(userProjectsQuery, `users/${user?.id}/projects`);
 
   const level = userProfile?.level || 1;
@@ -95,7 +87,11 @@ export default function ProgressPage() {
 
     const projectSkillCounts = userProjects.reduce((acc, project) => {
       project.tags.forEach(tag => {
-        if (userProfile.skills.includes(tag.toLowerCase())) {
+        // Normalize tags from project and user for comparison
+        const normalizedTag = tag.toLowerCase().trim();
+        const userHasSkill = userProfile.skills.some(s => s.toLowerCase().trim() === normalizedTag);
+
+        if (userHasSkill) {
           acc[tag] = (acc[tag] || 0) + 1;
         }
       });
@@ -115,6 +111,7 @@ export default function ProgressPage() {
 
     return allUserSkills.sort((a, b) => b.count - a.count);
   }, [userProfile, userProjects]);
+
 
   const softSkillsData = useMemo(() => {
     if (!userProjects || !user || !userProfile) return [];
