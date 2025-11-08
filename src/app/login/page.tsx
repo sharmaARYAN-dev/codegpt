@@ -10,12 +10,16 @@ import { useAuth, useUser } from '@/firebase';
 import { useEffect } from 'react';
 import { doc, setDoc } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
+import { FirestorePermissionError } from '@/firebase/errors';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
   const router = useRouter();
   const auth = useAuth();
   const firestore = useFirestore();
   const { user, loading } = useUser();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!loading && user) {
@@ -33,16 +37,34 @@ export default function LoginPage() {
       
       // Create or update user profile in Firestore
       const userRef = doc(firestore, 'users', user.uid);
-      await setDoc(userRef, {
+      const userData = {
         id: user.uid,
         displayName: user.displayName,
         email: user.email,
         photoURL: user.photoURL,
-      }, { merge: true });
+        skills: [],
+        interests: [],
+        reputation: [],
+      };
+
+      setDoc(userRef, userData, { merge: true }).catch(async (serverError) => {
+          const permissionError = new FirestorePermissionError({
+            path: userRef.path,
+            operation: 'create', // or 'update' depending on your logic
+            requestResourceData: userData,
+          });
+          errorEmitter.emit('permission-error', permissionError);
+      });
+
 
       router.push('/dashboard');
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error during Google login:", error);
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: error.message || "An unexpected error occurred during login.",
+      });
     }
   };
 
