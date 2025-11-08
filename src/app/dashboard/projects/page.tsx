@@ -111,29 +111,30 @@ export default function ProjectsPage() {
         const memberCount = (project.members?.length || 0);
 
         return (
-          <Link href={`/dashboard/projects/${project.id}`} key={project.id} className="block group">
-            <Card className="flex h-full flex-col overflow-hidden transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg group-hover:shadow-primary/20 group-hover:border-primary/30">
-              <CardHeader>
-                <div className='flex items-center gap-4'>
-                  <Avatar className='size-12'>
-                    {owner?.photoURL && <AvatarImage src={owner.photoURL} alt={owner.displayName} />}
-                    <AvatarFallback>{owner?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <CardTitle className="font-headline text-xl leading-tight">{project.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1">by {owner?.displayName}</p>
+            <Card key={project.id} className="flex h-full flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20 hover:border-primary/30 group">
+              <Link href={`/dashboard/projects/${project.id}`} className='flex-grow'>
+                <CardHeader>
+                  <div className='flex items-center gap-4'>
+                    <Avatar className='size-12'>
+                      {owner?.photoURL && <AvatarImage src={owner.photoURL} alt={owner.displayName} />}
+                      <AvatarFallback>{owner?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <CardTitle className="font-headline text-xl leading-tight">{project.name}</CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">by {owner?.displayName}</p>
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="flex-grow space-y-4">
-                <p className="text-sm text-muted-foreground line-clamp-3">{project.description}</p>
-                <div className='space-y-3'>
-                  <p className='text-xs font-semibold uppercase text-muted-foreground tracking-wider'>Tech Stack</p>
-                  <div className="flex flex-wrap items-center gap-2 text-sm">
-                    {project.tags?.map(t => <Badge key={t} variant={t === 'ai/ml' ? 'default' : 'secondary'}>{t}</Badge>)}
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground line-clamp-3">{project.description}</p>
+                  <div className='space-y-3'>
+                    <p className='text-xs font-semibold uppercase text-muted-foreground tracking-wider'>Tech Stack</p>
+                    <div className="flex flex-wrap items-center gap-2 text-sm">
+                      {project.tags?.map(t => <Badge key={t} variant={t === 'ai/ml' ? 'default' : 'secondary'}>{t}</Badge>)}
+                    </div>
                   </div>
-                </div>
-              </CardContent>
+                </CardContent>
+              </Link>
               <div className="flex items-center justify-between p-6 pt-2">
                 <div className='flex items-center gap-4 text-sm text-muted-foreground'>
                   <div className='flex items-center gap-1.5'>
@@ -150,7 +151,6 @@ export default function ProjectsPage() {
                 </Button>
               </div>
             </Card>
-          </Link>
         );
       })}
       <Card
