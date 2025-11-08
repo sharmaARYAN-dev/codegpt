@@ -76,7 +76,23 @@ export default function ProjectsPage() {
   const usersQuery = useMemo(() => db ? collection(db, 'users') : null, []);
   const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery, 'users');
 
-  const filters = ['All', 'Web Dev', 'AI/ML', 'Mobile', 'Game Dev'];
+  const filters = useMemo(() => {
+    if (!allProjects) return { 'All': 0 };
+
+    const tagCounts = allProjects.reduce((acc, project) => {
+        project.tags.forEach(tag => {
+            const formattedTag = tag.toLowerCase().replace(/\s+/g, '-');
+            const displayName = tag.split(/[\s-]+/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+            if (!acc[displayName]) {
+                acc[displayName] = 0;
+            }
+            acc[displayName]++;
+        });
+        return acc;
+    }, {} as Record<string, number>);
+
+    return { 'All': allProjects.length, ...tagCounts };
+  }, [allProjects]);
   
   const filteredProjects = useMemo(() => {
     if (!allProjects) return [];
@@ -117,8 +133,8 @@ export default function ProjectsPage() {
 
         return (
             <Card key={project.id} className="flex h-full flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20 hover:border-primary/30 group">
-              <Link href={`/dashboard/projects/${project.id}`} className='flex flex-col flex-grow'>
-                <CardHeader>
+              <Link href={`/dashboard/projects/${project.id}`} className='flex flex-col flex-grow p-6 pb-0'>
+                <CardHeader className="p-0">
                   <div className='flex items-center gap-4'>
                     <Avatar className='size-12'>
                       {owner?.photoURL && <AvatarImage src={owner.photoURL} alt={owner.displayName} />}
@@ -130,7 +146,7 @@ export default function ProjectsPage() {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="flex-grow space-y-4">
+                <CardContent className="p-0 pt-6 flex-grow space-y-4">
                   <p className="text-sm text-muted-foreground line-clamp-3">{project.description}</p>
                   <div className='space-y-3'>
                     <p className='text-xs font-semibold uppercase text-muted-foreground tracking-wider'>Tech Stack</p>
@@ -140,7 +156,7 @@ export default function ProjectsPage() {
                   </div>
                 </CardContent>
               </Link>
-              <div className="flex items-center justify-between p-6 pt-2 mt-auto">
+              <div className="flex items-center justify-between p-6 pt-6 mt-auto">
                 <div className='flex items-center gap-4 text-sm text-muted-foreground'>
                   <div className='flex items-center gap-1.5'>
                     <Users className='size-4' />
@@ -184,15 +200,27 @@ export default function ProjectsPage() {
           </Button>
         </div>
 
-        <div className="flex flex-wrap items-center gap-6">
-           <div className="relative w-full max-w-xs">
+        <div className="flex flex-col sm:flex-row flex-wrap items-center gap-6">
+           <div className="relative w-full sm:w-auto sm:max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Search projects..." className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {filters.map(filter => (
-              <Button key={filter} size="sm" variant={activeFilter === filter ? 'default' : 'outline'} onClick={() => setActiveFilter(filter)}>{filter}</Button>
-            ))}
+            {Object.entries(filters).map(([filter, count]) => {
+                if (filter !== 'All' && count === 0) return null;
+                return (
+                    <Button 
+                        key={filter} 
+                        size="sm" 
+                        variant={activeFilter === filter ? 'default' : 'outline'} 
+                        onClick={() => setActiveFilter(filter)}
+                        className="flex items-center gap-2"
+                    >
+                        <span>{filter}</span>
+                        <Badge variant={activeFilter === filter ? 'secondary' : 'default'} className="rounded-full">{count}</Badge>
+                    </Button>
+                )
+            })}
           </div>
         </div>
 
