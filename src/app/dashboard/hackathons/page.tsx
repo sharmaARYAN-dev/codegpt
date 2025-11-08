@@ -135,12 +135,7 @@ export default function HackathonsPage() {
                       <span>{event.location}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 text-yellow-400">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className={`size-4 ${i < event.rating ? 'fill-current' : ''}`} />
-                    ))}
-                  </div>
-
+                  
                   <div className="flex items-center gap-2 text-sm flex-wrap">
                     {event.tags.map(tag => <Badge key={tag} variant='secondary'>{tag}</Badge>)}
                   </div>

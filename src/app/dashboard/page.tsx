@@ -81,10 +81,6 @@ export default function DashboardPage() {
                 <Card key={project.id} className="transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/10">
                   <CardContent className="p-4 sm:p-6">
                     <div className='flex items-start gap-4'>
-                        <Avatar className='hidden sm:block size-11 mt-1'>
-                            {owner?.photoURL && <AvatarImage src={owner.photoURL} alt={owner.displayName} />}
-                            <AvatarFallback>{owner?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
-                        </Avatar>
                         <div className='flex-1'>
                             <div className='flex items-center justify-between gap-2'>
                                 <div className='flex items-center gap-3'>
@@ -92,9 +88,15 @@ export default function DashboardPage() {
                                         {owner?.photoURL && <AvatarImage src={owner.photoURL} alt={owner.displayName} />}
                                         <AvatarFallback className='text-sm'>{owner?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
                                     </Avatar>
-                                    <div>
-                                        <p className="font-semibold">{owner?.displayName}</p>
-                                        <p className="text-sm text-muted-foreground">Project Owner</p>
+                                     <div className="flex items-center gap-4">
+                                        <Avatar className="hidden sm:block size-11">
+                                            {owner?.photoURL && <AvatarImage src={owner.photoURL} alt={owner.displayName} />}
+                                            <AvatarFallback>{owner?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <p className="font-semibold">{owner?.displayName}</p>
+                                            <p className="text-sm text-muted-foreground">Project Owner</p>
+                                        </div>
                                     </div>
                                 </div>
                                 <Button asChild size="sm" variant="secondary">
@@ -107,12 +109,6 @@ export default function DashboardPage() {
                                 {project.tags?.map((tag) => (
                                     <Badge key={tag} variant={tag === 'AI/ML' ? 'default' : 'secondary'}>{tag}</Badge>
                                 ))}
-                            </div>
-                            <div className='flex items-center gap-1 text-yellow-400 mt-4'>
-                                {[...Array(5)].map((_, i) => (
-                                  <Star key={i} className={`size-4 ${i < project.rating ? 'fill-current' : ''}`} />
-                                ))}
-                                <span className='text-xs text-muted-foreground ml-1'>({project.rating.toFixed(1)})</span>
                             </div>
                         </div>
                     </div>
