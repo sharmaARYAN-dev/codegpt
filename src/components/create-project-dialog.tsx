@@ -30,17 +30,21 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import { MultiSelect } from './ui/multi-select';
 
 const projectSchema = z.object({
   name: z.string().min(3, 'Project name must be at least 3 characters long.'),
   description: z.string().min(10, 'Description must be at least 10 characters long.'),
-  tags: z.string().min(1, 'Please add at least one tag.'),
+  tags: z.array(z.string()).min(1, 'Please add at least one tag.'),
 });
 
 interface CreateProjectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+const popularTags = ["React", "Next.js", "AI/ML", "Python", "TypeScript", "Node.js", "Firebase", "JavaScript"];
+
 
 export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogProps) {
   const firestore = useFirestore();
@@ -52,7 +56,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
     defaultValues: {
       name: '',
       description: '',
-      tags: '',
+      tags: [],
     },
   });
 
@@ -67,7 +71,6 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
     setIsSubmitting(true);
     const projectData = {
       ...values,
-      tags: values.tags.split(',').map(tag => tag.trim()),
       ownerId: user.uid,
       memberIds: [],
       rating: Math.floor(Math.random() * 5) + 1,
@@ -94,7 +97,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
     toast.promise(promise, {
         loading: 'Creating your project...',
         success: () => {
-            form.reset();
+            form.reset({ name: '', description: '', tags: []});
             onOpenChange(false);
             setIsSubmitting(false);
             return `${values.name} has been successfully created.`;
@@ -112,7 +115,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Create a New Project</DialogTitle>
           <DialogDescription>
@@ -154,10 +157,15 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                 <FormItem>
                   <FormLabel>Tags / Tech Stack</FormLabel>
                   <FormControl>
-                    <Input placeholder="React, Next.js, AI" {...field} />
+                    <MultiSelect
+                      placeholder="Add tech stack..."
+                      selected={field.value}
+                      onChange={field.onChange}
+                      popularOptions={popularTags}
+                    />
                   </FormControl>
                   <FormDescription>
-                    Comma-separated list of technologies or topics.
+                    Add relevant technologies or topics for your project.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
