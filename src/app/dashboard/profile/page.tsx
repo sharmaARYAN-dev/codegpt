@@ -91,7 +91,7 @@ export default function ProfilePage() {
                 {userProfile.displayName
                   ?.split(' ')
                   .map((n) => n[0])
-                  .join('')}
+                  .join('') || '??'}
               </AvatarFallback>
             </Avatar>
             <div className="mt-4 sm:ml-6 flex-grow min-w-0">
