@@ -9,9 +9,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Settings, LogOut, Bell, Search, Orbit, Menu, Sun, Moon } from 'lucide-react';
@@ -40,7 +37,7 @@ export function Header() {
          <Link href="/dashboard" className="flex items-center gap-2 md:hidden">
             <Orbit className="h-7 w-7 text-primary" />
         </Link>
-        <SidebarTrigger className="flex md:hidden">
+        <SidebarTrigger className="flex">
             <Menu className="h-5 w-5" />
         </SidebarTrigger>
       </div>

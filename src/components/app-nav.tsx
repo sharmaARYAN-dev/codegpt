@@ -7,7 +7,6 @@ import {
   SidebarMenuButton,
   SidebarFooter,
   SidebarContent,
-  SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { LayoutDashboard, Users, FolderKanban, MessageSquare, LogOut, Swords, Lightbulb, User as UserIcon, Orbit } from 'lucide-react';
 import Link from 'next/link';
@@ -45,12 +44,11 @@ export function AppNav() {
 
   return (
     <>
-      <SidebarHeader className="hidden items-center justify-between border-b border-sidebar-border p-2 md:flex">
+      <SidebarHeader className="hidden md:flex">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
           <Orbit className="h-6 w-6 text-primary" />
           <span className="text-lg group-data-[collapsible=icon]:hidden">Universe</span>
         </Link>
-        <SidebarTrigger />
       </SidebarHeader>
       <SidebarContent className="p-2">
         <SidebarMenu>
