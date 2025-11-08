@@ -6,7 +6,6 @@ export interface StudentProfile {
   displayName: string;
   email: string;
   photoURL?: string;
-  aboutMe?: string;
   skills: string[]; // normalized lowercase
   interests: string[]; // normalized lowercase
   bio?: string;
@@ -45,14 +44,6 @@ export interface Project {
   createdAt: Timestamp;
   updatedAt: Timestamp;
   commentCount?: number;
-  // Fields to remove/change
-  memberIds?: string[];
-  rating?: number;
-  forks?: number;
-  links?: {
-    repo?: string;
-    demo?: string;
-  };
 };
 
 export interface ChatMessage {

@@ -21,6 +21,9 @@ import type { StudentProfile } from '@/lib/types';
 const registerSchema = z.object({
   displayName: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
+  college: z.string().min(3, { message: 'College name is required.' }),
+  branch: z.string().min(2, { message: 'Branch/Major is required.' }),
+  year: z.string().min(1, { message: 'Year of study is required.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
 });
 
@@ -60,11 +63,16 @@ export default function RegisterPage() {
         displayName: data.displayName,
         email: data.email,
         photoURL: authUser.photoURL || "",
+        college: data.college,
+        branch: data.branch,
+        year: data.year,
         skills: [],
         interests: [],
         bio: "",
         links: { github: "", linkedin: "", portfolio: "" },
         reputation: 0,
+        xp: 0,
+        level: 1,
       };
       
       await setDoc(userRef, {
@@ -142,6 +150,44 @@ export default function RegisterPage() {
                   aria-invalid={errors.email ? 'true' : 'false'}
                 />
                 {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
+              </div>
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                 <div className="space-y-2">
+                  <Label htmlFor="college">College/University</Label>
+                  <Input
+                    id="college"
+                    type="text"
+                    placeholder="e.g. Stanford University"
+                    {...register('college')}
+                    className="bg-background"
+                    aria-invalid={errors.college ? 'true' : 'false'}
+                  />
+                  {errors.college && <p className="text-sm text-destructive">{errors.college.message}</p>}
+                </div>
+                 <div className="space-y-2">
+                  <Label htmlFor="year">Year</Label>
+                  <Input
+                    id="year"
+                    type="text"
+                    placeholder="e.g. 2nd"
+                    {...register('year')}
+                    className="bg-background"
+                    aria-invalid={errors.year ? 'true' : 'false'}
+                  />
+                  {errors.year && <p className="text-sm text-destructive">{errors.year.message}</p>}
+                </div>
+              </div>
+               <div className="space-y-2">
+                <Label htmlFor="branch">Branch / Major</Label>
+                <Input
+                  id="branch"
+                  type="text"
+                  placeholder="e.g. Computer Science"
+                  {...register('branch')}
+                  className="bg-background"
+                  aria-invalid={errors.branch ? 'true' : 'false'}
+                />
+                {errors.branch && <p className="text-sm text-destructive">{errors.branch.message}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
