@@ -15,6 +15,7 @@ import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebas
 import { collection, query, limit, orderBy } from 'firebase/firestore';
 import type { Project, Event, StudentProfile } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useMemo } from 'react';
 
 function DashboardSkeleton() {
   return (
@@ -56,7 +57,7 @@ export default function DashboardPage() {
   const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
   const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery);
 
-  const suggestedTeammates = useMemoFirebase(() => {
+  const suggestedTeammates = useMemo(() => {
     if (!user || !users) return [];
     return users.filter(u => u.id !== user.uid).slice(0, 3);
   }, [user, users]);
@@ -123,7 +124,7 @@ export default function DashboardPage() {
                             <p className="font-semibold">{event.title}</p>
                             <p className="text-sm text-muted-foreground">{new Date(event.date).toLocaleDateString()}, {event.location}</p>
                             <Button variant="outline" size="sm" className="mt-3 w-full" asChild>
-                                <Link href="/dashboard/hackathons">Learn More</Link>
+                                <Link href="/dashboard/events">Learn More</Link>
                             </Button>
                         </div>
                     ))}
