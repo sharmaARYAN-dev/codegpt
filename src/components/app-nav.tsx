@@ -8,7 +8,6 @@ import {
   SidebarMenuButton,
   SidebarFooter,
   SidebarContent,
-  Sidebar,
 } from '@/components/ui/sidebar';
 import { LayoutDashboard, Users, FolderKanban, MessageSquare, User, LogOut, Swords, Lightbulb } from 'lucide-react';
 import Link from 'next/link';
@@ -16,9 +15,9 @@ import { usePathname } from 'next/navigation';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Home' },
-  { href: '/dashboard/events', icon: FolderKanban, label: 'Projects' },
-  { href: '/dashboard/forums', icon: MessageSquare, label: 'Communities' },
-  { href: '/dashboard/hackathons', icon: Swords, label: 'Events' },
+  { href: '/dashboard/projects', icon: FolderKanban, label: 'Projects' },
+  { href: '/dashboard/communities', icon: MessageSquare, label: 'Communities' },
+  { href: '/dashboard/events', icon: Swords, label: 'Events' },
   { href: '/dashboard/teammates', icon: Users, label: 'Teammates' },
   { href: '/dashboard/ideas', icon: Lightbulb, label: 'Ideas' },
   { href: '/dashboard/profile', icon: User, label: 'Profile' },
@@ -37,7 +36,7 @@ export function AppNav() {
             <SidebarMenuItem key={item.href}>
                 <Link href={item.href} legacyBehavior passHref>
                 <SidebarMenuButton
-                    isActive={pathname === item.href}
+                    isActive={pathname.startsWith(item.href) && (item.href === '/dashboard' ? pathname === item.href : true)}
                     tooltip={item.label}
                 >
                     <item.icon />

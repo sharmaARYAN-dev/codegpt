@@ -1,7 +1,6 @@
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -37,22 +36,22 @@ export default function DashboardPage() {
                             <p className="font-semibold">{owner.name}</p>
                             <p className="text-sm text-muted-foreground">College 1st Year</p>
                             <h2 className="font-headline text-lg font-semibold mt-2">{project.name}</h2>
-                            <p className="text-sm text-muted-foreground mt-1">{project.description}</p>
+                            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{project.description}</p>
                             <div className="flex flex-wrap gap-2 mt-3">
                                 {project.tags?.map((tag) => (
                                     <Badge key={tag} variant={tag === 'AI/ML' ? 'default' : 'secondary'}>{tag}</Badge>
                                 ))}
                             </div>
                             <div className='flex items-center justify-between mt-4'>
-                                <div className='flex items-center gap-2 text-muted-foreground'>
-                                    <Star className='size-4'/>
-                                    <Star className='size-4'/>
-                                    <Star className='size-4'/>
-                                    <Star className='size-4 text-primary'/>
-                                    <Star className='size-4 text-primary'/>
+                                <div className='flex items-center gap-1 text-yellow-400'>
+                                    <Star className='size-4 fill-current' />
+                                    <Star className='size-4 fill-current' />
+                                    <Star className='size-4 fill-current' />
+                                    <Star className='size-4' />
+                                    <Star className='size-4' />
                                 </div>
                                 <Button asChild size="sm">
-                                    <Link href="/dashboard/project">Join</Link>
+                                    <Link href={`/dashboard/projects/${project.id}`}>View Project</Link>
                                 </Button>
                             </div>
                         </div>
@@ -73,7 +72,9 @@ export default function DashboardPage() {
                         <div key={event.id} className="p-3 rounded-lg border bg-card hover:bg-muted/50">
                             <p className="font-semibold">{event.title}</p>
                             <p className="text-sm text-muted-foreground">{event.date}, {event.location}</p>
-                            <Button variant="outline" size="sm" className="mt-2 w-full">Learn More</Button>
+                            <Button variant="outline" size="sm" className="mt-2 w-full" asChild>
+                                <Link href="/dashboard/events">Learn More</Link>
+                            </Button>
                         </div>
                     ))}
                 </CardContent>

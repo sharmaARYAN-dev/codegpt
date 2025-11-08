@@ -9,14 +9,17 @@ export default function LandingPage() {
     {
       icon: <Users className="h-8 w-8 text-primary" />,
       title: 'Find Your Team',
+      description: "Connect with talented students and build your dream team."
     },
     {
       icon: <Lightbulb className="h-8 w-8 text-accent" />,
       title: 'Share Your Idea',
+      description: "Get feedback on your project ideas and find collaborators."
     },
     {
       icon: <Trophy className="h-8 w-8 text-primary" />,
       title: 'Join Hackathons',
+      description: "Compete in exciting challenges and win amazing prizes."
     },
   ];
 
@@ -31,7 +34,7 @@ export default function LandingPage() {
       />
       <div className="absolute inset-0 z-0 h-full w-full bg-[url('https://res.cloudinary.com/dfhpkqrjw/image/upload/v1717438453/grid_y4h5x6.svg')] [background-position:calc(50%_+_1px)_calc(50%_+_1px)]" />
 
-      <header className="sticky top-0 z-50">
+      <header className="sticky top-0 z-50 backdrop-blur-sm bg-background/50">
         <div className="container mx-auto px-4">
             <div className="flex h-20 items-center justify-between">
                 <Link href="/" className="flex items-center gap-2">
@@ -39,15 +42,16 @@ export default function LandingPage() {
                     <span className="text-xl font-bold">Universe</span>
                 </Link>
                 <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
-                    <Link href="#" className="text-foreground/70 transition-colors hover:text-foreground">Features</Link>
-                    <Link href="#" className="text-foreground/70 transition-colors hover:text-foreground">Pricing</Link>
+                    <Link href="#features" className="text-foreground/70 transition-colors hover:text-foreground">Features</Link>
+                    <Link href="/dashboard/projects" className="text-foreground/70 transition-colors hover:text-foreground">Projects</Link>
+                    <Link href="/dashboard/events" className="text-foreground/70 transition-colors hover:text-foreground">Events</Link>
                 </nav>
                 <div className="hidden items-center gap-4 md:flex">
                     <Button variant="ghost" asChild>
-                        <Link href="/dashboard">Login</Link>
+                        <Link href="/login">Login</Link>
                     </Button>
-                    <Button asChild className="bg-gradient-to-r from-accent to-primary text-primary-foreground font-bold">
-                        <Link href="/dashboard">Get Started</Link>
+                    <Button asChild>
+                        <Link href="/login">Get Started</Link>
                     </Button>
                 </div>
                 <Button variant="ghost" size="icon" className="md:hidden">
@@ -68,14 +72,14 @@ export default function LandingPage() {
                         & Collaborate.
                     </h1>
                     <p className="mt-6 text-lg md:text-xl max-w-md text-foreground/70">
-                        The all-one platform for college innovators to find teammates, share ideas, and build the future.
+                        The all-in-one platform for college innovators to find teammates, share ideas, and build the future.
                     </p>
                     <div className="mt-8 flex flex-wrap gap-4">
-                        <Button asChild size="lg" className="font-bold text-lg px-8 py-6 bg-gradient-to-r from-accent to-primary text-primary-foreground">
-                            <Link href="/dashboard">Get Started</Link>
+                        <Button asChild size="lg" className="font-bold text-lg px-8 py-6">
+                            <Link href="/login">Get Started for Free</Link>
                         </Button>
                          <Button asChild size="lg" variant="outline" className="font-bold text-lg px-8 py-6">
-                            <Link href="/dashboard/events">Explore Projects</Link>
+                            <Link href="/dashboard/projects">Explore Projects</Link>
                         </Button>
                     </div>
                 </div>
@@ -87,7 +91,11 @@ export default function LandingPage() {
             </div>
         </section>
 
-        <section className="container mx-auto px-4 pb-20 md:pb-32">
+        <section id="features" className="container mx-auto px-4 pb-20 md:pb-32">
+             <div className="text-center mb-12">
+                <h2 className="font-headline text-4xl font-bold">Why Universe?</h2>
+                <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">Discover a universe of opportunities. Connect with peers, build amazing projects, and launch your career in tech.</p>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {features.map((feature) => (
                     <Card key={feature.title} className="bg-card/50 backdrop-blur-sm border-border/20 p-6 text-center transition-all duration-300 hover:border-primary/50 hover:-translate-y-2">
@@ -96,12 +104,18 @@ export default function LandingPage() {
                                 {feature.icon}
                             </div>
                             <p className="font-semibold text-lg">{feature.title}</p>
+                            <p className="text-sm text-muted-foreground">{feature.description}</p>
                         </CardContent>
                     </Card>
                 ))}
             </div>
         </section>
       </main>
+      <footer className='border-t py-6'>
+          <div className='container mx-auto px-4 text-center text-sm text-muted-foreground'>
+              <p>&copy; {new Date().getFullYear()} Universe. All rights reserved.</p>
+          </div>
+      </footer>
     </div>
   );
 }
