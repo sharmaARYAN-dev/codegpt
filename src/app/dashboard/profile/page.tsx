@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { CreateProjectDialog } from '@/components/create-project-dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const reputationIcons = {
   'Top Contributor': Award,
@@ -259,76 +260,81 @@ export default function ProfilePage() {
                   }
                 </CardContent>
               </Card>
+              
                <Card>
                 <CardHeader>
-                  <CardTitle className="font-headline text-xl">Bookmarked Projects</CardTitle>
+                  <CardTitle className="font-headline text-xl">My Bookmarks</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {loadingBookmarkedProjects ? <Loader2 className="animate-spin" /> : 
-                    !bookmarkedProjects || bookmarkedProjects.length === 0 ? (
-                      <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
-                        <Bookmark className="mx-auto h-12 w-12" />
-                        <p className="mt-4 font-semibold">No bookmarked projects.</p>
-                        <p className="mt-1 text-sm">Explore projects and bookmark your favorites!</p>
-                         <Button asChild variant="secondary" className="mt-4">
-                           <Link href="/dashboard/projects">Explore Projects</Link>
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className='space-y-4'>
-                        {bookmarkedProjects.map(project => (
-                            <div key={project.id} className="group flex items-center justify-between p-3 border rounded-md hover:bg-muted/50 hover:border-primary/30 transition-colors">
-                                <Link href={`/dashboard/projects/${project.id}`} className="flex-1 min-w-0">
-                                    <h3 className="font-semibold truncate">{project.name}</h3>
-                                    <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
-                                </Link>
-                                <div className='opacity-0 group-hover:opacity-100 transition-opacity pl-2'>
-                                    <Button size="icon" variant="ghost" className='h-8 w-8' onClick={() => handleUnbookmark(project.id, project.name)}>
-                                        <Trash2 className="h-4 w-4 text-destructive" />
-                                    </Button>
-                                </div>
+                  <Tabs defaultValue="projects">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="projects">Projects</TabsTrigger>
+                      <TabsTrigger value="events">Events</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="projects" className='mt-4'>
+                        {loadingBookmarkedProjects ? <Loader2 className="animate-spin" /> : 
+                        !bookmarkedProjects || bookmarkedProjects.length === 0 ? (
+                          <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
+                            <Bookmark className="mx-auto h-12 w-12" />
+                            <p className="mt-4 font-semibold">No bookmarked projects.</p>
+                            <p className="mt-1 text-sm">Explore projects and bookmark your favorites!</p>
+                            <Button asChild variant="secondary" className="mt-4">
+                              <Link href="/dashboard/projects">Explore Projects</Link>
+                            </Button>
                           </div>
-                        ))}
-                      </div>
-                    )
-                  }
+                        ) : (
+                          <div className='space-y-4'>
+                            {bookmarkedProjects.map(project => (
+                                <div key={project.id} className="group flex items-center justify-between p-3 border rounded-md hover:bg-muted/50 hover:border-primary/30 transition-colors">
+                                    <Link href={`/dashboard/projects/${project.id}`} className="flex-1 min-w-0">
+                                        <h3 className="font-semibold truncate">{project.name}</h3>
+                                        <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
+                                    </Link>
+                                    <div className='opacity-0 group-hover:opacity-100 transition-opacity pl-2'>
+                                        <Button size="icon" variant="ghost" className='h-8 w-8' onClick={() => handleUnbookmark(project.id, project.name)}>
+                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                        </Button>
+                                    </div>
+                              </div>
+                            ))}
+                          </div>
+                        )
+                      }
+                    </TabsContent>
+                    <TabsContent value="events" className='mt-4'>
+                      {loadingBookmarkedEvents ? <Loader2 className="animate-spin" /> : 
+                        !bookmarkedEvents || bookmarkedEvents.length === 0 ? (
+                          <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
+                            <Calendar className="mx-auto h-12 w-12" />
+                            <p className="mt-4 font-semibold">No bookmarked events.</p>
+                            <p className="mt-1 text-sm">Explore events and bookmark the ones you're interested in!</p>
+                            <Button asChild variant="secondary" className="mt-4">
+                              <Link href="/dashboard/events">Explore Events</Link>
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className='space-y-4'>
+                            {bookmarkedEvents.map(event => (
+                                <div key={event.id} className="group flex items-center justify-between p-3 border rounded-md hover:bg-muted/50 hover:border-primary/30 transition-colors">
+                                    <Link href={`/dashboard/events`} className="flex-1 min-w-0">
+                                        <h3 className="font-semibold truncate">{event.title}</h3>
+                                        <p className="text-sm text-muted-foreground line-clamp-2">{event.date.toDate().toLocaleDateString()}</p>
+                                    </Link>
+                                    <div className='opacity-0 group-hover:opacity-100 transition-opacity pl-2'>
+                                        <Button size="icon" variant="ghost" className='h-8 w-8' onClick={() => handleUnbookmarkEvent(event.id, event.title)}>
+                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                        </Button>
+                                    </div>
+                              </div>
+                            ))}
+                          </div>
+                        )
+                      }
+                    </TabsContent>
+                  </Tabs>
                 </CardContent>
               </Card>
-               <Card>
-                <CardHeader>
-                  <CardTitle className="font-headline text-xl">Bookmarked Events</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {loadingBookmarkedEvents ? <Loader2 className="animate-spin" /> : 
-                    !bookmarkedEvents || bookmarkedEvents.length === 0 ? (
-                      <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
-                        <Calendar className="mx-auto h-12 w-12" />
-                        <p className="mt-4 font-semibold">No bookmarked events.</p>
-                        <p className="mt-1 text-sm">Explore events and bookmark the ones you're interested in!</p>
-                         <Button asChild variant="secondary" className="mt-4">
-                           <Link href="/dashboard/events">Explore Events</Link>
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className='space-y-4'>
-                        {bookmarkedEvents.map(event => (
-                            <div key={event.id} className="group flex items-center justify-between p-3 border rounded-md hover:bg-muted/50 hover:border-primary/30 transition-colors">
-                                <Link href={`/dashboard/events`} className="flex-1 min-w-0">
-                                    <h3 className="font-semibold truncate">{event.title}</h3>
-                                    <p className="text-sm text-muted-foreground line-clamp-2">{event.date.toDate().toLocaleDateString()}</p>
-                                </Link>
-                                <div className='opacity-0 group-hover:opacity-100 transition-opacity pl-2'>
-                                    <Button size="icon" variant="ghost" className='h-8 w-8' onClick={() => handleUnbookmarkEvent(event.id, event.title)}>
-                                        <Trash2 className="h-4 w-4 text-destructive" />
-                                    </Button>
-                                </div>
-                          </div>
-                        ))}
-                      </div>
-                    )
-                  }
-                </CardContent>
-              </Card>
+
             </div>
             <div className="space-y-8">
               <Card>
