@@ -229,7 +229,7 @@ export function CreateEventDialog({ open, onOpenChange, eventToEdit }: CreateEve
                     control={form.control}
                     name="date"
                     render={({ field }) => (
-                        <FormItem className="flex flex-col">
+                        <FormItem className="flex flex-col pt-2">
                         <FormLabel>Date</FormLabel>
                         <Popover>
                             <PopoverTrigger asChild>
