@@ -8,7 +8,7 @@ import {
   SidebarFooter,
   SidebarContent,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Users, FolderKanban, MessageSquare, LogOut, Calendar, Lightbulb, User as UserIcon, Orbit } from 'lucide-react';
+import { LayoutDashboard, Users, FolderKanban, MessageSquare, LogOut, Calendar, Lightbulb, User as UserIcon, Orbit, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/firebase';
@@ -18,8 +18,9 @@ const navItems = [
   { href: '/dashboard/projects', icon: FolderKanban, label: 'Projects' },
   { href: '/dashboard/communities', icon: MessageSquare, label: 'Community' },
   { href: '/dashboard/events', icon: Calendar, label: 'Events' },
-  { href: '/dashboard/teammates', icon: Users, label: 'Teammates' },
+  { href: '/dashboard/teammates', icon: Users, label: 'Team' },
   { href: '/dashboard/ideas', icon: Lightbulb, label: 'Ideas' },
+  { href: '/dashboard/progress', icon: TrendingUp, label: 'Progress'},
   { href: '/dashboard/profile', icon: UserIcon, label: 'Profile' },
 ];
 

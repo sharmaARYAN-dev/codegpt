@@ -12,6 +12,8 @@ export type StudentProfile = {
     label: string;
     color: string;
   }[];
+  xp?: number;
+  level?: number;
   socialLinks?: {
     github?: string;
     linkedin?: string;
