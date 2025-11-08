@@ -44,7 +44,7 @@ export interface Project {
   joinRequests?: { uid: string; message?: string; createdAt: Date }[];
   demoLink?: string;
   repo?: string;
-  createdAt: Timestamp;
+  createdAt: Timestamp | null;
   updatedAt: Timestamp;
   commentCount?: number;
   upvotes?: string[];
@@ -94,3 +94,18 @@ export interface Comment {
     updatedAt: Timestamp;
     parentId?: string;
 };
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: 'connection_request' | 'connection_accepted' | 'new_comment' | 'project_invite';
+  message: string;
+  from?: {
+    id: string;
+    name: string;
+    photoURL?: string;
+  };
+  link: string;
+  isRead: boolean;
+  createdAt: Timestamp;
+}

@@ -29,6 +29,7 @@ import Link from 'next/link';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
+import { createNotification } from '@/lib/notification-services';
 
 function TeammatesSkeleton() {
   return (
@@ -77,15 +78,26 @@ function TeammatesSkeleton() {
 }
 
 function useConnection(currentUser: StudentProfile | null) {
-    const sendRequest = useCallback(async (targetUserId: string) => {
+    const sendRequest = useCallback(async (targetUser: StudentProfile) => {
         if (!currentUser || !db) return;
         
         const currentUserRef = doc(db, "users", currentUser.id);
-        const targetUserRef = doc(db, "users", targetUserId);
+        const targetUserRef = doc(db, "users", targetUser.id);
 
         const promise = Promise.all([
-             updateDoc(currentUserRef, { sentRequests: arrayUnion(targetUserId) }),
-             updateDoc(targetUserRef, { incomingRequests: arrayUnion(currentUser.id) })
+             updateDoc(currentUserRef, { sentRequests: arrayUnion(targetUser.id) }),
+             updateDoc(targetUserRef, { incomingRequests: arrayUnion(currentUser.id) }),
+             createNotification({
+                userId: targetUser.id,
+                type: 'connection_request',
+                message: `${currentUser.displayName} wants to connect with you.`,
+                from: {
+                    id: currentUser.id,
+                    name: currentUser.displayName,
+                    photoURL: currentUser.photoURL,
+                },
+                link: '/dashboard/teammates',
+             })
         ]);
         
         toast.promise(promise, {
@@ -96,20 +108,31 @@ function useConnection(currentUser: StudentProfile | null) {
 
     }, [currentUser]);
 
-    const acceptRequest = useCallback(async (requesterId: string) => {
+    const acceptRequest = useCallback(async (requester: StudentProfile) => {
         if (!currentUser || !db) return;
 
         const currentUserRef = doc(db, "users", currentUser.id);
-        const requesterRef = doc(db, "users", requesterId);
+        const requesterRef = doc(db, "users", requester.id);
 
         const promise = Promise.all([
             updateDoc(currentUserRef, {
-                incomingRequests: arrayRemove(requesterId),
-                connections: arrayUnion(requesterId)
+                incomingRequests: arrayRemove(requester.id),
+                connections: arrayUnion(requester.id)
             }),
             updateDoc(requesterRef, {
                 sentRequests: arrayRemove(currentUser.id),
                 connections: arrayUnion(currentUser.id)
+            }),
+            createNotification({
+                userId: requester.id,
+                type: 'connection_accepted',
+                message: `${currentUser.displayName} accepted your connection request.`,
+                from: {
+                    id: currentUser.id,
+                    name: currentUser.displayName,
+                    photoURL: currentUser.photoURL,
+                },
+                link: '/dashboard/teammates',
             })
         ]);
         
@@ -291,7 +314,7 @@ export default function ConnectionsPage() {
                         <ConnectionRequestCard 
                             key={req.id} 
                             request={req}
-                            onAccept={() => acceptRequest(req.id)}
+                            onAccept={() => acceptRequest(req)}
                             onDecline={() => declineRequest(req.id)}
                         />
                     ))}
@@ -342,7 +365,7 @@ export default function ConnectionsPage() {
                     <Button 
                         className="w-full" 
                         disabled={buttonState !== 'CONNECT'}
-                        onClick={() => sendRequest(student.id)}
+                        onClick={() => sendRequest(student)}
                     >
                        {buttonState === 'CONNECT' && <><UserPlus className="mr-2 h-4 w-4" /> Connect</>}
                        {buttonState === 'PENDING' && <><Clock className="mr-2 h-4 w-4" /> Pending</>}

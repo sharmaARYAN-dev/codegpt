@@ -9,9 +9,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Settings, LogOut, Bell, Search, Orbit, Menu, Sun, Moon } from 'lucide-react';
+import { Settings, LogOut, Bell, Search, Orbit, Menu, Sun, Moon, Check, UserPlus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Input } from './ui/input';
@@ -19,11 +20,14 @@ import { useAuth } from '@/context/AuthContext';
 import { useTheme } from 'next-themes';
 import React from 'react';
 import { auth } from '@/lib/firebase';
+import { useNotifications } from '@/hooks/use-notifications';
+import { formatDistanceToNow } from 'date-fns';
 
 export function Header() {
   const { user } = useAuth();
   const router = useRouter();
   const { theme, setTheme } = useTheme();
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications(user?.id);
   
   const handleLogout = async () => {
     await auth.signOut();
@@ -70,10 +74,44 @@ export function Header() {
         </div>
       
       <div className="flex flex-1 items-center justify-end gap-2">
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <Bell className="h-5 w-5" />
-          <span className="sr-only">Toggle notifications</span>
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full relative">
+              <Bell className="h-5 w-5" />
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                  {unreadCount}
+                </span>
+              )}
+              <span className="sr-only">Toggle notifications</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-80" align="end">
+             <DropdownMenuLabel className="flex justify-between items-center">
+              <span>Notifications</span>
+              {unreadCount > 0 && <Button variant="link" size="sm" className="h-auto p-0" onClick={markAllAsRead}>Mark all as read</Button>}
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup className="max-h-96 overflow-y-auto">
+              {notifications.length === 0 ? (
+                <p className="p-4 text-sm text-center text-muted-foreground">No new notifications</p>
+              ) : (
+                notifications.map(notif => (
+                  <DropdownMenuItem key={notif.id} className="items-start gap-3" onSelect={(e) => { e.preventDefault(); if (!notif.isRead) markAsRead(notif.id); router.push(notif.link); }}>
+                    <div className="mt-1">
+                      {notif.type === 'connection_accepted' ? <Check className="h-4 w-4 text-green-500" /> : <UserPlus className="h-4 w-4 text-primary" />}
+                    </div>
+                    <div className="flex-1">
+                       <p className={`text-sm ${!notif.isRead && 'font-semibold'}`}>{notif.message}</p>
+                       <p className="text-xs text-muted-foreground">{formatDistanceToNow(notif.createdAt.toDate(), { addSuffix: true })}</p>
+                    </div>
+                    {!notif.isRead && <div className="size-2 rounded-full bg-primary mt-2"></div>}
+                  </DropdownMenuItem>
+                ))
+              )}
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <Button variant="ghost" size="icon" className="rounded-full" onClick={toggleTheme}>
             <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
