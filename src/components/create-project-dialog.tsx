@@ -75,7 +75,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
       tags: values.tags.map(t => t.toLowerCase()),
       skillsNeeded: values.tags.map(t => t.toLowerCase()),
       ownerId: user.id,
-      members: [{ uid: user.id, role: 'owner', joinedAt: serverTimestamp() }],
+      members: [{ uid: user.id, role: 'owner', joinedAt: new Date() }],
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
       repo: '',

@@ -39,8 +39,8 @@ export interface Project {
   tags: string[]; // e.g., ["webdev","ai"]
   skillsNeeded: string[]; // normalized
   ownerId: string; // Changed from createdBy to ownerId
-  members: { uid: string; role: string; joinedAt: Timestamp }[];
-  joinRequests?: { uid: string; message?: string; createdAt: Timestamp }[];
+  members: { uid: string; role: string; joinedAt: Date }[];
+  joinRequests?: { uid: string; message?: string; createdAt: Date }[];
   demoLink?: string;
   repo?: string;
   createdAt: Timestamp;
