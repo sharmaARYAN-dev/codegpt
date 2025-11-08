@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Orbit, Chrome } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword } from 'firebase/auth';
 import { useAuth, useUser } from '@/firebase';
 import { useEffect } from 'react';
 import { doc, setDoc } from 'firebase/firestore';
@@ -13,6 +13,8 @@ import { useFirestore } from '@/firebase';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { useToast } from '@/hooks/use-toast';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,7 +37,6 @@ export default function LoginPage() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
-      // Create or update user profile in Firestore
       const userRef = doc(firestore, 'users', user.uid);
       const userData = {
         id: user.uid,
@@ -47,15 +48,14 @@ export default function LoginPage() {
         reputation: [],
       };
 
-      setDoc(userRef, userData, { merge: true }).catch(async (serverError) => {
+      setDoc(userRef, userData, { merge: true }).catch(async () => {
           const permissionError = new FirestorePermissionError({
             path: userRef.path,
-            operation: 'create', // or 'update' depending on your logic
+            operation: 'create',
             requestResourceData: userData,
           });
           errorEmitter.emit('permission-error', permissionError);
       });
-
 
       router.push('/dashboard');
     } catch (error: any) {
@@ -64,6 +64,26 @@ export default function LoginPage() {
         variant: "destructive",
         title: "Login Failed",
         description: error.message || "An unexpected error occurred during login.",
+      });
+    }
+  };
+
+  const handleEmailLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!auth) return;
+
+    const email = event.currentTarget.email.value;
+    const password = event.currentTarget.password.value;
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      router.push('/dashboard');
+    } catch (error: any) {
+       console.error("Error during email login:", error);
+       toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: "Invalid email or password. Please try again.",
       });
     }
   };
@@ -87,30 +107,39 @@ export default function LoginPage() {
       />
       <div className="absolute inset-0 z-0 h-full w-full bg-[url('https://res.cloudinary.com/dfhpkqrjw/image/upload/v1717438453/grid_y4h5x6.svg')] [background-position:calc(50%_+_1px)_calc(50%_+_1px)]" />
 
-      <header className="sticky top-0 z-50">
-        <div className="container mx-auto px-4">
-            <div className="flex h-20 items-center justify-between">
-                <Link href="/" className="flex items-center gap-2">
-                    <Orbit className="h-7 w-7 text-primary" />
-                    <span className="text-xl font-bold">Universe</span>
-                </Link>
-            </div>
-        </div>
-      </header>
-
       <main className="flex-1 relative z-10 flex items-center justify-center p-4">
         <Card className="w-full max-w-sm bg-card/50 backdrop-blur-sm border-border/20">
           <CardHeader className="text-center">
-            <CardTitle className="font-headline text-3xl font-bold">Join Universe</CardTitle>
-            <CardDescription>Sign in to connect, create, and collaborate.</CardDescription>
+            <CardTitle className="font-headline text-3xl font-bold">Welcome back to Universe.</CardTitle>
+            <CardDescription>Step into your Universe.</CardDescription>
           </CardHeader>
           <CardContent>
+            <form onSubmit={handleEmailLogin} className="space-y-4">
+               <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" placeholder="Email" required className="bg-input/50" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input id="password" type="password" placeholder="Password" required className="bg-input/50" />
+              </div>
+              <Button type="submit" className="w-full h-12 text-base font-bold bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+                Login
+              </Button>
+            </form>
+             <div className="my-4 flex items-center">
+                <div className="flex-grow border-t border-muted-foreground/20"></div>
+                <span className="mx-4 text-xs uppercase text-muted-foreground">OR</span>
+                <div className="flex-grow border-t border-muted-foreground/20"></div>
+            </div>
             <Button variant="outline" className="w-full h-12 text-base" onClick={handleGoogleLogin}>
               <Chrome className="mr-2 h-5 w-5" />
               Continue with Google
             </Button>
-            <div className="mt-4 text-center text-xs text-muted-foreground">
-              By continuing, you agree to our Terms of Service and Privacy Policy.
+            <div className="mt-4 text-center text-sm text-muted-foreground">
+              <Link href="#" className="underline hover:text-primary">
+                Create Account
+              </Link>
             </div>
           </CardContent>
         </Card>
