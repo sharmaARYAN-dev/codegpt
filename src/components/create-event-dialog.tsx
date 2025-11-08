@@ -46,9 +46,12 @@ const eventSchema = z.object({
     required_error: "A date for the event is required.",
   }),
   isOnline: z.boolean().default(false),
-  location: z.string().min(2, 'Location is required.'),
+  location: z.string().optional(),
   description: z.string().min(20, 'Description must be at least 20 characters long.'),
   tags: z.string().min(2, 'Please provide at least one tag.'),
+}).refine(data => data.isOnline || (!!data.location && data.location.length >= 2), {
+    message: 'Location is required for in-person events.',
+    path: ['location'],
 });
 
 interface CreateEventDialogProps {
@@ -235,7 +238,7 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
                         <FormItem>
                         <FormLabel>Location</FormLabel>
                         <FormControl>
-                            <Input placeholder="e.g., Main Auditorium" {...field} />
+                            <Input placeholder="e.g., Main Auditorium" {...field} value={field.value ?? ''} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
