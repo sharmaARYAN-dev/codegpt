@@ -4,6 +4,16 @@ import { Orbit, Users, Lightbulb, Trophy, Menu } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { SolarSystem } from '@/components/solar-system';
 
+// Helper function to generate random box-shadows for stars
+const generateStars = (count: number, size: number) => {
+  let boxShadow = '';
+  for (let i = 0; i < count; i++) {
+    boxShadow += `${Math.random() * 2000}px ${Math.random() * 2000}px hsl(var(--primary-foreground)), `;
+  }
+  return boxShadow.slice(0, -2);
+};
+
+
 export default function LandingPage() {
   const features = [
     {
@@ -23,18 +33,14 @@ export default function LandingPage() {
     },
   ];
 
+  const smallStars = { '--size': '1px', '--box-shadow': generateStars(700, 1) } as React.CSSProperties;
+  const mediumStars = { '--size': '2px', '--box-shadow': generateStars(200, 2) } as React.CSSProperties;
+  const largeStars = { '--size': '3px', '--box-shadow': generateStars(100, 3) } as React.CSSProperties;
+
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <div
-        className="absolute inset-0 -z-10 opacity-20"
-        style={{
-          backgroundImage:
-            'radial-gradient(circle at 25% 25%, hsl(var(--primary) / 0.3), rgba(255, 255, 255, 0) 35%), radial-gradient(circle at 75% 75%, hsl(var(--accent) / 0.3), rgba(255, 255, 255, 0) 35%)',
-        }}
-      />
-      <div className="absolute inset-0 -z-20 h-full w-full bg-background bg-[url('https://res.cloudinary.com/dfhpkqrjw/image/upload/v1717438453/grid_y4h5x6.svg')] bg-repeat [background-position:calc(50%_+_1px)_calc(50%_+_1px)]" />
-
-      <header className="sticky top-0 z-50 border-b border-border/20 bg-background/50 backdrop-blur-sm">
+      <header className="sticky top-0 z-50 border-b border-border/20 bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex h-20 items-center justify-between">
                 <Link href="/" className="flex items-center gap-2">
@@ -63,7 +69,17 @@ export default function LandingPage() {
       </header>
 
       <main className="flex-1">
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 md:pt-32 md:pb-24 text-center">
+        <section className="relative container mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 md:pt-32 md:pb-24 text-center overflow-hidden">
+             <div className="absolute inset-0 -z-10 opacity-20"
+                style={{
+                backgroundImage:
+                    'radial-gradient(circle at 25% 25%, hsl(var(--primary) / 0.3), rgba(255, 255, 255, 0) 35%), radial-gradient(circle at 75% 75%, hsl(var(--accent) / 0.3), rgba(255, 255, 255, 0) 35%)',
+                }}
+            />
+            <div className='stars-bg' style={smallStars}></div>
+            <div className='stars-bg-2' style={mediumStars}></div>
+            <div className='stars-bg-3' style={largeStars}></div>
+
             <div className="grid grid-cols-1 gap-12 items-center md:grid-cols-2">
                 <div className="text-center md:text-left">
                     <h1 className="font-headline text-5xl font-extrabold tracking-tighter !leading-[1.1] sm:text-6xl lg:text-7xl">
@@ -84,8 +100,8 @@ export default function LandingPage() {
                     </div>
                 </div>
 
-                 <div className="hidden md:flex items-center justify-center relative -top-16">
-                     <SolarSystem />
+                 <div className="hidden md:flex items-center justify-center">
+                    <SolarSystem />
                 </div>
 
             </div>

@@ -62,3 +62,103 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Helper for solar system animation */
+.solar-system-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 1/1;
+  margin-top: -4rem; /* Adjust as needed */
+}
+
+.solar {
+  height: 50px;
+  width: 50px;
+  background: orange;
+  border-radius: 50%;
+  position: relative;
+  animation: glow 1.5s linear infinite;
+}
+
+.solar i {
+  border-radius: 50%;
+  display: block;
+  position: absolute;
+  border: 1px solid hsla(var(--foreground), 0.15);
+  box-sizing: border-box;
+  transform-origin: 50% 50%;
+}
+
+.solar i::before {
+  content: "";
+  border-radius: 50%;
+  display: block;
+  position: absolute;
+  top: -5px;
+  right: 45%;
+}
+
+.solar i.mercury {
+  width: 80px; height: 80px; margin-left: -40px; left: 50%; top: 50%; margin-top: -40px; animation: orbit 5s linear infinite;
+}
+.solar i.mercury:before { background: #6f5f5f; height: 7px; width: 7px; }
+
+.solar i.venus {
+  width: 110px; height: 110px; margin-left: -55px; left: 50%; top: 50%; margin-top: -55px; animation: orbit 8s linear infinite;
+}
+.solar i.venus:before { background: #e7a71f; height: 10px; width: 10px; }
+
+.solar i.earth {
+  width: 140px; height: 140px; margin-left: -70px; left: 50%; top: 50%; margin-top: -70px; animation: orbit 12s linear infinite;
+}
+.solar i.earth:before { background: #63bee2; height: 10px; width: 10px; }
+
+.solar i.mars {
+  width: 170px; height: 170px; margin-left: -85px; left: 50%; top: 50%; margin-top: -85px; animation: orbit 18s linear infinite;
+}
+.solar i.mars:before { background: red; height: 10px; width: 10px; }
+
+.solar i.jupiter {
+  width: 260px; height: 260px; margin-left: -130px; left: 50%; top: 50%; margin-top: -130px; animation: orbit 25s linear infinite;
+}
+.solar i.jupiter:before { background: #cf9b2b; top: -15px; height: 30px; width: 30px; }
+
+@keyframes orbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes glow {
+  0% { box-shadow: none; }
+  50% { background: #ffeb00; box-shadow: 0 0 20px orange; }
+  100% { box-shadow: none; }
+}
+
+/* Twinkling Star Background */
+.stars-bg, .stars-bg-2, .stars-bg-3 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.stars-bg {
+  background: transparent;
+  z-index: -3;
+}
+
+.stars-bg-2 {
+  z-index: -2;
+}
+
+.stars-bg-3 {
+  z-index: -1;
+}

@@ -85,10 +85,22 @@ export default {
             height: '0',
           },
         },
+        'twinkle': {
+          '0%': {
+            boxShadow: 'var(--box-shadow), 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff',
+          },
+          '50%': {
+            boxShadow: 'var(--box-shadow), 0 0 10px #ffc, 0 0 20px #ffc, 0 0 30px #f99, 0 0 40px #f99, 0 0 50px #f99',
+          },
+          '100%': {
+            boxShadow: 'var(--box-shadow), 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff',
+          },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'twinkle': 'twinkle 7s alternate infinite',
       },
     },
   },
