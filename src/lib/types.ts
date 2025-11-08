@@ -44,6 +44,7 @@ export type Event = {
   type: 'Hackathon' | 'Workshop' | 'Conference';
   date: string; // ISO 8601 format
   location: string;
+  isOnline: boolean;
   description: string;
   organizerId: string;
   tags: string[];

@@ -63,12 +63,13 @@
         "type": { "type": "string", "enum": ["Hackathon", "Workshop", "Conference"] },
         "date": { "type": "string", "format": "date-time" },
         "location": { "type": "string" },
+        "isOnline": { "type": "boolean" },
         "description": { "type": "string" },
         "organizerId": { "type": "string" },
         "tags": { "type": "array", "items": { "type": "string" } },
         "rating": { "type": "number" }
       },
-      "required": ["title", "type", "date", "location", "description", "organizerId"]
+      "required": ["title", "type", "date", "location", "isOnline", "description", "organizerId"]
     },
     "ForumPost": {
       "title": "Forum Post",
