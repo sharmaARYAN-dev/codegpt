@@ -25,6 +25,7 @@ import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialo
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { cn } from '@/lib/utils';
+import { EventDetailsDialog } from '@/components/event-details-dialog';
 
 function EventsSkeleton() {
   return (
@@ -51,10 +52,11 @@ function EventsSkeleton() {
 
 type EventType = 'All' | 'Hackathon' | 'Workshop' | 'Conference';
 
-function EventCard({ event, users, onJoin, onEdit, onDelete, onBookmark, isBookmarked }: { event: Event, users: StudentProfile[] | null, onJoin: (eventName: string) => void, onEdit: (event: Event) => void, onDelete: (eventId: string, eventName: string) => void, onBookmark: () => void, isBookmarked: boolean }) {
+function EventCard({ event, users, onJoin, onEdit, onDelete, onBookmark, isBookmarked }: { event: Event, users: StudentProfile[] | null, onJoin: (event: Event) => void, onEdit: (event: Event) => void, onDelete: (eventId: string, eventName: string) => void, onBookmark: () => void, isBookmarked: boolean }) {
     const { user } = useAuth();
     const organizer = users?.find(u => u.id === event.organizerId);
     const isOwner = user && user.id === event.organizerId;
+    const isRegistered = user?.registeredEvents?.includes(event.id);
 
     return (
         <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20 hover:border-primary/30 group">
@@ -100,7 +102,9 @@ function EventCard({ event, users, onJoin, onEdit, onDelete, onBookmark, isBookm
             <p className="text-muted-foreground pt-2 line-clamp-2 text-sm leading-relaxed">{event.description}</p>
             </CardContent>
             <div className='p-6 pt-2'>
-                <Button className="w-full" onClick={() => onJoin(event.title)}>Join Event</Button>
+                <Button className="w-full" onClick={() => onJoin(event)} disabled={isRegistered}>
+                  {isRegistered ? 'Registered' : 'Join Event'}
+                </Button>
             </div>
         </Card>
     )
@@ -114,6 +118,7 @@ export default function EventsPage() {
   const [isDeleteEventOpen, setDeleteEventOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<{id: string, name: string} | null>(null);
   const [eventToEdit, setEventToEdit] = useState<Event | undefined>(undefined);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   const eventsQuery = useMemo(() => {
     if (!db) return null;
@@ -163,11 +168,12 @@ export default function EventsPage() {
     setEventToDelete(null);
   }
 
-
-  const handleJoinEvent = (eventName: string) => {
-    toast.success('Successfully Registered!', {
-      description: `You have joined the event: ${eventName}.`,
-    });
+  const handleJoinEvent = (event: Event) => {
+    if (!user) {
+        toast.error("You must be logged in to join an event.");
+        return;
+    }
+    setSelectedEvent(event);
   }
 
   const handleBookmark = (event: Event) => {
@@ -221,6 +227,13 @@ export default function EventsPage() {
         onConfirm={confirmDelete}
         itemName={eventToDelete?.name ?? 'event'}
       />
+      {selectedEvent && (
+        <EventDetailsDialog 
+            event={selectedEvent}
+            isOpen={!!selectedEvent}
+            onOpenChange={() => setSelectedEvent(null)}
+        />
+      )}
       <div className="space-y-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>

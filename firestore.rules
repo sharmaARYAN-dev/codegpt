@@ -13,7 +13,7 @@ service cloud.firestore {
     match /users/{uid} {
       allow read: if isSignedIn();
       allow create: if isOwner(uid);
-      allow update: if isOwner(uid) && request.resource.data.keys().hasOnly(['displayName', 'email', 'photoURL', 'skills', 'interests', 'bio', 'links', 'reputation', 'updatedAt', 'college', 'branch', 'year', 'xp', 'level', 'connections', 'incomingRequests', 'sentRequests', 'bookmarks', 'bookmarkedEvents']);
+      allow update: if isOwner(uid) && request.resource.data.keys().hasOnly(['displayName', 'email', 'photoURL', 'skills', 'interests', 'bio', 'links', 'reputation', 'updatedAt', 'college', 'branch', 'year', 'xp', 'level', 'connections', 'incomingRequests', 'sentRequests', 'bookmarks', 'bookmarkedEvents', 'registeredEvents']);
       allow delete: if false;
 
        match /notifications/{notificationId} {

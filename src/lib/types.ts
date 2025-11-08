@@ -32,6 +32,7 @@ export interface StudentProfile {
   sentRequests?: string[];
   bookmarks?: string[];
   bookmarkedEvents?: string[];
+  registeredEvents?: string[];
 };
 
 export interface Project {
@@ -99,7 +100,7 @@ export interface Comment {
 export interface Notification {
   id: string;
   userId: string;
-  type: 'connection_request' | 'connection_accepted' | 'new_comment' | 'project_invite';
+  type: 'connection_request' | 'connection_accepted' | 'new_comment' | 'project_invite' | 'event_reminder';
   message: string;
   from?: {
     id: string;
