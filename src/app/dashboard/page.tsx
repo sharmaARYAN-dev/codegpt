@@ -155,7 +155,7 @@ export default function DashboardPage() {
             </Card>
              <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline text-lg">Suggested Teammates</CardTitle>
+                    <CardTitle className="font-headline text-lg">Suggested Connections</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                      {suggestedTeammates?.map((student) => {

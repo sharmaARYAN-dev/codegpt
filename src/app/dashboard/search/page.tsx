@@ -132,7 +132,7 @@ export default function SearchPage() {
 
              {searchResults && searchResults.users.length > 0 && (
                 <section>
-                    <h2 className="font-headline text-2xl font-bold mb-4 flex items-center gap-2"><Users className='size-6 text-primary' /> Teammates</h2>
+                    <h2 className="font-headline text-2xl font-bold mb-4 flex items-center gap-2"><Users className='size-6 text-primary' /> Connections</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {searchResults.users.map(user => (
                             <Link href={`/dashboard/teammates`} key={user.id} className="block group">

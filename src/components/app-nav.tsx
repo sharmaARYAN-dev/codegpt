@@ -18,7 +18,7 @@ const navItems = [
   { href: '/dashboard/projects', icon: FolderKanban, label: 'Projects' },
   { href: '/dashboard/communities', icon: MessageSquare, label: 'Community' },
   { href: '/dashboard/events', icon: Calendar, label: 'Events' },
-  { href: '/dashboard/teammates', icon: Users, label: 'Team' },
+  { href: '/dashboard/teammates', icon: Users, label: 'Connections' },
   { href: '/dashboard/ideas', icon: Lightbulb, label: 'Ideas' },
   { href: '/dashboard/progress', icon: TrendingUp, label: 'Progress'},
   { href: '/dashboard/profile', icon: UserIcon, label: 'Profile' },

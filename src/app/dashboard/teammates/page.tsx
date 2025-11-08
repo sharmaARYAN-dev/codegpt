@@ -25,7 +25,6 @@ import { collection, doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/fi
 import type { StudentProfile } from '@/lib/types';
 import { useMemo, useState, useCallback } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
@@ -163,16 +162,17 @@ function ConnectionRequestCard({ request, onAccept, onDecline }: { request: Stud
     )
 }
 
-export default function TeammatesPage() {
+export default function ConnectionsPage() {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedInterest, setSelectedInterest] = useState('all');
+  const [sortBy, setSortBy] = useState('relevance');
   const { sendRequest, acceptRequest, declineRequest } = useConnection(user);
 
   const usersQuery = useMemo(() => db ? collection(db, 'users') : null, [db]);
   const { data: users, loading } = useCollection<StudentProfile>(usersQuery, 'users');
   
-  const teammates = useMemo(() => {
+  const connections = useMemo(() => {
     if (!users) return [];
     let filteredUsers = user ? users.filter(u => u.id !== user.id) : users;
 
@@ -181,14 +181,42 @@ export default function TeammatesPage() {
     }
 
     if (searchTerm) {
+      const lowercasedTerm = searchTerm.toLowerCase();
       filteredUsers = filteredUsers.filter(u => 
-        u.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        u.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()))
+        u.displayName.toLowerCase().includes(lowercasedTerm) ||
+        u.college?.toLowerCase().includes(lowercasedTerm) ||
+        u.skills.some(skill => skill.toLowerCase().includes(lowercasedTerm)) ||
+        u.interests.some(interest => interest.toLowerCase().includes(lowercasedTerm))
       );
     }
     
-    return filteredUsers;
-  }, [user, users, searchTerm, selectedInterest]);
+    // Scoring and Sorting
+    const scoredUsers = filteredUsers.map(u => {
+        let score = 0;
+        if (user) {
+            const currentUserSkills = new Set(user.skills || []);
+            const currentUserInterests = new Set(user.interests || []);
+            const sharedSkills = u.skills?.filter(skill => currentUserSkills.has(skill)) || [];
+            const sharedInterests = u.interests?.filter(interest => currentUserInterests.has(interest)) || [];
+            score += sharedSkills.length * 2;
+            score += sharedInterests.length;
+        }
+        return { ...u, score };
+    });
+
+    if (sortBy === 'relevance') {
+        return scoredUsers.sort((a, b) => b.score - a.score);
+    }
+    if (sortBy === 'xp') {
+        return scoredUsers.sort((a, b) => (b.xp || 0) - (a.xp || 0));
+    }
+    if (sortBy === 'name') {
+        return scoredUsers.sort((a, b) => a.displayName.localeCompare(b.displayName));
+    }
+    
+    return scoredUsers;
+
+  }, [user, users, searchTerm, selectedInterest, sortBy]);
   
   const interests = useMemo(() => {
     if (!users) return [];
@@ -211,7 +239,7 @@ export default function TeammatesPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-headline text-3xl font-bold tracking-tight">Find Your Next Teammate</h1>
+        <h1 className="font-headline text-3xl font-bold tracking-tight">Find Connections</h1>
         <p className="text-muted-foreground mt-1">Browse and connect with talented students across the university.</p>
       </div>
 
@@ -220,20 +248,32 @@ export default function TeammatesPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative md:col-span-2">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search by name or skill..." className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+              <Input placeholder="Search by name, skill, interest, or college..." className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
-            <Select value={selectedInterest} onValueChange={setSelectedInterest}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by interest" />
-              </SelectTrigger>
-              <SelectContent>
-                {interests.map((interest) => (
-                  <SelectItem key={interest} value={interest} className="capitalize">
-                    {interest === 'all' ? 'All Interests' : interest}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="grid grid-cols-2 gap-4">
+                <Select value={selectedInterest} onValueChange={setSelectedInterest}>
+                <SelectTrigger>
+                    <SelectValue placeholder="Filter by interest" />
+                </SelectTrigger>
+                <SelectContent>
+                    {interests.map((interest) => (
+                    <SelectItem key={interest} value={interest} className="capitalize">
+                        {interest === 'all' ? 'All Interests' : interest}
+                    </SelectItem>
+                    ))}
+                </SelectContent>
+                </Select>
+                 <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="relevance">Sort by: Relevance</SelectItem>
+                        <SelectItem value="xp">Sort by: Experience</SelectItem>
+                        <SelectItem value="name">Sort by: Name</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -259,10 +299,9 @@ export default function TeammatesPage() {
             </Card>
         )}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {teammates.map((student) => {
+          {connections.map((student) => {
             if (user?.incomingRequests?.includes(student.id)) return null;
 
-            const hasSocials = student.links && Object.values(student.links).some(link => !!link);
             const buttonState = getButtonState(student.id);
 
             return (
@@ -273,13 +312,14 @@ export default function TeammatesPage() {
                     <AvatarFallback className='text-3xl'>{student.displayName.substring(0, 2)}</AvatarFallback>
                   </Avatar>
                   <CardTitle className="mt-4 font-headline text-xl">{student.displayName}</CardTitle>
+                  <p className="text-sm text-muted-foreground">{student.college}</p>
                 </CardHeader>
                 <CardContent className="flex-grow">
                   <div className="space-y-4">
                       <div>
-                          <h4 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Skills</h4>
+                          <h4 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">Skills</h4>
                           <div className="flex flex-wrap justify-center gap-1.5 mt-2">
-                              {student.skills.map((skill) => (
+                              {student.skills.slice(0, 3).map((skill) => (
                               <Badge key={skill} variant="secondary">
                                   {skill}
                               </Badge>
@@ -287,9 +327,9 @@ export default function TeammatesPage() {
                           </div>
                       </div>
                        <div>
-                          <h4 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider">Interests</h4>
+                          <h4 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">Interests</h4>
                           <div className="flex flex-wrap justify-center gap-1.5 mt-2">
-                              {student.interests.map((interest) => (
+                              {student.interests.slice(0, 3).map((interest) => (
                               <Badge key={interest} variant="outline">
                                   {interest}
                               </Badge>
@@ -308,29 +348,18 @@ export default function TeammatesPage() {
                        {buttonState === 'PENDING' && <><Clock className="mr-2 h-4 w-4" /> Pending</>}
                        {buttonState === 'CONNECTED' && <><Check className="mr-2 h-4 w-4" /> Connected</>}
                     </Button>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                        <Button className="w-full" variant="secondary" disabled={!hasSocials}>View Socials</Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-56">
-                        {student.links?.github && (
-                            <Link href={student.links.github} target="_blank" rel="noopener noreferrer">
-                            <DropdownMenuItem>
-                                <Github className="mr-2 h-4 w-4" />
-                                <span>View GitHub</span>
-                            </DropdownMenuItem>
-                            </Link>
-                        )}
-                        {student.links?.linkedin && (
-                            <Link href={student.links.linkedin} target="_blank" rel="noopener noreferrer">
-                            <DropdownMenuItem>
-                                <Linkedin className="mr-2 h-4 w-4" />
-                                <span>View LinkedIn</span>
-                            </DropdownMenuItem>
-                            </Link>
-                        )}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="flex w-full gap-2">
+                      {student.links?.github && (
+                        <Button className="flex-1" variant="secondary" asChild>
+                           <Link href={student.links.github} target="_blank" rel="noopener noreferrer"><Github className="mr-2 h-4 w-4" /> GitHub</Link>
+                        </Button>
+                      )}
+                      {student.links?.linkedin && (
+                         <Button className="flex-1" variant="secondary" asChild>
+                           <Link href={student.links.linkedin} target="_blank" rel="noopener noreferrer"><Linkedin className="mr-2 h-4 w-4" /> LinkedIn</Link>
+                        </Button>
+                      )}
+                    </div>
                 </CardFooter>
               </Card>
             );
