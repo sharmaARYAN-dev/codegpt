@@ -24,6 +24,8 @@ import { collection, doc, query, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { Progress } from '@/components/ui/progress';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from 'recharts';
 
 const badgeIcons = {
   'Rookie Collaborator': Trophy,
@@ -97,6 +99,37 @@ export default function ProgressPage() {
     }))
   }, [userProfile]);
 
+  const softSkillsData = useMemo(() => {
+    if (!userProjects || !user || !userProfile) return [];
+    
+    // Placeholder logic for soft skills calculation
+    let leadership = 0;
+    let teamwork = 0;
+    let innovation = 0;
+    let problemSolving = 0;
+    let productivity = 0;
+
+    userProjects.forEach(p => {
+      if (p.ownerId === user.uid) {
+        leadership += 20; // Bonus for leading a project
+      }
+      teamwork += (p.rating / 5) * 15;
+      innovation += (p.tags.includes('AI/ML') || p.tags.includes('IoT')) ? 15 : 5;
+      problemSolving += (p.rating / 5) * 15;
+      productivity += 10;
+    });
+
+    const normalize = (value: number) => Math.min(100, Math.floor(value));
+
+    return [
+      { subject: 'Productivity', value: normalize(productivity) },
+      { subject: 'Teamwork', value: normalize(teamwork) },
+      { subject: 'Problem-Solving', value: normalize(problemSolving) },
+      { subject: 'Innovation', value: normalize(innovation) },
+      { subject: 'Leadership', value: normalize(leadership) },
+    ];
+  }, [userProjects, user, userProfile]);
+
   if (loadingUser || loadingProfile || loadingProjects) {
     return <ProgressSkeleton />;
   }
@@ -104,6 +137,13 @@ export default function ProgressPage() {
   if (!userProfile) {
     return <p>User profile not found.</p>;
   }
+
+  const chartConfig = {
+    value: {
+      label: 'Value',
+      color: "hsl(var(--primary))",
+    },
+  };
 
   return (
     <div className="space-y-8">
@@ -147,54 +187,87 @@ export default function ProgressPage() {
         </Card>
       </div>
       
-       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-headline text-xl">Skill Growth</CardTitle>
-             <CardDescription>Your proficiency based on completed projects.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {skillGrowth.map(skill => (
-              <div key={skill.name}>
-                <div className="flex justify-between mb-1">
-                  <span className="text-base font-medium text-muted-foreground">{skill.name}</span>
-                  <span className="text-sm font-medium text-primary">{skill.level}%</span>
+       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <div className='lg:col-span-2 grid gap-6'>
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-headline text-xl">Skill Growth</CardTitle>
+              <CardDescription>Your proficiency based on completed projects.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {skillGrowth.map(skill => (
+                <div key={skill.name}>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-base font-medium text-muted-foreground">{skill.name}</span>
+                    <span className="text-sm font-medium text-primary">{skill.level}%</span>
+                  </div>
+                  <Progress value={skill.level} />
                 </div>
-                <Progress value={skill.level} />
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-headline text-xl">Badges Earned</CardTitle>
-            <CardDescription>Achievements unlocked on your journey.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {userProfile.reputation?.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {userProfile.reputation.map(badge => {
-                    const Icon = badgeIcons[badge.label as keyof typeof badgeIcons] || Star;
-                    return (
-                      <div key={badge.label} className="flex flex-col items-center text-center gap-2 p-4 border rounded-lg bg-card hover:bg-muted/50 transition-colors">
-                        <div className={`p-3 rounded-full bg-primary/10 ${badge.color}`}>
-                           <Icon className="size-8" />
+              ))}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-headline text-xl">Badges Earned</CardTitle>
+              <CardDescription>Achievements unlocked on your journey.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {userProfile.reputation?.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {userProfile.reputation.map(badge => {
+                      const Icon = badgeIcons[badge.label as keyof typeof badgeIcons] || Star;
+                      return (
+                        <div key={badge.label} className="flex flex-col items-center text-center gap-2 p-4 border rounded-lg bg-card hover:bg-muted/50 transition-colors">
+                          <div className={`p-3 rounded-full bg-primary/10 ${badge.color}`}>
+                            <Icon className="size-8" />
+                          </div>
+                          <p className="font-semibold text-sm">{badge.label}</p>
                         </div>
-                        <p className="font-semibold text-sm">{badge.label}</p>
-                      </div>
-                    )
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg">
-                    <Trophy className="mx-auto h-12 w-12" />
-                    <p className="mt-4 font-semibold">No badges yet.</p>
-                    <p className="mt-1 text-sm">Complete projects to start earning them!</p>
-                </div>
-              )}
-          </CardContent>
-        </Card>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg">
+                      <Trophy className="mx-auto h-12 w-12" />
+                      <p className="mt-4 font-semibold">No badges yet.</p>
+                      <p className="mt-1 text-sm">Complete projects to start earning them!</p>
+                  </div>
+                )}
+            </CardContent>
+          </Card>
+        </div>
+         <div className="lg:col-span-1">
+          <Card>
+              <CardHeader>
+                <CardTitle className="font-headline text-xl">Competency Snapshot</CardTitle>
+                <CardDescription>Your soft skills based on project history.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                  <ChartContainer
+                      config={chartConfig}
+                      className="mx-auto aspect-square max-h-[350px]"
+                    >
+                      <RadarChart data={softSkillsData}>
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent indicator="dot" />}
+                        />
+                        <PolarAngleAxis dataKey="subject" />
+                        <PolarGrid />
+                        <Radar
+                          dataKey="value"
+                          fill="var(--color-value)"
+                          fillOpacity={0.6}
+                          dot={{
+                            r: 4,
+                            fillOpacity: 1,
+                          }}
+                        />
+                      </RadarChart>
+                  </ChartContainer>
+              </CardContent>
+            </Card>
+        </div>
       </div>
 
     </div>

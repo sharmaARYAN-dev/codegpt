@@ -21,6 +21,13 @@ export type StudentProfile = {
     instagram?: string;
     reddit?: string;
   };
+  softSkills?: {
+    leadership: number;
+    innovation: number;
+    problemSolving: number;
+    teamwork: number;
+    productivity: number;
+  }
 };
 
 export type Project = {
