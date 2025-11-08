@@ -104,7 +104,7 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
   return (
     <div className="space-y-8">
         <div className='flex flex-col sm:flex-row justify-between items-start gap-4'>
-            <div>
+            <div className="flex-1">
                 <h1 className="font-headline text-3xl md:text-4xl font-bold tracking-tight">
                 {project.name}
                 </h1>

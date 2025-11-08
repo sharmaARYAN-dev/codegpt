@@ -141,7 +141,7 @@ export default function TeammatesPage() {
             const hasSocials = student.socialLinks && Object.values(student.socialLinks).some(link => link);
             return (
               <Card key={student.id} className="flex flex-col text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-primary/20 hover:shadow-lg hover:border-primary/30">
-                <CardHeader className="items-center pt-8">
+                <CardHeader className="flex-1 flex flex-col items-center pt-8">
                   <Avatar className="h-28 w-28 border-4 border-muted">
                     <AvatarImage src={student.photoURL} alt={student.displayName} data-ai-hint="person portrait" />
                     <AvatarFallback className='text-3xl'>{student.displayName.substring(0, 2)}</AvatarFallback>
