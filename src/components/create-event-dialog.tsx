@@ -25,9 +25,9 @@ import {
 } from '@/components/ui/form';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
 import { toast } from 'sonner';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Calendar as CalendarIcon, Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -37,7 +37,7 @@ import { Calendar } from './ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Switch } from './ui/switch';
-
+import type { Event } from '@/lib/types';
 
 const eventSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters long.'),
@@ -54,16 +54,19 @@ const eventSchema = z.object({
     path: ['location'],
 });
 
+type EventFormValues = z.infer<typeof eventSchema>;
+
 interface CreateEventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  eventToEdit?: Event;
 }
 
-export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps) {
+export function CreateEventDialog({ open, onOpenChange, eventToEdit }: CreateEventDialogProps) {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<z.infer<typeof eventSchema>>({
+  const form = useForm<EventFormValues>({
     resolver: zodResolver(eventSchema),
     defaultValues: {
       title: '',
@@ -73,49 +76,79 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
       tags: '',
     },
   });
+
+  useEffect(() => {
+    if (eventToEdit) {
+      form.reset({
+        title: eventToEdit.title,
+        type: eventToEdit.type,
+        date: eventToEdit.date.toDate(),
+        isOnline: eventToEdit.isOnline,
+        location: eventToEdit.isOnline ? '' : eventToEdit.location,
+        description: eventToEdit.description,
+        tags: eventToEdit.tags.join(', '),
+      });
+    } else {
+      form.reset({
+        title: '',
+        isOnline: false,
+        location: '',
+        description: '',
+        tags: '',
+        type: undefined,
+        date: undefined
+      });
+    }
+  }, [eventToEdit, form, open]);
   
   const isOnline = form.watch('isOnline');
+  const isEditing = !!eventToEdit;
   
-  const onSubmit = async (values: z.infer<typeof eventSchema>) => {
+  const onSubmit = async (values: EventFormValues) => {
     if (!db || !user) {
-      toast.error('Error', {
-        description: 'You must be logged in to create an event.',
-      });
+      toast.error('Error', { description: 'You must be logged in to create or edit an event.' });
       return;
     }
 
     setIsSubmitting(true);
+    
     const eventData = {
       ...values,
       tags: values.tags.split(',').map(tag => tag.trim()),
       location: values.isOnline ? 'Online' : values.location,
       organizerId: user.id,
-      createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
 
-    const collectionRef = collection(db, 'events');
-    const promise = () => addDoc(collectionRef, eventData).catch(async (serverError) => {
-        const permissionError = new FirestorePermissionError({
-          path: collectionRef.path,
-          operation: 'create',
-          requestResourceData: eventData,
-        });
-        errorEmitter.emit('permission-error', permissionError);
-        throw serverError;
-      });
+    const promise = () => {
+        if (isEditing) {
+            const eventRef = doc(db, 'events', eventToEdit.id);
+            return updateDoc(eventRef, eventData).catch(async (serverError) => {
+                const permissionError = new FirestorePermissionError({ path: eventRef.path, operation: 'update', requestResourceData: eventData });
+                errorEmitter.emit('permission-error', permissionError);
+                throw serverError;
+            });
+        } else {
+            const collectionRef = collection(db, 'events');
+            return addDoc(collectionRef, { ...eventData, createdAt: serverTimestamp() }).catch(async (serverError) => {
+                const permissionError = new FirestorePermissionError({ path: collectionRef.path, operation: 'create', requestResourceData: eventData });
+                errorEmitter.emit('permission-error', permissionError);
+                throw serverError;
+            });
+        }
+    };
 
     toast.promise(promise, {
-        loading: 'Creating your event...',
+        loading: isEditing ? 'Saving changes...' : 'Creating your event...',
         success: () => {
             form.reset();
             onOpenChange(false);
             setIsSubmitting(false);
-            return `${values.title} has been successfully created.`;
+            return isEditing ? 'Event updated successfully.' : 'Event created successfully.';
         },
         error: (err) => {
             setIsSubmitting(false);
-            return 'There was a problem creating your event.';
+            return isEditing ? 'There was a problem updating your event.' : 'There was a problem creating your event.';
         }
     });
   };
@@ -124,9 +157,9 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Create a New Event</DialogTitle>
+          <DialogTitle>{isEditing ? 'Edit Event' : 'Create a New Event'}</DialogTitle>
           <DialogDescription>
-            Fill out the details below to post a new event for the community.
+            {isEditing ? 'Update the details for your event.' : 'Fill out the details below to post a new event for the community.'}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -151,7 +184,7 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
                     render={({ field }) => (
                         <FormItem>
                         <FormLabel>Event Type</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select an event type" />
@@ -278,7 +311,7 @@ export function CreateEventDialog({ open, onOpenChange }: CreateEventDialogProps
               <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Event
+                {isEditing ? 'Save Changes' : 'Create Event'}
               </Button>
             </DialogFooter>
           </form>

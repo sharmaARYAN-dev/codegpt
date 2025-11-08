@@ -92,5 +92,6 @@ export interface Comment {
     content: string; // Changed from body
     authorId: string;
     createdAt: Timestamp;
+    updatedAt: Timestamp;
     parentId?: string;
 };

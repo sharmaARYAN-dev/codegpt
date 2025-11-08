@@ -15,12 +15,17 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import type { Event, StudentProfile } from '@/lib/types';
-import { collection, query, where, orderBy, type QueryConstraint } from 'firebase/firestore';
+import { collection, query, where, orderBy, type QueryConstraint, doc, deleteDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { useMemo, useState } from 'react';
 import { CreateEventDialog } from '@/components/create-event-dialog';
 import { db } from '@/lib/firebase';
+import { useAuth } from '@/context/AuthContext';
+import { ItemOptionsMenu } from '@/components/item-options-menu';
+import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 function EventsSkeleton() {
   return (
@@ -43,11 +48,69 @@ function EventsSkeleton() {
 
 type EventType = 'All' | 'Hackathon' | 'Workshop' | 'Conference';
 
+function EventCard({ event, users, onJoin, onEdit, onDelete }: { event: Event, users: StudentProfile[] | null, onJoin: (eventName: string) => void, onEdit: (event: Event) => void, onDelete: (eventId: string, eventName: string) => void }) {
+    const { user } = useAuth();
+    const organizer = users?.find(u => u.id === event.organizerId);
+    const isOwner = user && user.id === event.organizerId;
+
+    return (
+        <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20 hover:border-primary/30 group">
+            <CardHeader>
+                <div className='flex items-start justify-between'>
+                    <div className='flex items-center gap-4'>
+                    <Avatar className='size-12'>
+                        {organizer?.photoURL && <AvatarImage src={organizer.photoURL} alt={organizer.displayName} />}
+                        <AvatarFallback>{organizer?.displayName?.substring(0, 2) ?? 'EV'}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                        <p className="font-semibold text-base truncate">{organizer?.displayName}</p>
+                        <p className="text-sm text-muted-foreground">Organizer</p>
+                    </div>
+                    </div>
+                    <div className='flex'>
+                        {isOwner ? (
+                             <ItemOptionsMenu onEdit={() => onEdit(event)} onDelete={() => onDelete(event.id, event.title)} />
+                        ) : (
+                            <Button variant='ghost' size='icon'>
+                                <Bookmark className='size-5' />
+                            </Button>
+                        )}
+                    </div>
+                </div>
+                <CardTitle className="font-headline pt-4 text-xl">{event.title}</CardTitle>
+            </CardHeader>
+            <CardContent className="flex-grow space-y-4">
+            <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                <div className='flex items-center gap-2'>
+                <Calendar className='size-4' />
+                <span>{event.date.toDate().toLocaleDateString()}</span>
+                </div>
+                <div className='flex items-center gap-2'>
+                <MapPin className='size-4' />
+                <span>{event.location}</span>
+                </div>
+            </div>
+            
+            <div className="flex items-center gap-2 text-sm flex-wrap">
+                {event.tags.map(tag => <Badge key={tag} variant='secondary'>{tag}</Badge>)}
+            </div>
+            <p className="text-muted-foreground pt-2 line-clamp-2 text-sm leading-relaxed">{event.description}</p>
+            </CardContent>
+            <div className='p-6 pt-2'>
+                <Button className="w-full" onClick={() => onJoin(event.title)}>Join Event</Button>
+            </div>
+        </Card>
+    )
+}
+
 export default function EventsPage() {
   const heroImage = PlaceHolderImages.find(img => img.id === 'event-conference');
   const [activeType, setActiveType] = useState<EventType>('All');
   const [locationType, setLocationType] = useState('all');
   const [isCreateEventOpen, setCreateEventOpen] = useState(false);
+  const [isDeleteEventOpen, setDeleteEventOpen] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState<{id: string, name: string} | null>(null);
+  const [eventToEdit, setEventToEdit] = useState<Event | undefined>(undefined);
 
   const eventsQuery = useMemo(() => {
     if (!db) return null;
@@ -69,6 +132,34 @@ export default function EventsPage() {
 
   const usersQuery = useMemo(() => db ? collection(db, 'users') : null, [db]);
   const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery, 'users');
+  
+  const handleCreateOrEdit = (event?: Event) => {
+    setEventToEdit(event);
+    setCreateEventOpen(true);
+  }
+
+  const handleDelete = (eventId: string, eventName: string) => {
+    setEventToDelete({ id: eventId, name: eventName });
+    setDeleteEventOpen(true);
+  }
+
+  const confirmDelete = async () => {
+    if (!db || !eventToDelete) return;
+    const eventRef = doc(db, 'events', eventToDelete.id);
+    const promise = () => deleteDoc(eventRef).catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({ path: eventRef.path, operation: 'delete' });
+        errorEmitter.emit('permission-error', permissionError);
+        throw serverError;
+    });
+
+    toast.promise(promise, {
+        loading: `Deleting ${eventToDelete.name}...`,
+        success: 'Event deleted successfully.',
+        error: 'Failed to delete event.'
+    });
+    setEventToDelete(null);
+  }
+
 
   const handleJoinEvent = (eventName: string) => {
     toast.success('Successfully Registered!', {
@@ -77,14 +168,24 @@ export default function EventsPage() {
   }
   
   const eventTypes: EventType[] = ['All', 'Hackathon', 'Workshop', 'Conference'];
-
-  if (loadingEvents || loadingUsers) {
-    return <div className='space-y-8'><div className="relative min-h-[240px] rounded-lg bg-muted" /><EventsSkeleton /></div>
-  }
+  const isLoading = loadingEvents || loadingUsers;
 
   return (
     <>
-      <CreateEventDialog open={isCreateEventOpen} onOpenChange={setCreateEventOpen} />
+      <CreateEventDialog 
+        open={isCreateEventOpen} 
+        onOpenChange={(open) => {
+            if (!open) setEventToEdit(undefined);
+            setCreateEventOpen(open)
+        }} 
+        eventToEdit={eventToEdit}
+      />
+      <DeleteConfirmationDialog 
+        isOpen={isDeleteEventOpen}
+        onOpenChange={setDeleteEventOpen}
+        onConfirm={confirmDelete}
+        itemName={eventToDelete?.name ?? 'event'}
+      />
       <div className="space-y-8">
         <div className="relative flex flex-col justify-end min-h-[240px] md:min-h-[300px] overflow-hidden rounded-lg bg-gradient-to-t from-black/80 via-transparent to-black/20 p-4 sm:p-8">
           {heroImage && <Image src={heroImage.imageUrl} alt={heroImage.description} fill className="-z-10 object-cover" />}
@@ -92,7 +193,7 @@ export default function EventsPage() {
             <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">Explore Events</h1>
             <p className="mt-2 text-base md:text-lg text-white/80 max-w-lg">Find your next opportunity to innovate, learn, and connect with the brightest minds.</p>
           </div>
-          <Button className='absolute top-4 right-4' onClick={() => setCreateEventOpen(true)}>
+          <Button className='absolute top-4 right-4' onClick={() => handleCreateOrEdit()}>
             <Plus className='mr-2' />
             Create Event
           </Button>
@@ -136,51 +237,11 @@ export default function EventsPage() {
           </aside>
 
           <main className='grid grid-cols-1 gap-6 md:col-span-3 lg:grid-cols-2'>
-            {allEvents?.map((event) => {
-              const organizer = users?.find(u => u.id === event.organizerId);
-              return (
-                <Card key={event.id} className="flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20 hover:border-primary/30 group">
-                  <CardHeader>
-                    <div className='flex items-start justify-between'>
-                      <div className='flex items-center gap-4'>
-                        <Avatar className='size-12'>
-                          {organizer?.photoURL && <AvatarImage src={organizer.photoURL} alt={organizer.displayName} />}
-                          <AvatarFallback>{organizer?.displayName?.substring(0, 2) ?? 'EV'}</AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0">
-                          <p className="font-semibold text-base truncate">{organizer?.displayName}</p>
-                          <p className="text-sm text-muted-foreground">Organizer</p>
-                        </div>
-                      </div>
-                      <Button variant='ghost' size='icon'>
-                        <Bookmark className='size-5' />
-                      </Button>
-                    </div>
-                    <CardTitle className="font-headline pt-4 text-xl">{event.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex-grow space-y-4">
-                    <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
-                      <div className='flex items-center gap-2'>
-                        <Calendar className='size-4' />
-                        <span>{event.date.toDate().toLocaleDateString()}</span>
-                      </div>
-                      <div className='flex items-center gap-2'>
-                        <MapPin className='size-4' />
-                        <span>{event.location}</span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 text-sm flex-wrap">
-                      {event.tags.map(tag => <Badge key={tag} variant='secondary'>{tag}</Badge>)}
-                    </div>
-                    <p className="text-muted-foreground pt-2 line-clamp-2 text-sm leading-relaxed">{event.description}</p>
-                  </CardContent>
-                  <div className='p-6 pt-2'>
-                    <Button className="w-full" onClick={() => handleJoinEvent(event.title)}>Join Event</Button>
-                  </div>
-                </Card>
-              )
-            })}
+            {isLoading ? Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-96" />) :
+                allEvents?.map((event) => (
+                  <EventCard key={event.id} event={event} users={users} onJoin={handleJoinEvent} onEdit={handleCreateOrEdit} onDelete={handleDelete} />
+                ))
+            }
           </main>
         </div>
 
