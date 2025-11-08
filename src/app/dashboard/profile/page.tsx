@@ -5,8 +5,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Award, ShieldCheck, Star, Github, Linkedin, Loader2, FileCode2, Trash2, Bookmark } from 'lucide-react';
-import type { StudentProfile, Project } from '@/lib/types';
+import { Award, ShieldCheck, Star, Github, Linkedin, Loader2, FileCode2, Trash2, Bookmark, Calendar } from 'lucide-react';
+import type { StudentProfile, Project, Event } from '@/lib/types';
 import { useMemo, useState } from 'react';
 import { EditProfileDialog } from '@/components/edit-profile-dialog';
 import { collection, doc, query, where, deleteDoc, arrayRemove, updateDoc } from 'firebase/firestore';
@@ -75,7 +75,10 @@ export default function ProfilePage() {
   const { data: userProjects, loading: loadingProjects } = useCollection<Project>(userProjectsQuery, 'projects');
 
   const bookmarkedProjectsQuery = useMemo(() => (db && user && user.bookmarks && user.bookmarks.length > 0) ? query(collection(db, 'projects'), where('__name__', 'in', user.bookmarks)) : null, [user]);
-  const { data: bookmarkedProjects, loading: loadingBookmarks } = useCollection<Project>(bookmarkedProjectsQuery, `users/${user?.id}/bookmarks`);
+  const { data: bookmarkedProjects, loading: loadingBookmarkedProjects } = useCollection<Project>(bookmarkedProjectsQuery, `users/${user?.id}/bookmarks`);
+  
+  const bookmarkedEventsQuery = useMemo(() => (db && user && user.bookmarkedEvents && user.bookmarkedEvents.length > 0) ? query(collection(db, 'events'), where('__name__', 'in', user.bookmarkedEvents)) : null, [user]);
+  const { data: bookmarkedEvents, loading: loadingBookmarkedEvents } = useCollection<Event>(bookmarkedEventsQuery, `users/${user?.id}/bookmarkedEvents`);
 
 
   const handleDeleteProject = (project: { id: string, name: string }) => {
@@ -122,10 +125,35 @@ export default function ProfilePage() {
         error: 'Failed to unbookmark project.'
     });
   }
+  
+  const handleUnbookmarkEvent = (eventId: string, eventName: string) => {
+    if (!db || !user) return;
+    
+    const userRef = doc(db, 'users', user.id);
+    const promise = () => updateDoc(userRef, {
+        bookmarkedEvents: arrayRemove(eventId)
+    }).catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+            path: userRef.path,
+            operation: 'update',
+            requestResourceData: { bookmarkedEvents: `arrayRemove(${eventId})` },
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        throw serverError;
+    });
+
+    toast.promise(promise, {
+        loading: `Removing ${eventName} from bookmarks...`,
+        success: 'Event unbookmarked.',
+        error: 'Failed to unbookmark event.'
+    });
+  }
 
   if (loadingUser || !userProfile) {
     return <ProfileSkeleton />;
   }
+
+  const isLoading = loadingProjects || loadingBookmarkedProjects || loadingBookmarkedEvents;
 
   return (
     <>
@@ -236,7 +264,7 @@ export default function ProfilePage() {
                   <CardTitle className="font-headline text-xl">Bookmarked Projects</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {loadingBookmarks ? <Loader2 className="animate-spin" /> : 
+                  {loadingBookmarkedProjects ? <Loader2 className="animate-spin" /> : 
                     !bookmarkedProjects || bookmarkedProjects.length === 0 ? (
                       <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
                         <Bookmark className="mx-auto h-12 w-12" />
@@ -256,6 +284,41 @@ export default function ProfilePage() {
                                 </Link>
                                 <div className='opacity-0 group-hover:opacity-100 transition-opacity pl-2'>
                                     <Button size="icon" variant="ghost" className='h-8 w-8' onClick={() => handleUnbookmark(project.id, project.name)}>
+                                        <Trash2 className="h-4 w-4 text-destructive" />
+                                    </Button>
+                                </div>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  }
+                </CardContent>
+              </Card>
+               <Card>
+                <CardHeader>
+                  <CardTitle className="font-headline text-xl">Bookmarked Events</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loadingBookmarkedEvents ? <Loader2 className="animate-spin" /> : 
+                    !bookmarkedEvents || bookmarkedEvents.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
+                        <Calendar className="mx-auto h-12 w-12" />
+                        <p className="mt-4 font-semibold">No bookmarked events.</p>
+                        <p className="mt-1 text-sm">Explore events and bookmark the ones you're interested in!</p>
+                         <Button asChild variant="secondary" className="mt-4">
+                           <Link href="/dashboard/events">Explore Events</Link>
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className='space-y-4'>
+                        {bookmarkedEvents.map(event => (
+                            <div key={event.id} className="group flex items-center justify-between p-3 border rounded-md hover:bg-muted/50 hover:border-primary/30 transition-colors">
+                                <Link href={`/dashboard/events`} className="flex-1 min-w-0">
+                                    <h3 className="font-semibold truncate">{event.title}</h3>
+                                    <p className="text-sm text-muted-foreground line-clamp-2">{event.date.toDate().toLocaleDateString()}</p>
+                                </Link>
+                                <div className='opacity-0 group-hover:opacity-100 transition-opacity pl-2'>
+                                    <Button size="icon" variant="ghost" className='h-8 w-8' onClick={() => handleUnbookmarkEvent(event.id, event.title)}>
                                         <Trash2 className="h-4 w-4 text-destructive" />
                                     </Button>
                                 </div>
