@@ -31,7 +31,7 @@ export interface StudentProfile {
 export interface Project {
   id: string;
   name: string; // Changed from title to name
-  description: string;
+  description:string;
   tags: string[]; // e.g., ["webdev","ai"]
   skillsNeeded: string[]; // normalized
   ownerId: string; // Changed from createdBy to ownerId
@@ -41,11 +41,11 @@ export interface Project {
   repo?: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
+  commentCount?: number;
   // Fields to remove/change
   memberIds?: string[];
   rating?: number;
   forks?: number;
-  comments?: number;
   links?: {
     repo?: string;
     demo?: string;
@@ -54,7 +54,7 @@ export interface Project {
 
 export interface ChatMessage {
     id: string;
-    senderUid: string;
+    senderId: string;
     body: string;
     attachments?: string[]; // storage paths
     createdAt: Timestamp;

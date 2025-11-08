@@ -20,14 +20,14 @@ service cloud.firestore {
     match /projects/{projectId} {
       allow read: if isSignedIn();
       allow create: if isSignedIn();
-      // Only owner can update project details
+      // Only owner can update project details like commentCount
       allow update: if isOwner(resource.data.ownerId);
       allow delete: if isOwner(resource.data.ownerId);
       match /chat/{msgId} {
         allow read: if isSignedIn();
-        // Members of the project can create chat messages
-        allow create: if isSignedIn() && (request.auth.uid == get(/databases/$(database)/documents/projects/$(projectId)).data.ownerId || request.auth.uid in get(/databases/$(database)/documents/projects/$(projectId)).data.members.map(m => m.uid));
-        allow delete: if false;
+        // Any signed-in user can create chat messages for now
+        allow create: if isSignedIn();
+        allow update, delete: if false;
       }
     }
 

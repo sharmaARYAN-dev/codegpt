@@ -9,17 +9,21 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, Users, GitFork, ExternalLink, Loader2, Share2 } from 'lucide-react';
+import { MessageSquare, Users, GitFork, ExternalLink, Loader2, Share2, Send } from 'lucide-react';
 import Link from 'next/link';
 import { useDoc } from '@/firebase/firestore/use-doc';
-import { collection, doc } from 'firebase/firestore';
-import type { Project, StudentProfile } from '@/lib/types';
+import { collection, doc, query, orderBy, addDoc, serverTimestamp, updateDoc, increment } from 'firebase/firestore';
+import type { Project, StudentProfile, ChatMessage } from '@/lib/types';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
+import { Input } from '@/components/ui/input';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 function ProjectWorkspaceSkeleton() {
   return (
@@ -43,7 +47,7 @@ function ProjectWorkspaceSkeleton() {
           <div className="lg:col-span-2 space-y-8">
             <Card><CardHeader><Skeleton className="h-6 w-48" /></CardHeader><CardContent><Skeleton className="h-24 w-full" /></CardContent></Card>
             <Card><CardHeader><Skeleton className="h-6 w-48" /></CardHeader><CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4"><Skeleton className="h-20 w-full" /><Skeleton className="h-20 w-full" /></CardContent></Card>
-            <Card><CardHeader><Skeleton className="h-6 w-48" /></CardHeader><CardContent><Skeleton className="h-16 w-full" /></CardContent></Card>
+            <Card><CardHeader><Skeleton className="h-6 w-48" /></CardHeader><CardContent><Skeleton className="h-32 w-full" /></CardContent></Card>
           </div>
           <div className="space-y-8"><Card><CardHeader><Skeleton className="h-6 w-48" /></CardHeader><CardContent className="space-y-4"><Skeleton className="h-24 w-full" /><Skeleton className="h-24 w-full" /></CardContent></Card></div>
         </div>
@@ -55,11 +59,17 @@ function ProjectWorkspaceSkeleton() {
 export default function ProjectWorkspacePage({ params }: { params: { id: string } }) {
   const { user } = useAuth();
   const id = params.id;
+  const [comment, setComment] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const projectRef = useMemo(() => db ? doc(db, 'projects', id) : null, [id]);
   const { data: project, loading: loadingProject } = useDoc<Project>(projectRef);
 
   const usersQuery = useMemo(() => db ? collection(db, 'users') : null, [db]);
   const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery, 'users');
+
+  const chatQuery = useMemo(() => db ? query(collection(db, 'projects', id, 'chat'), orderBy('createdAt', 'asc')) : null, [db, id]);
+  const { data: chatMessages, loading: loadingChat } = useCollection<ChatMessage>(chatQuery, `projects/${id}/chat`);
 
   const teamMembers = useMemo(() => {
     if (!project || !users) return [];
@@ -115,9 +125,48 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
     }
   };
 
-  const isOwner = user && project && user.id === project.ownerId;
+  const handleAddComment = async () => {
+    if (!db || !user || !comment.trim()) return;
 
-  if (loadingProject || loadingUsers) {
+    setIsSubmitting(true);
+
+    const messageData = {
+        senderId: user.id,
+        body: comment,
+        createdAt: serverTimestamp(),
+    };
+
+    const collectionRef = collection(db, 'projects', id, 'chat');
+    const projectDocRef = doc(db, 'projects', id);
+
+    const promise = () => addDoc(collectionRef, messageData).then(() => {
+        return updateDoc(projectDocRef, { commentCount: increment(1) });
+    }).catch(async (serverError) => {
+        const isWriteError = serverError.message.includes('chat');
+        const permissionError = new FirestorePermissionError({
+            path: isWriteError ? collectionRef.path : projectDocRef.path,
+            operation: isWriteError ? 'create' : 'update',
+            requestResourceData: isWriteError ? messageData : { commentCount: 'increment' },
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        throw serverError;
+    });
+
+    toast.promise(promise, {
+        loading: "Sending message...",
+        success: () => {
+            setComment('');
+            setIsSubmitting(false);
+            return "Message sent!";
+        },
+        error: "Failed to send message."
+    })
+  }
+
+  const isOwner = user && project && user.id === project.ownerId;
+  const isLoading = loadingProject || loadingUsers || loadingChat;
+
+  if (isLoading) {
     return <ProjectWorkspaceSkeleton />;
   }
 
@@ -176,7 +225,7 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
         </div>
          <div className='flex items-center gap-2'>
             <MessageSquare className='size-4' />
-            <span>0 Comments</span>
+            <span>{project.commentCount || 0} Comments</span>
         </div>
       </div>
 
@@ -226,12 +275,51 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
           <Card>
             <CardHeader>
               <CardTitle>
-                Comments
+                Project Chat
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className='text-sm text-muted-foreground'>No comments yet. Be the first to share your thoughts!</p>
-               <Button variant="outline">Add Comment</Button>
+                <ScrollArea className="h-[400px] w-full pr-4">
+                    <div className='space-y-6'>
+                        {chatMessages && chatMessages.length > 0 ? (
+                            chatMessages.map(msg => {
+                                const sender = users?.find(u => u.id === msg.senderId);
+                                return (
+                                    <div key={msg.id} className="flex items-start gap-3">
+                                        <Avatar className='size-9'>
+                                            {sender?.photoURL && <AvatarImage src={sender.photoURL} alt={sender.displayName} />}
+                                            <AvatarFallback>{sender?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
+                                        </Avatar>
+                                        <div className='flex-1'>
+                                            <div className='flex items-baseline gap-2'>
+                                                <p className="font-semibold">{sender?.displayName}</p>
+                                                <p className="text-xs text-muted-foreground">{msg.createdAt?.toDate()?.toLocaleTimeString()}</p>
+                                            </div>
+                                            <p className="text-muted-foreground">{msg.body}</p>
+                                        </div>
+                                    </div>
+                                )
+                            })
+                        ) : (
+                            <p className="text-sm text-center text-muted-foreground py-8">No comments yet. Be the first to share your thoughts!</p>
+                        )}
+                    </div>
+                </ScrollArea>
+               <div className='flex items-center gap-2 mt-4'>
+                <Avatar className='size-9'>
+                    {user?.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName ?? ''} />}
+                    <AvatarFallback>{user?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
+                </Avatar>
+                <Input 
+                    placeholder="Add a comment..." 
+                    value={comment} 
+                    onChange={(e) => setComment(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleAddComment()}}
+                />
+                <Button onClick={handleAddComment} disabled={isSubmitting || !comment.trim()}>
+                    {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                </Button>
+               </div>
             </CardContent>
           </Card>
         </div>

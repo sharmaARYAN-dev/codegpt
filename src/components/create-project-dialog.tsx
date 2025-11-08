@@ -80,6 +80,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
       updatedAt: serverTimestamp(),
       repo: '',
       demoLink: '',
+      commentCount: 0,
     };
 
     const collectionRef = collection(db, 'projects');
