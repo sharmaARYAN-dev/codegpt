@@ -75,8 +75,8 @@ export default function ProgressPage() {
 
   const userProfile = user;
 
-  const userProjectsQuery = useMemo(() => (db && user) ? query(collection(db, 'projects'), where('members', 'array-contains', user.id)) : null, [user]);
-  const { data: userProjects, loading: loadingProjects } = useCollection<Project>(userProjectsQuery);
+  const userProjectsQuery = useMemo(() => (db && user) ? query(collection(db, 'projects'), where('members', 'array-contains', user.id)) : null, [user, db]);
+  const { data: userProjects, loading: loadingProjects } = useCollection<Project>(userProjectsQuery, 'projects');
 
   const level = userProfile?.level || 1;
   const xp = userProfile?.xp || 0;

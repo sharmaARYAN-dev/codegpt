@@ -65,14 +65,14 @@ export default function CommunitiesPage() {
       return query(coll, where('community', '==', activeFilter), orderBy('createdAt', 'desc'));
     }
     return query(coll, orderBy('createdAt', 'desc'));
-  }, [activeFilter]);
-  const { data: forumPosts, loading: loadingPosts } = useCollection<ForumPost>(postsQuery);
+  }, [activeFilter, db]);
+  const { data: forumPosts, loading: loadingPosts } = useCollection<ForumPost>(postsQuery, 'forumPosts');
 
-  const projectsQuery = useMemo(() => db ? query(collection(db, 'projects'), orderBy('createdAt', 'desc'), limit(2)) : null, []);
-  const { data: suggestedProjects, loading: loadingProjects } = useCollection<Project>(projectsQuery);
+  const projectsQuery = useMemo(() => db ? query(collection(db, 'projects'), orderBy('createdAt', 'desc'), limit(2)) : null, [db]);
+  const { data: suggestedProjects, loading: loadingProjects } = useCollection<Project>(projectsQuery, 'projects');
 
-  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, []);
-  const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery);
+  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, [db]);
+  const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery, 'users');
 
   const handleUpvote = (postId: string) => {
     if (!db || !user) {

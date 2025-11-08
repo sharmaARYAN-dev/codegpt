@@ -1,17 +1,17 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { onSnapshot, Query, DocumentData } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
-export function useCollection<T>(query: Query<DocumentData> | null) {
+export function useCollection<T>(query: Query<DocumentData> | null, path: string | null) {
   const [data, setData] = useState<T[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (!query) {
+    if (!query || !path) {
       setData([]);
       setLoading(false);
       return;
@@ -29,7 +29,7 @@ export function useCollection<T>(query: Query<DocumentData> | null) {
       },
       (err) => {
         const permissionError = new FirestorePermissionError({
-          path: (query as any)._query.path.canonical,
+          path: path,
           operation: 'list',
         });
         errorEmitter.emit('permission-error', permissionError);
@@ -39,7 +39,8 @@ export function useCollection<T>(query: Query<DocumentData> | null) {
     );
 
     return () => unsubscribe();
-  }, [query]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, path]);
 
   return { data, loading, error };
 }

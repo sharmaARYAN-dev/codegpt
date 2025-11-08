@@ -70,11 +70,11 @@ export default function ProjectsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
 
-  const projectsQuery = useMemo(() => db ? query(collection(db, 'projects'), orderBy('createdAt', 'desc')) : null, []);
-  const { data: allProjects, loading: loadingProjects } = useCollection<Project>(projectsQuery);
+  const projectsQuery = useMemo(() => db ? query(collection(db, 'projects'), orderBy('createdAt', 'desc')) : null, [db]);
+  const { data: allProjects, loading: loadingProjects } = useCollection<Project>(projectsQuery, 'projects');
 
-  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, []);
-  const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery);
+  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, [db]);
+  const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery, 'users');
 
   const filters = ['All', 'Web Dev', 'AI/ML', 'Mobile', 'Game Dev'];
   

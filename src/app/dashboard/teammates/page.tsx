@@ -71,8 +71,8 @@ export default function TeammatesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedInterest, setSelectedInterest] = useState('all');
 
-  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, []);
-  const { data: users, loading } = useCollection<StudentProfile>(usersQuery);
+  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, [db]);
+  const { data: users, loading } = useCollection<StudentProfile>(usersQuery, 'users');
   
   const teammates = useMemo(() => {
     if (!users) return [];

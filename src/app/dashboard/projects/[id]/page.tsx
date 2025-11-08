@@ -55,8 +55,8 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
   const projectRef = useMemo(() => db ? doc(db, 'projects', params.id) : null, [params.id]);
   const { data: project, loading: loadingProject } = useDoc<Project>(projectRef);
 
-  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, []);
-  const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery);
+  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, [db]);
+  const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery, 'users');
 
   const teamMembers = useMemo(() => {
     if (!project || !users) return [];

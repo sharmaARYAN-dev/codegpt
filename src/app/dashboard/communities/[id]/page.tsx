@@ -64,11 +64,12 @@ export default function PostPage({ params }: { params: { id: string } }) {
   const authorRef = useMemo(() => (db && post) ? doc(db, 'users', post.authorId) : null, [post]);
   const { data: author, loading: loadingAuthor } = useDoc<StudentProfile>(authorRef);
 
-  const commentsQuery = useMemo(() => db ? query(collection(db, 'forumPosts', params.id, 'comments'), orderBy('createdAt', 'asc')) : null, [params.id]);
-  const { data: comments, loading: loadingComments } = useCollection<Comment>(commentsQuery);
+  const commentsPath = useMemo(() => `forumPosts/${params.id}/comments`, [params.id]);
+  const commentsQuery = useMemo(() => db ? query(collection(db, commentsPath), orderBy('createdAt', 'asc')) : null, [db, commentsPath]);
+  const { data: comments, loading: loadingComments } = useCollection<Comment>(commentsQuery, commentsPath);
 
-  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, []);
-  const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery);
+  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, [db]);
+  const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery, 'users');
 
   const handleAddComment = async () => {
     if (!comment.trim() || !user || !db) return;

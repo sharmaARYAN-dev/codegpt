@@ -63,12 +63,12 @@ export default function EventsPage() {
     }
 
     return query(baseColl, ...queries, orderBy('date'));
-  }, [activeType, locationType]);
+  }, [activeType, locationType, db]);
 
-  const { data: allEvents, loading: loadingEvents } = useCollection<Event>(eventsQuery);
+  const { data: allEvents, loading: loadingEvents } = useCollection<Event>(eventsQuery, 'events');
 
-  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, []);
-  const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery);
+  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, [db]);
+  const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery, 'users');
 
   const handleJoinEvent = (eventName: string) => {
     toast.success('Successfully Registered!', {

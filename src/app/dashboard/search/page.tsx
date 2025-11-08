@@ -40,17 +40,17 @@ export default function SearchPage() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
 
-  const projectsQuery = useMemo(() => db ? collection(db, 'projects') : null, []);
-  const { data: allProjects, loading: loadingProjects } = useCollection<Project>(projectsQuery);
+  const projectsQuery = useMemo(() => db ? collection(db, 'projects') : null, [db]);
+  const { data: allProjects, loading: loadingProjects } = useCollection<Project>(projectsQuery, 'projects');
 
-  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, []);
-  const { data: allUsers, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery);
+  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, [db]);
+  const { data: allUsers, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery, 'users');
   
-  const eventsQuery = useMemo(() => db ? collection(db, 'events') : null, []);
-  const { data: allEvents, loading: loadingEvents } = useCollection<Event>(eventsQuery);
+  const eventsQuery = useMemo(() => db ? collection(db, 'events') : null, [db]);
+  const { data: allEvents, loading: loadingEvents } = useCollection<Event>(eventsQuery, 'events');
 
-  const postsQuery = useMemo(() => db ? collection(db, 'forumPosts') : null, []);
-  const { data: allPosts, loading: loadingPosts } = useCollection<ForumPost>(postsQuery);
+  const postsQuery = useMemo(() => db ? collection(db, 'forumPosts') : null, [db]);
+  const { data: allPosts, loading: loadingPosts } = useCollection<ForumPost>(postsQuery, 'forumPosts');
 
   const searchResults = useMemo(() => {
     if (!query) return null;

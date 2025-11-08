@@ -49,14 +49,14 @@ function DashboardSkeleton() {
 export default function DashboardPage() {
   const { user } = useAuth();
 
-  const projectsQuery = useMemo(() => db ? query(collection(db, 'projects'), orderBy('createdAt', 'desc'), limit(3)) : null, []);
-  const { data: feedProjects, loading: loadingProjects } = useCollection<Project>(projectsQuery);
+  const projectsQuery = useMemo(() => db ? query(collection(db, 'projects'), orderBy('createdAt', 'desc'), limit(3)) : null, [db]);
+  const { data: feedProjects, loading: loadingProjects } = useCollection<Project>(projectsQuery, 'projects');
   
-  const eventsQuery = useMemo(() => db ? query(collection(db, 'events'), limit(2)) : null, []);
-  const { data: recommendedEvents, loading: loadingEvents } = useCollection<Event>(eventsQuery);
+  const eventsQuery = useMemo(() => db ? query(collection(db, 'events'), limit(2)) : null, [db]);
+  const { data: recommendedEvents, loading: loadingEvents } = useCollection<Event>(eventsQuery, 'events');
 
-  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, []);
-  const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery);
+  const usersQuery = useMemo(() => db ? collection(db, 'users') : null, [db]);
+  const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery, 'users');
 
   const suggestedTeammates = useMemo(() => {
     if (!user || !users) return [];

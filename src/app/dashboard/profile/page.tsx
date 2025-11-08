@@ -63,8 +63,8 @@ export default function ProfilePage() {
   // user is StudentProfile, no need to fetch again
   const userProfile = user;
 
-  const userProjectsQuery = useMemo(() => (db && user) ? query(collection(db, 'projects'), where('ownerId', '==', user.id)) : null, [user]);
-  const { data: userProjects, loading: loadingProjects } = useCollection<Project>(userProjectsQuery);
+  const userProjectsQuery = useMemo(() => (db && user) ? query(collection(db, 'projects'), where('ownerId', '==', user.id)) : null, [user, db]);
+  const { data: userProjects, loading: loadingProjects } = useCollection<Project>(userProjectsQuery, 'projects');
 
   if (loadingUser || !userProfile) {
     return <ProfileSkeleton />;
