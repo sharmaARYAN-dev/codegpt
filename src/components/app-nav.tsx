@@ -46,8 +46,8 @@ export function AppNav() {
     <>
       <SidebarHeader className="hidden md:flex">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-          <Orbit className="h-6 w-6 text-primary" />
-          <span className="text-lg group-data-[collapsible=icon]:hidden">Universe</span>
+          <Orbit className="h-7 w-7 text-primary" />
+          <span className="text-xl group-data-[collapsible=icon]:hidden">Universe</span>
         </Link>
       </SidebarHeader>
       <SidebarContent className="p-2">
