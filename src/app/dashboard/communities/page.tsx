@@ -6,43 +6,14 @@ import { ArrowBigUp, MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { useCollection } from '@/firebase';
-import type { ForumPost, Project, StudentProfile } from '@/lib/types';
-import { useState, useMemo } from 'react';
-import { collection, query, limit, orderBy, doc, updateDoc, increment } from 'firebase/firestore';
-import { useFirestore, useUser } from '@/firebase';
+import { forumPosts, suggestedProjects, users } from '@/lib/mock-data';
+import { useState } from 'react';
 import { CreatePostDialog } from '@/components/create-post-dialog';
 
 export default function CommunitiesPage() {
   const filters = ['All', 'AI/ML', 'WebDev', 'Design', 'Startups', 'Gaming'];
-  const firestore = useFirestore();
-  const { user } = useUser();
   const [isCreatePostOpen, setCreatePostOpen] = useState(false);
-
-  const postsQuery = useMemo(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'forumPosts'), orderBy('createdAt', 'desc'));
-  }, [firestore]);
-  const { data: forumPosts } = useCollection<ForumPost>(postsQuery);
-
-  const projectsQuery = useMemo(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'projects'), limit(2), orderBy('rating', 'desc'));
-  }, [firestore]);
-  const { data: suggestedProjects } = useCollection<Project>(projectsQuery);
-
-  const { data: users } = useCollection<StudentProfile>(
-    firestore ? collection(firestore, 'users') : null
-  );
-
-  const handleUpvote = (postId: string) => {
-    if (!firestore || !user) return;
-    const postRef = doc(firestore, 'forumPosts', postId);
-    updateDoc(postRef, {
-      upvotes: increment(1)
-    });
-  };
-
+  
   return (
     <>
       <CreatePostDialog open={isCreatePostOpen} onOpenChange={setCreatePostOpen} />
@@ -65,8 +36,8 @@ export default function CommunitiesPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           <div className="lg:col-span-2 space-y-4">
-            {forumPosts?.map((post) => {
-              const author = users?.find(u => u.id === post.authorId);
+            {forumPosts.map((post) => {
+              const author = users.find(u => u.id === post.authorId);
               return (
                 <Card key={post.id} className="p-4 transition-shadow duration-300 hover:border-primary/50 hover:shadow-lg">
                   <div className='mb-3 flex items-center gap-3'>
@@ -83,7 +54,7 @@ export default function CommunitiesPage() {
                   <h2 className="font-headline mt-1 text-xl font-semibold">{post.title}</h2>
                   <p className='text-muted-foreground mt-2 line-clamp-2 text-sm'>{post.content}</p>
                   <div className="mt-4 flex items-center gap-4 text-sm text-muted-foreground">
-                    <Button variant='outline' size='sm' className='text-primary hover:bg-primary/10 hover:text-primary' onClick={() => handleUpvote(post.id)}>
+                    <Button variant='outline' size='sm' className='text-primary hover:bg-primary/10 hover:text-primary'>
                       <ArrowBigUp className="mr-2 h-4 w-4" />
                       Upvote ({post.upvotes})
                     </Button>
@@ -107,8 +78,8 @@ export default function CommunitiesPage() {
                 <CardTitle className="font-headline text-lg">Hot Projects</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {suggestedProjects?.map((project) => {
-                  const owner = users?.find(u => u.id === project.ownerId);
+                {suggestedProjects.map((project) => {
+                  const owner = users.find(u => u.id === project.ownerId);
                   return (
                     <div key={project.id}>
                       <div className='flex items-center gap-3'>

@@ -11,32 +11,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, Users, GitFork, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
-import { useDoc, useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import type { Project, StudentProfile } from '@/lib/types';
-import { useMemo } from 'react';
-import { doc, collection } from 'firebase/firestore';
+import { allProjects, users } from '@/lib/mock-data';
 
 export default function ProjectWorkspacePage({ params }: { params: { id: string } }) {
-  const firestore = useFirestore();
-
-  const projectRef = useMemoFirebase(() => {
-    if (!firestore || !params.id) return null;
-    return doc(firestore, 'projects', params.id);
-  }, [firestore, params.id]);
-  const { data: project } = useDoc<Project>(projectRef);
-  
-  const usersQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return collection(firestore, 'users');
-  }, [firestore]);
-  const { data: users } = useCollection<StudentProfile>(usersQuery);
-
-  const teamMembers = useMemo(() => {
-    if (!project || !users) return [];
-    // Ensure owner is always part of the team members list
-    const memberIds = [...(project.memberIds || []), project.ownerId];
-    return users.filter(u => memberIds.includes(u.id));
-  }, [project, users]);
+  const project = allProjects.find((p) => p.id === params.id);
+  const teamMembers = users.filter(u => project?.memberIds.includes(u.id) || u.id === project?.ownerId)
 
   const openRoles = [
     {
@@ -52,7 +31,7 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
   ];
 
   if (!project) {
-    return <div>Loading...</div>
+    return <div>Project not found.</div>
   }
 
   return (
@@ -63,7 +42,7 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
                 {project.name}
                 </h1>
                 <div className="flex flex-wrap gap-2 mt-2">
-                {project.tags?.map((tag) => (
+                {project.tags.map((tag) => (
                     <Badge
                     key={tag}
                     variant={
@@ -87,11 +66,11 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
         </div>
         <div className='flex items-center gap-2'>
             <GitFork className='size-4' />
-            <span>{project.forks || 0} Forks</span>
+            <span>{project.forks} Forks</span>
         </div>
          <div className='flex items-center gap-2'>
             <MessageSquare className='size-4' />
-            <span>{project.comments || 0} Comments</span>
+            <span>{project.comments} Comments</span>
         </div>
       </div>
 
@@ -121,7 +100,7 @@ export default function ProjectWorkspacePage({ params }: { params: { id: string 
                 return (
                   <div key={member.id} className="flex items-center gap-3 p-3 rounded-md border bg-card hover:bg-muted/50">
                     <Avatar className="size-10">
-                      {member.photoURL && <AvatarImage src={member.photoURL} alt={member.displayName} />}
+                      <AvatarImage src={member.photoURL} alt={member.displayName} />
                       <AvatarFallback>
                         {member.displayName.substring(0, 2)}
                       </AvatarFallback>

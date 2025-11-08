@@ -1,14 +1,14 @@
 'use client';
 
-import { useUser, useDoc, useFirestore } from '@/firebase';
+import { useUser } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Award, ShieldCheck, Star } from 'lucide-react';
+import { users as mockUsers } from '@/lib/mock-data';
 import type { StudentProfile } from '@/lib/types';
 import { useMemo, useState } from 'react';
-import { doc } from 'firebase/firestore';
 import { EditProfileDialog } from '@/components/edit-profile-dialog';
 
 const reputationIcons = {
@@ -22,15 +22,22 @@ const reputationIcons = {
 
 export default function ProfilePage() {
   const { user } = useUser();
-  const firestore = useFirestore();
   const [isEditProfileOpen, setEditProfileOpen] = useState(false);
-
-  const userProfileRef = useMemo(() => {
-    if (!firestore || !user) return null;
-    return doc(firestore, 'users', user.uid);
-  }, [firestore, user]);
-
-  const { data: userProfile } = useDoc<StudentProfile>(userProfileRef);
+  
+  const userProfile = useMemo(() => {
+    // In a real app, you'd fetch this from your backend based on the user's ID
+    // For now, we'll find the user in our mock data.
+    // Fallback to a default profile if user not in mock data.
+    return mockUsers.find(p => p.email.split('.')[0] === user?.email?.split('@')[0].split('.')[0]) || {
+        id: user?.uid || 'new-user',
+        displayName: user?.displayName || "New User",
+        email: user?.email || "",
+        photoURL: user?.photoURL || "",
+        skills: ["Web Development"],
+        interests: ["AI"],
+        reputation: [{ label: "Rising Star", color: "text-green-400" }]
+    } as StudentProfile;
+  }, [user]);
 
   if (!user || !userProfile) {
     return (

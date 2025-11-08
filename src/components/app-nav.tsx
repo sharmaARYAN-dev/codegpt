@@ -8,7 +8,7 @@ import {
   SidebarFooter,
   SidebarContent,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Users, FolderKanban, MessageSquare, LogOut, Swords, Lightbulb, User as UserIcon, Database } from 'lucide-react';
+import { LayoutDashboard, Users, FolderKanban, MessageSquare, LogOut, Swords, Lightbulb, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/firebase';
@@ -60,17 +60,6 @@ export function AppNav() {
               </Link>
             </SidebarMenuItem>
           ))}
-           <SidebarMenuItem>
-              <Link href="/seed">
-                <SidebarMenuButton
-                  isActive={isNavItemActive('/seed')}
-                  tooltip="Seed Database"
-                >
-                  <Database />
-                  <span>Seed Database</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="mt-auto border-t border-sidebar-border p-2">

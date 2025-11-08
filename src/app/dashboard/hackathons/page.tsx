@@ -10,21 +10,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Bookmark, Star, MapPin, Calendar, Home, Building } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import Link from 'next/link';
+import { allEvents, users } from '@/lib/mock-data';
 import Image from 'next/image';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { useCollection, useFirestore } from '@/firebase';
-import type { Event, StudentProfile } from '@/lib/types';
-import { collection } from 'firebase/firestore';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function HackathonsPage() {
-  const firestore = useFirestore();
-  const { data: allEvents } = useCollection<Event>(firestore ? collection(firestore, 'events') : null);
-  const { data: users } = useCollection<StudentProfile>(
-    firestore ? collection(firestore, 'users') : null
-  );
-
   const heroImage = PlaceHolderImages.find(img => img.id === 'event-conference');
 
   return (
@@ -78,8 +69,8 @@ export default function HackathonsPage() {
         </aside>
 
         <main className='grid grid-cols-1 gap-6 md:col-span-3 lg:grid-cols-2'>
-          {allEvents?.map((event) => {
-            const organizer = users?.find(u => u.id === event.organizerId);
+          {allEvents.map((event) => {
+            const organizer = users.find(u => u.id === event.organizerId);
             return (
               <Card key={event.id} className="flex flex-col overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20">
                 <CardHeader>
@@ -118,7 +109,7 @@ export default function HackathonsPage() {
                   </div>
 
                   <div className="flex items-center gap-2 text-sm">
-                    {event.tags?.map(tag => <Badge key={tag}>{tag}</Badge>)}
+                    {event.tags.map(tag => <Badge key={tag}>{tag}</Badge>)}
                   </div>
                   <p className="text-muted-foreground pt-2 line-clamp-2 text-sm">{event.description}</p>
                 </CardContent>

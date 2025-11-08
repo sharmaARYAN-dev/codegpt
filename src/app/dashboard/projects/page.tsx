@@ -10,32 +10,17 @@ import { Button } from '@/components/ui/button';
 import { Plus, Users, GitFork } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { useCollection, useFirestore } from '@/firebase';
-import type { Project, StudentProfile } from '@/lib/types';
-import { useMemo, useState } from 'react';
-import { collection } from 'firebase/firestore';
+import { allProjects, users } from '@/lib/mock-data';
+import { useState } from 'react';
 import { CreateProjectDialog } from '@/components/create-project-dialog';
 
 export default function ProjectsPage() {
-  const firestore = useFirestore();
   const [isCreateProjectOpen, setCreateProjectOpen] = useState(false);
 
-  const projectsQuery = useMemo(() => {
-    if (!firestore) return null;
-    return collection(firestore, 'projects');
-  }, [firestore]);
-  const { data: allProjects } = useCollection<Project>(projectsQuery);
-
-  const usersQuery = useMemo(() => {
-    if (!firestore) return null;
-    return collection(firestore, 'users');
-  }, [firestore]);
-  const { data: users } = useCollection<StudentProfile>(usersQuery);
-
-  const renderProjectGrid = (projectList: Project[]) => (
+  const renderProjectGrid = (projectList: typeof allProjects) => (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
       {projectList.map((project) => {
-        const owner = users?.find(u => u.id === project.ownerId);
+        const owner = users.find(u => u.id === project.ownerId);
         const memberCount = (project.memberIds?.length || 0) + 1;
 
         return (
@@ -108,7 +93,7 @@ export default function ProjectsPage() {
           <Button variant="ghost">Sort By: Newest</Button>
         </div>
 
-        {allProjects && users ? renderProjectGrid(allProjects) : <div>Loading projects...</div>}
+        {renderProjectGrid(allProjects)}
       </div>
     </>
   );
