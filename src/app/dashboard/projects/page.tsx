@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, Users, GitFork, Search } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { CreateProjectDialog } from '@/components/create-project-dialog';
 import { Input } from '@/components/ui/input';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
@@ -78,7 +78,7 @@ export default function ProjectsPage() {
 
   const filters = ['All', 'Web Dev', 'AI/ML', 'Mobile', 'Game Dev'];
   
-  const filteredProjects = useMemoFirebase(() => {
+  const filteredProjects = useMemo(() => {
     if (!allProjects) return [];
     
     let projects = allProjects;
