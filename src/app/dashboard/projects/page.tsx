@@ -81,7 +81,7 @@ export default function ProjectsPage() {
   const filteredProjects = useMemo(() => {
     if (!allProjects) return [];
     
-    let projects = allProjects;
+    let projects = [...allProjects];
 
     if (activeFilter !== 'All') {
         const filterTerms = activeFilter.toLowerCase().split(' ');
@@ -99,6 +99,15 @@ export default function ProjectsPage() {
       );
     }
     
+    // Ensure stable sort order after filtering
+    projects.sort((a, b) => {
+        if (a.createdAt && b.createdAt) {
+          // Assuming createdAt is a Firestore Timestamp
+          return b.createdAt.toMillis() - a.createdAt.toMillis();
+        }
+        return 0;
+    });
+
     return projects;
   }, [allProjects, searchTerm, activeFilter]);
 
