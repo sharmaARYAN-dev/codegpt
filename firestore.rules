@@ -48,6 +48,14 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isSignedIn();
       allow update, delete: if isSignedIn() && isOwner(resource.data.authorId);
+
+      // COMMENTS on posts
+      // Anyone can read comments.
+      // Signed-in users can create comments.
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isSignedIn();
+      }
     }
   }
 }

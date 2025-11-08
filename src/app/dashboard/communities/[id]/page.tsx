@@ -11,8 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowBigUp, MessageSquare, Loader2 } from 'lucide-react';
 import { useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
-import { doc, collection, addDoc, serverTimestamp, updateDoc, increment } from 'firebase/firestore';
-import type { ForumPost, StudentProfile } from '@/lib/types';
+import { doc, collection, addDoc, serverTimestamp, updateDoc, increment, query, orderBy } from 'firebase/firestore';
+import type { Comment, ForumPost, StudentProfile } from '@/lib/types';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
@@ -63,18 +63,51 @@ export default function PostPage({ params }: { params: { id: string } }) {
   const authorRef = useMemoFirebase(() => (firestore && post) ? doc(firestore, 'users', post.authorId) : null, [firestore, post]);
   const { data: author, loading: loadingAuthor } = useDoc<StudentProfile>(authorRef);
 
-  // Note: For a real app, comments would be a subcollection. For simplicity, we'll just show a textarea.
-  const handleAddComment = () => {
-    if (!comment.trim()) return;
-    setIsSubmitting(true);
-    toast.info("Submitting comment...");
+  const commentsQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'forumPosts', params.id, 'comments'), orderBy('createdAt', 'asc')) : null, [firestore, params.id]);
+  const { data: comments, loading: loadingComments } = useCollection<Comment>(commentsQuery);
+
+  const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
+  const { data: users, loading: loadingUsers } = useCollection<StudentProfile>(usersQuery);
+
+  const handleAddComment = async () => {
+    if (!comment.trim() || !user || !firestore) return;
     
-    // Simulate API call
-    setTimeout(() => {
-        toast.success("Comment posted successfully!");
+    setIsSubmitting(true);
+    
+    const commentData = {
+      content: comment,
+      authorId: user.uid,
+      createdAt: serverTimestamp(),
+    };
+
+    const collectionRef = collection(firestore, 'forumPosts', params.id, 'comments');
+    const postDocRef = doc(firestore, 'forumPosts', params.id);
+    
+    const promise = () => addDoc(collectionRef, commentData).then(() => {
+        return updateDoc(postDocRef, { comments: increment(1) });
+    }).catch(async (serverError) => {
+        const isWriteError = serverError.message.includes('comments');
+        const permissionError = new FirestorePermissionError({
+            path: isWriteError ? collectionRef.path : postDocRef.path,
+            operation: isWriteError ? 'create' : 'update',
+            requestResourceData: isWriteError ? commentData : { comments: 'increment' },
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        throw serverError;
+    });
+
+    toast.promise(promise, {
+      loading: 'Submitting comment...',
+      success: () => {
         setComment('');
         setIsSubmitting(false);
-    }, 1000);
+        return "Comment posted successfully!";
+      },
+      error: (err) => {
+        setIsSubmitting(false);
+        return 'There was a problem posting your comment.';
+      }
+    });
   }
   
   const handleUpvote = (postId: string) => {
@@ -90,7 +123,9 @@ export default function PostPage({ params }: { params: { id: string } }) {
     });
   }
 
-  if (loadingPost || loadingAuthor) {
+  const isLoading = loadingPost || loadingAuthor || loadingComments || loadingUsers;
+
+  if (isLoading) {
     return <PostSkeleton />;
   }
 
@@ -159,7 +194,34 @@ export default function PostPage({ params }: { params: { id: string } }) {
                 </div>
             </Card>
 
-            <p className="text-sm text-center text-muted-foreground">No comments yet. Start the discussion!</p>
+            {comments && comments.length > 0 ? (
+                <div className="space-y-4">
+                    {comments.map((c) => {
+                        const commentAuthor = users?.find(u => u.id === c.authorId);
+                        return (
+                            <Card key={c.id}>
+                                <CardHeader>
+                                     <div className="flex items-center gap-3">
+                                        <Avatar className='size-9'>
+                                            {commentAuthor?.photoURL && <AvatarImage src={commentAuthor.photoURL} alt={commentAuthor.displayName} />}
+                                            <AvatarFallback>{commentAuthor?.displayName?.substring(0, 2) ?? '??'}</AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <p className="font-semibold">{commentAuthor?.displayName}</p>
+                                            <p className="text-xs text-muted-foreground">{c.createdAt?.toDate()?.toLocaleDateString()}</p>
+                                        </div>
+                                    </div>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-muted-foreground whitespace-pre-wrap">{c.content}</p>
+                                </CardContent>
+                            </Card>
+                        )
+                    })}
+                </div>
+            ) : (
+                <p className="text-sm text-center text-muted-foreground">No comments yet. Start the discussion!</p>
+            )}
             
         </div>
     </div>

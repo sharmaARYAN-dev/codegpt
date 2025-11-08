@@ -60,3 +60,10 @@ export type ForumPost = {
   comments: number;
   createdAt: any; // Can be Timestamp
 };
+
+export type Comment = {
+    id: string;
+    content: string;
+    authorId: string;
+    createdAt: any; // Can be Timestamp
+};

@@ -85,6 +85,18 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["title", "content", "authorId", "community", "createdAt"]
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "A comment on a forum post.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "content": { "type": "string" },
+        "authorId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["content", "authorId", "createdAt"]
     }
   },
   "auth": {
@@ -106,6 +118,10 @@
     "/forumPosts/{postId}": {
       "schema": { "$ref": "#/entities/ForumPost" },
       "description": "Stores all posts from the community forums."
+    },
+    "/forumPosts/{postId}/comments/{commentId}": {
+      "schema": { "$ref": "#/entities/Comment" },
+      "description": "Stores comments for a specific forum post."
     }
   }
 }
