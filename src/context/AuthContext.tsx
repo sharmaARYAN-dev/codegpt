@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
-import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { useAuth as useFirebaseAuth, useFirestore } from "@/firebase";
 import type { StudentProfile } from "@/lib/types";
 
@@ -20,43 +20,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const db = useFirestore();
 
   useEffect(() => {
-    if (!auth || !db) return;
+    if (!auth || !db) {
+      // Firebase might not be initialized yet
+      setLoading(true);
+      return;
+    };
 
     const unsubscribeFromAuth = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
         const userRef = doc(db, "users", firebaseUser.uid);
         
-        // Use onSnapshot for real-time updates
-        const unsubscribeFromFirestore = onSnapshot(userRef, async (snap) => {
+        const unsubscribeFromFirestore = onSnapshot(userRef, (snap) => {
           if (snap.exists()) {
             setUser({ id: snap.id, ...snap.data() } as StudentProfile);
           } else {
-            // Create new user profile if it doesn't exist
-            const newUserProfile: Omit<StudentProfile, 'id' | 'createdAt' | 'updatedAt' > = {
-              displayName: firebaseUser.displayName || 'New User',
-              email: firebaseUser.email!,
-              photoURL: firebaseUser.photoURL || '',
-              skills: [],
-              interests: [],
-              bio: '',
-              links: { github: '', linkedin: '', portfolio: ''},
-              reputation: 0,
-              xp: 0,
-              level: 1,
-              connections: [],
-              incomingRequests: [],
-              sentRequests: [],
-              bookmarks: [],
-              bookmarkedEvents: [],
-              registeredEvents: [],
-            };
-            
-            await setDoc(userRef, {
-              ...newUserProfile,
-              createdAt: serverTimestamp(),
-              updatedAt: serverTimestamp(),
-            });
-            // The snapshot listener will automatically pick up the new user data
+            // This case should be handled during registration.
+            // If a profile doesn't exist for a logged-in user, there might be an issue.
+            // For now, we'll treat them as logged out.
+            setUser(null);
           }
           setLoading(false);
         }, (error) => {

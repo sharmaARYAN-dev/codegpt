@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useState,
+  useMemo,
   type ReactNode,
 } from 'react';
 import type { FirebaseApp } from 'firebase/app';
@@ -27,7 +28,7 @@ export interface FirebaseProviderProps {
 }
 
 export function FirebaseProvider({ app, db, children }: FirebaseProviderProps) {
-  const [auth, setAuth] = useState<Auth | null>(() => getAuth(app));
+  const auth = useMemo(() => getAuth(app), [app]);
 
   const value: FirebaseContextValue = {
     app,
