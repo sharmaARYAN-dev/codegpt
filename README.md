@@ -1,5 +1,8 @@
 # UniVerse - Next.js Student Collaboration Platform
 
+published website : 
+https://codegpt-delta.vercel.app/
+
 UniVerse is a comprehensive platform for college innovators, built with a modern, feature-rich stack. It's designed to facilitate collaboration, project management, and community engagement among students. This project is built with Next.js, React, TypeScript, and Tailwind CSS, featuring a backend powered by Firebase (Authentication, Firestore) and AI capabilities from Google's Genkit.
 
 ## Core Technologies
